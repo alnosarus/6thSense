@@ -1,0 +1,52 @@
+# Data
+datasets/raw/
+datasets/processed/
+datasets/processed_full/
+*.h5
+*.hdf5
+*.mat
+*.npy
+*.npz
+
+# Large archives (e.g. dataset downloads — keep local only)
+*.zip
+*.7z
+*.tar.gz
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Model outputs
+models/
+runs/
+*.pth
+*.pt
+*.onnx
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Node / frontend (Vite)
+node_modules/
+dist/
+.vite/
+
+# Cursor — local hook runtime state only (skills under .cursor/skills/ may be committed)
+.cursor/hooks/
