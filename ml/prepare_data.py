@@ -18,13 +18,16 @@ We compute strain from displacement, then derive a single stiffness
 label per sample by analyzing the strain distribution.
 
 Usage:
-  python prepare_data.py --raw_dir datasets/raw/TUFFC_2022_Bi_Directional_elasto/extracted
+  python ml/prepare_data.py
+  python ml/prepare_data.py --dataset tuffc_2022
+  python ml/prepare_data.py --raw_dir /path/to/extracted --output_dir /path/to/out
 """
 
 import argparse
-import os
-from pathlib import Path
 from glob import glob
+from pathlib import Path
+
+from senseprobe_config import load_config
 
 import numpy as np
 from scipy.signal import hilbert
@@ -125,17 +128,34 @@ def process_mat_file(filepath):
 
 def main():
     parser = argparse.ArgumentParser(description="Prepare TUFFC data for ML experiment")
-    parser.add_argument("--raw_dir", type=str,
-                        default="datasets/raw/TUFFC_2022_Bi_Directional_elasto/extracted")
-    parser.add_argument("--output_dir", type=str, default="datasets/processed")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default=None,
+        help="Dataset id from config/senseprobe.defaults.yaml (default: config defaults.dataset)",
+    )
+    parser.add_argument(
+        "--raw_dir",
+        type=str,
+        default=None,
+        help="Directory containing Data_*.mat (overrides dataset layout from config)",
+    )
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default=None,
+        help="Output directory for data.npz (default: dataset outputs.processed)",
+    )
     parser.add_argument("--img_size", type=int, default=256,
                         help="Resize images to this square size")
     parser.add_argument("--max_samples", type=int, default=0,
                         help="Limit number of samples (0 = all)")
     args = parser.parse_args()
 
-    raw_dir = Path(args.raw_dir)
-    output_dir = Path(args.output_dir)
+    cfg = load_config()
+    ds = cfg.dataset(args.dataset)
+    raw_dir = Path(args.raw_dir) if args.raw_dir else ds.raw_extracted_dir(cfg.data_root)
+    output_dir = Path(args.output_dir) if args.output_dir else ds.processed
     output_dir.mkdir(parents=True, exist_ok=True)
 
     mat_files = sorted(glob(str(raw_dir / "Data_*.mat")),

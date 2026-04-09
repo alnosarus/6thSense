@@ -11,7 +11,8 @@ Augmentations applied during training:
   - Horizontal/vertical flips, small rotation
 
 Usage:
-  python train_robust.py --data_dir datasets/processed_full --epochs 50
+  python ml/train_robust.py --epochs 50
+  python ml/train_robust.py --dataset tuffc_2022
 """
 
 import argparse
@@ -19,6 +20,8 @@ import json
 import os
 import time
 from pathlib import Path
+
+from senseprobe_config import load_config
 
 import numpy as np
 import torch
@@ -226,7 +229,7 @@ def eval_degraded(model, images, stiffness_norm, labels, test_idx, device):
 # Training
 # ============================================================
 
-def train(model, train_loader, test_loader, device, epochs, lr):
+def train(model, train_loader, test_loader, device, epochs, lr, checkpoint_path: Path):
     optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
 
     # Warmup + cosine
@@ -278,7 +281,7 @@ def train(model, train_loader, test_loader, device, epochs, lr):
 
             if tl < best_loss:
                 best_loss = tl
-                torch.save(model.state_dict(), "models/ResNet18_robust_best.pth")
+                torch.save(model.state_dict(), checkpoint_path)
 
 
 # ============================================================
@@ -287,11 +290,25 @@ def train(model, train_loader, test_loader, device, epochs, lr):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", default="datasets/processed_full")
+    parser.add_argument(
+        "--dataset",
+        default=None,
+        help="Dataset id from config (default: defaults.dataset)",
+    )
+    parser.add_argument(
+        "--data_dir",
+        default=None,
+        help="Override processed_full directory (default: dataset outputs.processed_full)",
+    )
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--lr", type=float, default=3e-4)
     args = parser.parse_args()
+
+    cfg = load_config()
+    ds = cfg.dataset(args.dataset)
+    data_dir = args.data_dir or str(ds.processed_full)
+    cfg.models_dir.mkdir(parents=True, exist_ok=True)
 
     device = torch.device(
         "cuda" if torch.cuda.is_available()
@@ -301,7 +318,7 @@ def main():
     print(f"Device: {device}")
 
     # Load data
-    data = np.load(Path(args.data_dir) / "data.npz")
+    data = np.load(Path(data_dir) / "data.npz")
     images = data["images"]
     stiffness = data["stiffness"].astype(np.float32)
     stiff_min, stiff_max = stiffness.min(), stiffness.max()
@@ -347,11 +364,20 @@ def main():
     print(" (with speckle, gaussian noise, blur, contrast augmentation)")
     print("=" * 60)
 
+    robust_ckpt = cfg.models_dir / "ResNet18_robust_best.pth"
     model = make_resnet18().to(device)
-    train(model, train_loader, test_loader, device, args.epochs, args.lr)
+    train(
+        model,
+        train_loader,
+        test_loader,
+        device,
+        args.epochs,
+        args.lr,
+        robust_ckpt,
+    )
 
     # ── Load best and evaluate ──
-    model.load_state_dict(torch.load("models/ResNet18_robust_best.pth", map_location=device))
+    model.load_state_dict(torch.load(robust_ckpt, map_location=device))
     model.to(device)
 
     print("\n" + "=" * 60)
@@ -360,7 +386,9 @@ def main():
 
     # Load original model
     orig_model = make_resnet18().to(device)
-    orig_model.load_state_dict(torch.load("models/ResNet18_best.pth", map_location=device))
+    orig_model.load_state_dict(
+        torch.load(cfg.models_dir / "ResNet18_best.pth", map_location=device)
+    )
 
     print("\nEvaluating original model...")
     orig_results = eval_degraded(orig_model, images, stiffness_norm, labels, test_idx, device)
@@ -416,7 +444,7 @@ def main():
     print("=" * 60)
 
     # Save results
-    save_dir = Path("results/robust")
+    save_dir = cfg.results_dir / "robust"
     save_dir.mkdir(parents=True, exist_ok=True)
     with open(save_dir / "comparison.json", "w") as f:
         json.dump({"original": orig_results, "robust": robust_results}, f, indent=2)

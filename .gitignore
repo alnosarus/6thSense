@@ -1,7 +1,15 @@
-# Data
+# --- Local data (never commit large assets) ---
+data/incoming/
+data/raw/
+data/cache/
+data/processed/
+data/processed_full/
+
+# Legacy dataset tree (deprecated; paths ignored if still present locally)
 datasets/raw/
 datasets/processed/
 datasets/processed_full/
+
 *.h5
 *.hdf5
 *.mat
@@ -19,6 +27,10 @@ __pycache__/
 .venv/
 venv/
 env/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
 
 # Jupyter
 .ipynb_checkpoints/
@@ -38,15 +50,24 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Cursor / local agent & GSD planning (keep on disk; do not publish)
+.cursor/
+.planning/
+
 # Secrets
 .env
 .env.local
 .env.*.local
+!.env.example
+
+# Local config overrides (optional)
+config/senseprobe.local.yaml
 
 # Node / frontend (Vite)
 node_modules/
 dist/
 .vite/
-
-# Cursor — local hook runtime state only (skills under .cursor/skills/ may be committed)
-.cursor/hooks/
+frontend/dist/
+frontend/node_modules/
+landing/dist/
+landing/node_modules/

@@ -13,9 +13,9 @@ Improvements over v1:
   7. Both classification + regression on image-level models
 
 Usage:
-  python research.py --data_dir datasets/processed_full --epochs 50
-  python research.py --data_dir datasets/processed_full --mode unet --epochs 60
-  python research.py --data_dir datasets/processed_full --mode all --epochs 50
+  python ml/research.py --data_dir data/processed_full --epochs 50
+  python ml/research.py --data_dir data/processed_full --mode unet --epochs 60
+  python ml/research.py --data_dir data/processed_full --mode all --epochs 50
 """
 
 import argparse
@@ -23,6 +23,8 @@ import json
 import os
 import time
 from pathlib import Path
+
+from senseprobe_config import load_config
 
 import numpy as np
 import torch
@@ -337,7 +339,16 @@ def get_lr_scheduler(optimizer, epochs, warmup_epochs=5):
     return optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 
 
-def train_classifier(name, model, train_loader, test_loader, device, epochs, lr):
+def train_classifier(
+    name,
+    model,
+    train_loader,
+    test_loader,
+    device,
+    epochs,
+    lr,
+    models_dir: Path,
+):
     """Train image-level classification + regression model."""
     print(f"\n{'='*60}")
     print(f" {name}")
@@ -414,8 +425,8 @@ def train_classifier(name, model, train_loader, test_loader, device, epochs, lr)
 
         if test_m["loss"] < best_test_loss:
             best_test_loss = test_m["loss"]
-            os.makedirs("models", exist_ok=True)
-            torch.save(model.state_dict(), f"models/{name}_best.pth")
+            models_dir.mkdir(parents=True, exist_ok=True)
+            torch.save(model.state_dict(), models_dir / f"{name}_best.pth")
 
         if epoch % 10 == 0 or epoch == 1 or epoch == epochs:
             print(
@@ -429,7 +440,7 @@ def train_classifier(name, model, train_loader, test_loader, device, epochs, lr)
     return history
 
 
-def train_unet(name, model, train_loader, test_loader, device, epochs, lr):
+def train_unet(name, model, train_loader, test_loader, device, epochs, lr, models_dir: Path):
     """Train U-Net for full strain map prediction."""
     print(f"\n{'='*60}")
     print(f" {name} (Strain Map Prediction)")
@@ -490,8 +501,8 @@ def train_unet(name, model, train_loader, test_loader, device, epochs, lr):
 
         if test_loss / n_test < best_test_loss:
             best_test_loss = test_loss / n_test
-            os.makedirs("models", exist_ok=True)
-            torch.save(model.state_dict(), f"models/{name}_best.pth")
+            models_dir.mkdir(parents=True, exist_ok=True)
+            torch.save(model.state_dict(), models_dir / f"{name}_best.pth")
 
         if epoch % 10 == 0 or epoch == 1 or epoch == epochs:
             print(
@@ -539,7 +550,16 @@ def visualize_unet_predictions(model, dataset, device, save_path, n=6):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", default="datasets/processed_full")
+    parser.add_argument(
+        "--dataset",
+        default=None,
+        help="Dataset id from config (default: defaults.dataset)",
+    )
+    parser.add_argument(
+        "--data_dir",
+        default=None,
+        help="Override processed_full directory (default: dataset outputs.processed_full)",
+    )
     parser.add_argument("--mode", choices=["classifiers", "unet", "all"], default="all")
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--unet_epochs", type=int, default=60)
@@ -549,6 +569,14 @@ def main():
     parser.add_argument("--test_split", type=float, default=0.2)
     args = parser.parse_args()
 
+    cfg = load_config()
+    ds = cfg.dataset(args.dataset)
+    data_dir = args.data_dir or str(ds.processed_full)
+    results_dir = cfg.results_dir
+    models_dir = cfg.models_dir
+    results_dir.mkdir(parents=True, exist_ok=True)
+    models_dir.mkdir(parents=True, exist_ok=True)
+
     device = torch.device(
         "cuda" if torch.cuda.is_available()
         else "mps" if torch.backends.mps.is_available()
@@ -557,8 +585,8 @@ def main():
     print(f"Device: {device}")
     print(f"Mode: {args.mode}")
 
-    results_dir = Path("results")
-    results_dir.mkdir(exist_ok=True)
+    clf_results: dict = {}
+    unet_results: dict = {}
 
     # ── Image-level models ──────────────────────────────
     if args.mode in ("classifiers", "all"):
@@ -581,7 +609,7 @@ def main():
         ])
 
         # Two dataset instances with different transforms
-        full_ds = StiffnessDataset(args.data_dir, transform=None)
+        full_ds = StiffnessDataset(data_dir, transform=None)
         test_size = int(len(full_ds) * args.test_split)
         train_size = len(full_ds) - test_size
         train_indices, test_indices = random_split(
@@ -591,8 +619,8 @@ def main():
         train_indices = list(train_indices)
         test_indices = list(test_indices)
 
-        train_ds = StiffnessDataset(args.data_dir, transform=train_transform)
-        test_ds = StiffnessDataset(args.data_dir, transform=test_transform)
+        train_ds = StiffnessDataset(data_dir, transform=train_transform)
+        test_ds = StiffnessDataset(data_dir, transform=test_transform)
 
         # Subset datasets
         from torch.utils.data import Subset
@@ -605,19 +633,36 @@ def main():
         print(f"Train: {len(train_subset)} | Test: {len(test_subset)}")
 
         # Run all models
-        model_factories = {
+        full_factories = {
             "SimpleCNN": make_simple_cnn,
             "ResNet18": make_resnet18,
             "ResNet50": make_resnet50,
             "EfficientNet-B0": make_efficientnet_b0,
             "ConvNeXt-Tiny": make_convnext_tiny,
         }
+        order = cfg.training_classifiers
+        if order:
+            model_factories = {k: full_factories[k] for k in order if k in full_factories}
+            skipped = [k for k in order if k not in full_factories]
+            if skipped:
+                print(f"Warning: training.classifiers names not implemented (skipped): {skipped}")
+            if not model_factories:
+                model_factories = full_factories
+        else:
+            model_factories = full_factories
 
         all_history = {}
         for name, factory in model_factories.items():
             model = factory()
             history = train_classifier(
-                name, model, train_loader, test_loader, device, args.epochs, args.lr
+                name,
+                model,
+                train_loader,
+                test_loader,
+                device,
+                args.epochs,
+                args.lr,
+                models_dir,
             )
             all_history[name] = history
 
@@ -653,7 +698,7 @@ def main():
         print("=" * 80)
         print(f"{'Model':<20} {'Acc':>8} {'R²':>8} {'MAE':>8} {'Best Loss':>10}")
         print("-" * 80)
-        clf_results = {}
+        clf_results.clear()
         for name, h in all_history.items():
             best = min(h["test"], key=lambda x: x["loss"])
             print(f"{name:<20} {best['accuracy']:>8.3f} {best['r2']:>8.3f} {best['mae']:>8.4f} {best['loss']:>10.4f}")
@@ -668,13 +713,13 @@ def main():
         print(" U-NET: FULL STRAIN MAP PREDICTION")
         print("#" * 60)
 
-        unet_ds = StrainMapDataset(args.data_dir, img_size=256, augment=False)
+        unet_ds = StrainMapDataset(data_dir, img_size=256, augment=False)
         test_size = int(len(unet_ds) * args.test_split)
         train_size = len(unet_ds) - test_size
 
         # Augmented version for training
-        unet_train_ds = StrainMapDataset(args.data_dir, img_size=256, augment=True)
-        unet_test_ds = StrainMapDataset(args.data_dir, img_size=256, augment=False)
+        unet_train_ds = StrainMapDataset(data_dir, img_size=256, augment=True)
+        unet_test_ds = StrainMapDataset(data_dir, img_size=256, augment=False)
 
         from torch.utils.data import Subset
         gen = torch.Generator().manual_seed(42)
@@ -688,20 +733,39 @@ def main():
 
         print(f"Train: {len(train_idx)} | Test: {len(test_idx)}")
 
-        unet_models = {
+        full_unets = {
             "UNet": UNet(in_ch=3, out_ch=1, base_ch=32),
             "ResUNet": ResUNet(),
         }
+        u_order = cfg.training_unets
+        if u_order:
+            unet_models = {k: full_unets[k] for k in u_order if k in full_unets}
+            skipped_u = [k for k in u_order if k not in full_unets]
+            if skipped_u:
+                print(f"Warning: training.unets names not implemented (skipped): {skipped_u}")
+            if not unet_models:
+                unet_models = full_unets
+        else:
+            unet_models = full_unets
 
         unet_histories = {}
         for name, model in unet_models.items():
             history = train_unet(
-                name, model, train_loader, test_loader, device, args.unet_epochs, args.lr
+                name,
+                model,
+                train_loader,
+                test_loader,
+                device,
+                args.unet_epochs,
+                args.lr,
+                models_dir,
             )
             unet_histories[name] = history
 
             # Load best and visualize
-            model.load_state_dict(torch.load(f"models/{name}_best.pth", map_location=device))
+            model.load_state_dict(
+                torch.load(models_dir / f"{name}_best.pth", map_location=device)
+            )
             model.to(device)
             visualize_unet_predictions(
                 model, Subset(unet_test_ds, test_idx),
@@ -735,7 +799,7 @@ def main():
         print("=" * 80)
         print(f"{'Model':<20} {'Pixel-R²':>10} {'Pixel-MAE':>10} {'Best Loss':>10}")
         print("-" * 80)
-        unet_results = {}
+        unet_results.clear()
         for name, h in unet_histories.items():
             best_idx = np.argmin(h["test_loss"])
             print(f"{name:<20} {h['test_r2'][best_idx]:>10.3f} {h['test_mae'][best_idx]:>10.4f} {h['test_loss'][best_idx]:>10.4f}")

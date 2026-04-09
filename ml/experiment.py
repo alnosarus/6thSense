@@ -10,12 +10,12 @@ Runs 3 models (ResNet18, EfficientNet-B0, SimpleCNN) on both:
 Uses 80/20 train/test split on all available data.
 
 Usage:
-  python experiment.py --data_dir datasets/processed --epochs 30
+  python ml/experiment.py --epochs 30
+  python ml/experiment.py --dataset tuffc_2022 --data_dir /custom/processed
 """
 
 import argparse
 import json
-import os
 import time
 from pathlib import Path
 
@@ -24,6 +24,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, random_split
+from senseprobe_config import load_config
 from torchvision import transforms, models
 from sklearn.metrics import accuracy_score, r2_score, mean_absolute_error
 from tqdm import tqdm
@@ -212,7 +213,7 @@ def evaluate(model, loader, device, cls_w=1.0, reg_w=1.0):
     }
 
 
-def run_model(name, model, train_loader, test_loader, device, epochs, lr):
+def run_model(name, model, train_loader, test_loader, device, epochs, lr, models_dir: Path):
     print(f"\n{'='*60}")
     print(f" {name}")
     print(f"{'='*60}")
@@ -236,8 +237,8 @@ def run_model(name, model, train_loader, test_loader, device, epochs, lr):
 
         if test_m["loss"] < best_test_loss:
             best_test_loss = test_m["loss"]
-            os.makedirs("models", exist_ok=True)
-            torch.save(model.state_dict(), f"models/{name}_best.pth")
+            models_dir.mkdir(parents=True, exist_ok=True)
+            torch.save(model.state_dict(), models_dir / f"{name}_best.pth")
 
         if epoch % 5 == 0 or epoch == 1:
             print(
@@ -294,13 +295,29 @@ def plot_all(all_history, save_dir="."):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", default="datasets/processed")
+    parser.add_argument(
+        "--dataset",
+        default=None,
+        help="Dataset id from config (default: defaults.dataset)",
+    )
+    parser.add_argument(
+        "--data_dir",
+        default=None,
+        help="Override processed data directory (default: dataset outputs.processed)",
+    )
     parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--img_size", type=int, default=224)
     parser.add_argument("--test_split", type=float, default=0.2)
     args = parser.parse_args()
+
+    cfg = load_config()
+    ds = cfg.dataset(args.dataset)
+    data_dir = args.data_dir or str(ds.processed)
+    results_dir = cfg.results_dir
+    models_dir = cfg.models_dir
+    models_dir.mkdir(parents=True, exist_ok=True)
 
     device = torch.device(
         "cuda" if torch.cuda.is_available()
@@ -315,7 +332,7 @@ def main():
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ])
 
-    dataset = StiffnessDataset(args.data_dir, transform=transform)
+    dataset = StiffnessDataset(data_dir, transform=transform)
 
     # 80/20 split
     test_size = int(len(dataset) * args.test_split)
@@ -329,20 +346,31 @@ def main():
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=0)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
-    # Run all 3 models
     all_history = {}
-    model_configs = {
+    full_models = {
         "SimpleCNN": SimpleCNN(),
         "ResNet18": DualHeadResNet(),
         "EfficientNet-B0": DualHeadEfficientNet(),
     }
+    order = cfg.training_experiment_classifiers
+    if order:
+        model_configs = {k: full_models[k] for k in order if k in full_models}
+        unknown = [k for k in order if k not in full_models]
+        if unknown:
+            print(f"Warning: unknown experiment_classifiers in config (skipped): {unknown}")
+        if not model_configs:
+            model_configs = full_models
+    else:
+        model_configs = full_models
 
     for name, model in model_configs.items():
-        history = run_model(name, model, train_loader, test_loader, device, args.epochs, args.lr)
+        history = run_model(
+            name, model, train_loader, test_loader, device, args.epochs, args.lr, models_dir
+        )
         all_history[name] = history
 
-    # Plot results
-    plot_all(all_history)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    plot_all(all_history, save_dir=str(results_dir))
 
     # Final summary
     print("\n" + "=" * 70)
@@ -357,7 +385,7 @@ def main():
         print(f"{name:<20} {best['accuracy']:>10.3f} {best['r2']:>10.3f} {best['mae']:>10.4f} {best['loss']:>10.4f}")
         results[name] = best
 
-    with open("results.json", "w") as f:
+    with open(results_dir / "results.json", "w") as f:
         json.dump(results, f, indent=2)
 
     # Verdict

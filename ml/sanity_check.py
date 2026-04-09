@@ -11,12 +11,15 @@ Tests:
   5. Degradation robustness (noise, blur, resolution, contrast)
 
 Usage:
-  python sanity_check.py --data_dir datasets/processed_full --model_path models/ResNet18_best.pth
+  python ml/sanity_check.py
+  python ml/sanity_check.py --dataset tuffc_2022 --model_path /path/to/ResNet18_best.pth
 """
 
 import argparse
 import os
 from pathlib import Path
+
+from senseprobe_config import load_config
 
 import numpy as np
 import torch
@@ -437,9 +440,27 @@ def run_degradation_suite(model, images, stiffness_norm, labels, test_idx, devic
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", default="datasets/processed_full")
-    parser.add_argument("--model_path", default="models/ResNet18_best.pth")
+    parser.add_argument(
+        "--dataset",
+        default=None,
+        help="Dataset id from config (default: defaults.dataset)",
+    )
+    parser.add_argument(
+        "--data_dir",
+        default=None,
+        help="Override processed_full directory (default: dataset outputs.processed_full)",
+    )
+    parser.add_argument(
+        "--model_path",
+        default=None,
+        help="Checkpoint .pth (default: <models_dir>/ResNet18_best.pth from config)",
+    )
     args = parser.parse_args()
+
+    cfg = load_config()
+    ds = cfg.dataset(args.dataset)
+    data_dir = args.data_dir or str(ds.processed_full)
+    model_path = args.model_path or str(cfg.models_dir / "ResNet18_best.pth")
 
     device = torch.device(
         "cuda" if torch.cuda.is_available()
@@ -448,11 +469,11 @@ def main():
     )
     print(f"Device: {device}")
 
-    save_dir = Path("results/sanity")
+    save_dir = cfg.results_dir / "sanity"
     save_dir.mkdir(parents=True, exist_ok=True)
 
     # Load data
-    data = np.load(Path(args.data_dir) / "data.npz")
+    data = np.load(Path(data_dir) / "data.npz")
     images = data["images"]
     stiffness = data["stiffness"].astype(np.float32)
     stiff_min, stiff_max = stiffness.min(), stiffness.max()
@@ -473,9 +494,9 @@ def main():
 
     # Load model
     model = make_resnet18()
-    model.load_state_dict(torch.load(args.model_path, map_location=device))
+    model.load_state_dict(torch.load(model_path, map_location=device))
     model = model.to(device)
-    print(f"Loaded model from {args.model_path}")
+    print(f"Loaded model from {model_path}")
 
     # ── Run all tests ──
     print("\n" + "=" * 60)
