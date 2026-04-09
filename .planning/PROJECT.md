@@ -26,13 +26,13 @@ Deliver the first practical "artificial nervous system" for robots by fusing low
 
 ### Validated
 
-- (None yet)
+- [x] Landing page with clear product narrative (v0.1)
+- [x] Technical architecture (PNS + CNS + Fusion) visible on-page
+- [x] Pilot/waitlist conversion CTA with inline feedback
 
 ### Active
 
-- [ ] Publish a landing page with clear product narrative
-- [ ] Communicate technical architecture (PNS + CNS + Fusion)
-- [ ] Include pilot/waitlist conversion CTA
+- [ ] v2: CRM-backed leads, deep technical page, interactive demos (see REQUIREMENTS)
 
 ### Out of Scope
 
@@ -66,4 +66,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update context with current state
 
 ---
-*Last updated: 2026-04-09 after initialization*
+*Last updated: 2026-04-09 — v0.1 landing requirements validated; 10-phase roadmap in ROADMAP.md*

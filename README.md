@@ -20,7 +20,7 @@ See `datasets/README.md` for sources and download instructions.
 
 ## Landing Page
 
-Public narrative site is a **React + Vite** app in `landing/`, with **Framer Motion** for scroll-driven hero motion and **React Three Fiber** (`@react-three/fiber`, `drei`, `three`) for an abstract scroll-linked 3D assembly. Typography uses **Syne** and **Cormorant Garamond** (loaded from Google Fonts in `landing/index.html`).
+Public narrative site is a **React + Vite** app in `landing/`, with **Framer Motion** for scroll-driven hero motion and **React Three Fiber** (`@react-three/fiber`, `drei`, `three`, **`@react-three/postprocessing`**, **GSAP**, **maath**) for an immersive scroll-linked 3D experience (studio HDRI, soft shadows, contact shadows, graded post-FX). **`three` is pinned to ~0.160** so `@react-three/postprocessing` v2 bundles cleanly with Vite (newer `three` builds removed APIs used by optional SSR paths in that stack). Typography uses **Syne** and **Cormorant Garamond** (loaded from Google Fonts in `landing/index.html`).
 
 Run it locally:
 
@@ -34,7 +34,8 @@ Production build: `cd landing && npm run build` (output in `landing/dist/`).
 
 Core files:
 - `landing/src/App.jsx` — page sections and copy
-- `landing/src/ProbeCanvas.jsx` — R3F scene tied to `ScrollContext`
+- `landing/src/ProbeCanvas.jsx` — R3F canvas + tone mapping / color space
+- `landing/src/ProbeExperience.jsx` — lighting, materials, camera rig, postprocessing, interaction
 - `landing/src/ScrollContext.jsx` — document scroll → 0–1 progress for 3D
 - `landing/src/styles.css`
 - `landing/src/main.jsx`

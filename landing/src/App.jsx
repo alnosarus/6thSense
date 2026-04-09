@@ -112,12 +112,14 @@ function AppInner() {
 
       <div className="grain" aria-hidden="true" />
 
-      <header className="hero" id="top">
+      <header className="hero" id="top" role="banner">
         <HeroVisual />
-        <nav className="nav-bar">
+        <nav className="nav-bar" aria-label="Primary">
           <span className="wordmark">SENSEPROBE</span>
           <div className="nav-links">
+            <a href="#architecture">Architecture</a>
             <a href="#explorer">System</a>
+            <a href="#proof">Proof</a>
             <a href="#compare">Contrast</a>
             <a href="#verticals">Markets</a>
             <a href="#waitlist" className="nav-cta">
@@ -155,7 +157,7 @@ function AppInner() {
         </div>
       </header>
 
-      <main id="main">
+      <main id="main" aria-label="SenseProbe product narrative">
         <section className="strip">
           <p>
             Research-grade thesis · Hardware-forward roadmap · ML that closes the loop between
@@ -163,7 +165,51 @@ function AppInner() {
           </p>
         </section>
 
-        <section id="explorer" className="explorer">
+        <section
+          id="architecture"
+          className="section arch-section"
+          aria-labelledby="arch-heading"
+        >
+          <motion.div {...fadeUpProps}>
+            <h2 id="arch-heading" className="section-title">
+              Three layers, one nervous system
+            </h2>
+            <p className="lead tight">
+              Biology does not treat touch and mechanical state as separate products. SenseProbe
+              mirrors that structure: a <strong>peripheral</strong> contact channel, a{" "}
+              <strong>central</strong> volumetric channel, and a <strong>fusion</strong> layer
+              that closes the loop for control.
+            </p>
+            <div className="arch-grid">
+              <article className="arch-card">
+                <p className="arch-badge">PNS · Peripheral</p>
+                <h3>Surface tactile sensing</h3>
+                <p>
+                  Piezoresistive tactility at the finger: pressure, shear, and slip at the contact
+                  patch—live feedback for manipulation, not a lab snapshot.
+                </p>
+              </article>
+              <article className="arch-card">
+                <p className="arch-badge">CNS · Central</p>
+                <h3>Volumetric mechanical inference</h3>
+                <p>
+                  Ultrasound-informed readouts of stiffness trends and boundaries beneath the
+                  surface—context before the end-effector commits.
+                </p>
+              </article>
+              <article className="arch-card arch-card-accent">
+                <p className="arch-badge">Fusion</p>
+                <h3>One interaction model</h3>
+                <p>
+                  Coupled observations for planners and policies: the same stack human hands use
+                  when contact and internal state must agree under uncertainty.
+                </p>
+              </article>
+            </div>
+          </motion.div>
+        </section>
+
+        <section id="explorer" className="explorer" aria-labelledby="explorer-heading">
           <div className="explorer-sticky">
             <Suspense
               fallback={
@@ -180,7 +226,9 @@ function AppInner() {
           </div>
           <div className="explorer-copy">
             <motion.article {...fadeUpProps}>
-              <h2 className="section-title">One product story, many angles</h2>
+              <h2 id="explorer-heading" className="section-title">
+                One product story, many angles
+              </h2>
               <p className="lead">
                 As you move through this page, the assembly rotates — surface ring, embedded
                 plane, optical marker — a deliberate metaphor for “the same device, different
@@ -223,9 +271,11 @@ function AppInner() {
           </div>
         </section>
 
-        <section className="section editorial" id="problem">
+        <section className="section editorial" id="problem" aria-labelledby="problem-heading">
           <motion.div {...fadeUpProps}>
-            <h2 className="section-title">Why “more cameras” stopped working</h2>
+            <h2 id="problem-heading" className="section-title">
+              Why “more cameras” stopped working
+            </h2>
             <div className="two-col">
               <div>
                 <p className="pull-quote">
@@ -245,9 +295,38 @@ function AppInner() {
           </motion.div>
         </section>
 
-        <section className="section section-dark" id="compare">
+        <section id="proof" className="section proof-section" aria-labelledby="proof-heading">
           <motion.div {...fadeUpProps}>
-            <h2 className="section-title light">The contrast, made blunt</h2>
+            <h2 id="proof-heading" className="section-title">
+              Proof from the bench
+            </h2>
+            <p className="lead tight">
+              Claims tied to active R&amp;D in this repo—not slide hypotheticals.
+            </p>
+            <ol className="proof-list">
+              <li>
+                <strong>Stiffness signal from standard B-mode.</strong> ML experiments on paired
+                ultrasound data show recoverable mechanical contrast without dedicated elastography
+                hardware everywhere—see project experiments and results artifacts.
+              </li>
+              <li>
+                <strong>Tactile economics at the finger.</strong> Roadmap targets sub-$30 BOM-class
+                piezoresistive assemblies for deployable manipulation, not one-off lab stacks.
+              </li>
+              <li>
+                <strong>Fusion-shaped loop.</strong> Training and evaluation pipelines treat contact
+                streams and volumetric inference as coupled channels—aligned with how policies
+                should consume them.
+              </li>
+            </ol>
+          </motion.div>
+        </section>
+
+        <section className="section section-dark" id="compare" aria-labelledby="compare-heading">
+          <motion.div {...fadeUpProps}>
+            <h2 id="compare-heading" className="section-title light">
+              The contrast, made blunt
+            </h2>
             <div className="compare-grid">
               <div className="compare-card compare-muted">
                 <h3>Surface-only robotics</h3>
@@ -269,9 +348,11 @@ function AppInner() {
           </motion.div>
         </section>
 
-        <section className="section bento-wrap" id="system">
+        <section className="section bento-wrap" id="system" aria-labelledby="system-heading">
           <motion.div {...fadeUpProps}>
-            <h2 className="section-title">System surfaces</h2>
+            <h2 id="system-heading" className="section-title">
+              System surfaces
+            </h2>
             <div className="bento">
               <div className="bento-a">
                 <h3>Hardware</h3>
@@ -305,7 +386,10 @@ function AppInner() {
           </motion.div>
         </section>
 
-        <section className="section metrics">
+        <section className="section metrics" aria-labelledby="metrics-heading">
+          <h2 id="metrics-heading" className="visually-hidden">
+            At a glance
+          </h2>
           <motion.div className="metrics-row" {...fadeUpProps}>
             <div>
               <span className="metric-val">2×</span>
@@ -322,9 +406,11 @@ function AppInner() {
           </motion.div>
         </section>
 
-        <section className="section" id="verticals">
+        <section className="section" id="verticals" aria-labelledby="verticals-heading">
           <motion.div {...fadeUpProps}>
-            <h2 className="section-title">Where it lands first</h2>
+            <h2 id="verticals-heading" className="section-title">
+              Where it lands first
+            </h2>
             <p className="lead tight">
               Long-horizon vision, near-term wedges. Same stack, different GTM skins — surgical
               rigor, factory throughput, or human-scale robots at home.
@@ -340,9 +426,11 @@ function AppInner() {
           </motion.div>
         </section>
 
-        <section className="section quotes">
+        <section className="section quotes" aria-labelledby="quotes-heading">
           <motion.div {...fadeUpProps}>
-            <h2 className="section-title">What partners are buying</h2>
+            <h2 id="quotes-heading" className="section-title">
+              What partners are buying
+            </h2>
             <div className="quote-grid">
               <blockquote>
                 “A manipulation story grounded in tissue and material physics — not another
@@ -363,22 +451,33 @@ function AppInner() {
           </motion.div>
         </section>
 
-        <section className="section faq" id="faq">
+        <section className="section faq" id="faq" aria-labelledby="faq-heading">
           <motion.div {...fadeUpProps}>
-            <h2 className="section-title">Direct questions</h2>
+            <h2 id="faq-heading" className="section-title">
+              Direct questions
+            </h2>
             <div className="faq-list">
               {faq.map((item, i) => (
                 <div key={item.q} className="faq-item">
                   <button
                     type="button"
                     className="faq-q"
+                    id={`faq-button-${i}`}
                     aria-expanded={openFaq === i}
+                    aria-controls={`faq-panel-${i}`}
                     onClick={() => setOpenFaq(openFaq === i ? -1 : i)}
                   >
                     {item.q}
                   </button>
                   {openFaq === i ? (
-                    <p className="faq-a">{item.a}</p>
+                    <p
+                      className="faq-a"
+                      id={`faq-panel-${i}`}
+                      role="region"
+                      aria-labelledby={`faq-button-${i}`}
+                    >
+                      {item.a}
+                    </p>
                   ) : null}
                 </div>
               ))}
@@ -386,20 +485,26 @@ function AppInner() {
           </motion.div>
         </section>
 
-        <section className="section waitlist" id="waitlist">
+        <section className="section waitlist" id="waitlist" aria-labelledby="waitlist-heading">
           <motion.div {...fadeUpProps}>
-            <h2 className="section-title">Start a technical conversation</h2>
+            <h2 id="waitlist-heading" className="section-title">
+              Start a technical conversation
+            </h2>
             <p className="lead tight">
               We work with teams that can run pilots, supply paired data, or co-develop
               integration on real platforms — not slide-only intros.
             </p>
-            <form className="waitlist-form" onSubmit={onSubmit}>
+            <form className="waitlist-form" onSubmit={onSubmit} noValidate>
               <label htmlFor="email">Work email</label>
+              <p className="form-hint" id="email-hint">
+                Used only to follow up on pilot fit. No marketing list.
+              </p>
               <input
                 id="email"
                 type="email"
                 value={email}
                 autoComplete="email"
+                aria-describedby="email-hint"
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
@@ -412,7 +517,7 @@ function AppInner() {
         </section>
       </main>
 
-      <footer className="footer">
+      <footer className="footer" role="contentinfo">
         <p>SenseProbe — surface tactility + volumetric inference for physical AI.</p>
         <a href="#top">Back to top</a>
       </footer>
