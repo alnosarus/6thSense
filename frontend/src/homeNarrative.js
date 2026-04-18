@@ -1,33 +1,17 @@
 /**
  * Homepage narrative content — edit here; UI maps over these structures.
- * Headline options for hero (pick one in App or A/B later):
  */
-export const heroHeadlineOptions = [
-  {
-    id: "pipeline",
-    h1: "The data pipeline for touch-aware robot learning",
-    deck: "6thSense builds custom tactile egocentric datasets with synchronized touch, vision, and hand interaction streams from real human demonstrations."
-  },
-  {
-    id: "fullstack",
-    h1: "Full-stack multimodal data collection for robotics",
-    deck: "We deliver hardware, capture, calibration, quality control, and packaged training datasets tailored to your manipulation tasks."
-  },
-  {
-    id: "modelready",
-    h1: "From human demonstration to model-ready dataset",
-    deck: "Aligned multimodal episodes that connect what the demonstrator saw, what the hand did, and what the hand felt."
-  }
-];
-
-/** Active headline set (swap `heroHeadlineOptions` index to try alternates). */
-export const heroCopy = heroHeadlineOptions[0];
+export const heroCopy = {
+  wordmark: "6THSENSE",
+  tagline: "Robots have five senses. We are building the sixth.",
+  deck: "Touch-aware demonstration data for the next generation of dexterous robots."
+};
 
 export const storyPanels = [
   {
     id: "hero",
     kicker: "6thSense",
-    title: heroCopy.h1,
+    title: heroCopy.tagline,
     body: heroCopy.deck,
     phase: "hero",
     layout: "left"
@@ -36,25 +20,17 @@ export const storyPanels = [
     id: "capture",
     kicker: "Capture stack",
     title: "Custom tactile + egocentric capture systems",
-    body: "Wearable sensing, egocentric video, and hand signals are recorded together during contact-rich manipulation tasks.",
+    body: "Wearable rigs record what humans see, do, and feel during contact-rich tasks.",
     phase: "signal",
     layout: "left"
   },
   {
     id: "alignment",
     kicker: "Aligned episodes",
-    title: "Time-synchronized multimodal sequences",
-    body: "Each episode preserves temporal alignment between tactile contact proxies, vision, motion signals, and task metadata.",
+    title: "Every modality lands on the same clock",
+    body: "Visual, tactile, motion, and metadata streams remain synchronized so each episode trains coherent behavior.",
     phase: "context",
     layout: "center"
-  },
-  {
-    id: "delivery",
-    kicker: "Data delivery",
-    title: "Clean, quality-controlled, model-ready outputs",
-    body: "We package episodes, annotations, metrics, and assumptions so robotics teams can train and evaluate without rebuilding the data stack.",
-    phase: "insight",
-    layout: "right"
   }
 ];
 
@@ -86,30 +62,41 @@ export const tractionItems = [
   }
 ];
 
-export const platformPillars = [
+export const platformStages = [
   {
-    title: "Custom capture hardware",
-    body: "Wearable and sensor configurations tailored to each customer task and manipulation environment.",
-    icon: "Cpu"
+    id: "capture",
+    step: "01",
+    label: "Capture",
+    caption: "Wearable + egocentric rigs",
+    glyph: "rig"
   },
   {
-    title: "Synchronized multimodal recording",
-    body: "Tactile/contact proxies, egocentric video, hand motion signals, and metadata recorded as aligned sequences.",
-    icon: "SplitSquareHorizontal"
+    id: "sync",
+    step: "02",
+    label: "Sync",
+    caption: "One clock, every modality",
+    glyph: "sync"
   },
   {
-    title: "Calibration and reliability workflows",
-    body: "Signal drift, fit shifts, channel instability, and timing checks are handled before data reaches training.",
-    icon: "Gauge"
+    id: "calibrate",
+    step: "03",
+    label: "Calibrate",
+    caption: "Drift, fit, and timing checks",
+    glyph: "calibrate"
   },
   {
-    title: "Dataset QC and packaging",
-    body: "Task segmentation, annotations, failure flags, and documentation shipped in model-ready formats.",
-    icon: "PackageCheck"
+    id: "package",
+    step: "04",
+    label: "Package",
+    caption: "Episodes shipped model-ready",
+    glyph: "package"
   }
 ];
 
-/** SenseProbe / offering — data catalog tiles (tune specs to shipped hardware + programs). */
+export const platformSummary =
+  "Hardware, sync, calibration, packaging - one stack, four stages. Robot-learning teams get aligned episodes, not raw folders.";
+
+/** Offering — data catalog tiles (tune specs to shipped hardware + programs). */
 export const dataCatalogTiles = [
   {
     id: "tactile",
@@ -177,20 +164,13 @@ export const catalogSceneExamples = [
   "Washing & rinsing dishes",
   "Loading / unloading dishwasher",
   "Folding & putting away laundry",
-  "Laundry sorting & handling",
   "Vacuuming & floor cleaning",
-  "Coffee & beverage prep",
-  "Other household manipulation (scoped per program)"
+  "Coffee & beverage prep"
 ];
 
-export const catalogBinding = {
-  title: "One dataset contract",
-  body: "Episodes bundle what you see, feel, and measure in the same clock — domestic scenes like the examples above are scoped per customer; modalities and commentary depth are agreed in the program so teams train on aligned supervision, not orphaned files."
-};
-
 export const catalogMeta = {
-  kicker: "Episode manifest",
-  title: "What SenseProbe programs deliver"
+  kicker: "What we capture",
+  title: "Eight aligned modalities, one episode"
 };
 
 export const credibilityPrinciples = [
@@ -208,16 +188,5 @@ export const credibilityPrinciples = [
     num: "03",
     title: "Model-ready packaging",
     body: "Episodes land in the formats your trainers expect, with QC metrics and assumptions — not a dump of raw sensor folders."
-  }
-];
-
-export const forTeamsCards = [
-  {
-    title: "Current wedge",
-    body: "Custom tactile egocentric datasets for robotics teams with specific manipulation objectives and a defined quality bar."
-  },
-  {
-    title: "Platform vision",
-    body: "Infrastructure for repeatable capture, calibration, and delivery of contact-rich human demonstration data at scale."
   }
 ];

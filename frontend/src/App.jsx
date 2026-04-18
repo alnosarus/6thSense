@@ -1,22 +1,19 @@
 import { useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ActivitySquare,
   Boxes,
   BrainCircuit,
-  Cpu,
-  Gauge,
-  PackageCheck,
-  SplitSquareHorizontal,
   Wrench
 } from "lucide-react";
 import DeviceStory from "./DeviceStory.jsx";
 import Credibility from "./Credibility.jsx";
 import DataCatalog from "./DataCatalog.jsx";
+import PlatformPipeline from "./PlatformPipeline.jsx";
 import ScrollProgress from "./ScrollProgress.jsx";
 import { useRevealNav } from "./useRevealNav.js";
 import { useActiveNavSection } from "./useActiveNavSection.js";
-import { forTeamsCards, platformPillars, tractionItems } from "./homeNarrative.js";
+import { tractionItems } from "./homeNarrative.js";
 
 const fadeUp = {
   initial: { opacity: 0, y: 28 },
@@ -57,11 +54,7 @@ const iconByName = {
   ActivitySquare,
   Wrench,
   Boxes,
-  BrainCircuit,
-  Cpu,
-  SplitSquareHorizontal,
-  Gauge,
-  PackageCheck
+  BrainCircuit
 };
 
 function RenderIcon({ name }) {
@@ -92,15 +85,20 @@ function AppInner() {
   const activeNavKey = useActiveNavSection();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
+  const [statusTone, setStatusTone] = useState("idle");
+  const [formShakeKey, setFormShakeKey] = useState(0);
   const [openFaq, setOpenFaq] = useState(-1);
 
   const onSubmit = (event) => {
     event.preventDefault();
     if (!email || !email.includes("@")) {
       setStatus("Enter a valid work email.");
+      setStatusTone("error");
+      setFormShakeKey((key) => key + 1);
       return;
     }
     setStatus("Received. The 6thSense team will follow up with a dataset scoping call.");
+    setStatusTone("success");
     setEmail("");
   };
 
@@ -126,7 +124,7 @@ function AppInner() {
               System
             </a>
             <a href="#catalog" className={navClass("catalog")}>
-              Manifest
+              Catalog
             </a>
             <a href="#credibility" className={navClass("credibility")}>
               Credibility
@@ -146,17 +144,6 @@ function AppInner() {
         <DeviceStory />
 
         <div className="page-after-hero">
-          <section className="proof-strip" id="proof" aria-label="What we do">
-            <p>
-              <strong>SenseProbe is our capture stack for touch-aware human demonstration.</strong> We ship synchronized
-              tactile, vision, and motion episodes — calibrated, QC&apos;d, and packaged for robot learning teams.
-            </p>
-            <p className="proof-strip-subline">
-              We start with focused sample programs, then scale through our collection network into customer-scoped data
-              contracts as task requirements sharpen.
-            </p>
-          </section>
-
           <section className="section traction-section" id="problem" aria-labelledby="problem-h">
             <motion.div {...fadeUpProps}>
               <p className="section-kicker-num">
@@ -166,10 +153,6 @@ function AppInner() {
               <h2 id="problem-h" className="section-title">
                 The problem we solve
               </h2>
-              <p className="lead tight traction-deck">
-                Most robot datasets miss the human-side contact signals that drive robust manipulation. We focus on the
-                missing layer between vision, action, and touch.
-              </p>
               <ul className="traction-timeline">
                 {tractionItems.map((item) => (
                   <li key={item.label} className="traction-item">
@@ -194,26 +177,7 @@ function AppInner() {
               <h2 id="system-h" className="section-title">
                 How we solve it
               </h2>
-              <p className="lead tight">
-                Our product is not a glove, camera rig, or raw file dump. It is a full-stack, quality-controlled data
-                pipeline for robot learning teams.
-              </p>
-              <ul className="system-pillars">
-                {platformPillars.map((pillar, i) => (
-                  <li key={pillar.title} className="system-pillar">
-                    <span className="system-pillar-num">{String(i + 1).padStart(2, "0")}</span>
-                    <div className="system-pillar-body">
-                      <h3>
-                        <span className="system-pillar-icon" aria-hidden="true">
-                          <RenderIcon name={pillar.icon} />
-                        </span>
-                        {pillar.title}
-                      </h3>
-                      <p>{pillar.body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <PlatformPipeline />
             </motion.div>
           </section>
 
@@ -221,42 +185,15 @@ function AppInner() {
 
           <Credibility />
 
-          <section className="section fit-section" id="fit" aria-labelledby="fit-h">
-            <motion.div {...fadeUpProps}>
-              <p className="section-kicker-num">
-                <span>05</span>
-                Fit
-              </p>
-              <h2 id="fit-h" className="section-title">
-                Who this is for
-              </h2>
-              <p className="lead tight">
-                Teams building dexterous manipulation systems and contact-rich robot learning pipelines that need better
-                real-world human demonstration data.
-              </p>
-              <div className="fit-deck">
-                {forTeamsCards.map((card) => (
-                  <article key={card.title} className="fit-card">
-                    <h3>{card.title}</h3>
-                    <p>{card.body}</p>
-                  </article>
-                ))}
-              </div>
-            </motion.div>
-          </section>
-
           <section className="section faq" id="faq" aria-labelledby="faq-heading">
             <motion.div {...fadeUpProps}>
               <p className="section-kicker-num">
-                <span>06</span>
+                <span>05</span>
                 FAQ
               </p>
               <h2 id="faq-heading" className="section-title">
                 Questions
               </h2>
-              <p className="lead tight">
-                Straight answers on signal semantics, tooling scope, and who benefits most from SenseProbe datasets.
-              </p>
               <div className="faq-list">
                 {faq.map((item, i) => (
                   <div key={item.q} className={`faq-item${openFaq === i ? " faq-item--open" : ""}`}>
@@ -271,16 +208,24 @@ function AppInner() {
                       <span className="faq-q-text">{item.q}</span>
                       <FaqChevron />
                     </button>
-                    {openFaq === i ? (
-                      <p
-                        className="faq-a"
-                        id={`faq-panel-${i}`}
-                        role="region"
-                        aria-labelledby={`faq-button-${i}`}
-                      >
-                        {item.a}
-                      </p>
-                    ) : null}
+                    <AnimatePresence initial={false}>
+                      {openFaq === i ? (
+                        <motion.p
+                          key="answer"
+                          className="faq-a"
+                          id={`faq-panel-${i}`}
+                          role="region"
+                          aria-labelledby={`faq-button-${i}`}
+                          initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={reduceMotion ? { height: "auto", opacity: 0 } : { height: 0, opacity: 0 }}
+                          transition={{ duration: reduceMotion ? 0 : 0.32, ease: [0.22, 1, 0.36, 1] }}
+                          style={{ overflow: "hidden" }}
+                        >
+                          {item.a}
+                        </motion.p>
+                      ) : null}
+                    </AnimatePresence>
                   </div>
                 ))}
               </div>
@@ -293,27 +238,56 @@ function AppInner() {
                 Start a dataset conversation
               </h2>
               <p className="lead tight">
-                Tell us your manipulation task family, sensing requirements, and training pipeline. We will scope the
-                right tactile egocentric data program for your team.
+                Tell us about the task. We&apos;ll scope the data.
               </p>
-              <form className="waitlist-form" onSubmit={onSubmit} noValidate>
+              <form
+                className={`waitlist-form${statusTone === "error" ? " waitlist-form--error" : ""}`}
+                onSubmit={onSubmit}
+                noValidate
+              >
                 <label htmlFor="email">Work email</label>
                 <p className="form-hint" id="email-hint">
                   Used only for technical follow-up and project scoping.
                 </p>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  autoComplete="email"
-                  aria-describedby="email-hint"
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+                <motion.div
+                  className="waitlist-input-wrap"
+                  key={formShakeKey}
+                  animate={statusTone === "error" && !reduceMotion ? { x: [0, -6, 6, -3, 3, 0] } : { x: 0 }}
+                  transition={{ duration: 0.32 }}
+                >
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    autoComplete="email"
+                    aria-describedby="email-hint"
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (statusTone === "error") setStatusTone("idle");
+                    }}
+                    required
+                  />
+                </motion.div>
                 <button type="submit">Discuss your dataset</button>
-                <p className="feedback" role="status" aria-live="polite">
-                  {status}
-                </p>
+                <AnimatePresence mode="wait" initial={false}>
+                  {status ? (
+                    <motion.p
+                      key={status}
+                      className={`feedback feedback--${statusTone}`}
+                      role="status"
+                      aria-live="polite"
+                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={reduceMotion ? { opacity: 0, y: 0 } : { opacity: 0, y: -4 }}
+                      transition={{ duration: reduceMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {statusTone === "success" ? <span className="feedback-check" aria-hidden="true">✓</span> : null}
+                      {status}
+                    </motion.p>
+                  ) : (
+                    <p className="feedback" role="status" aria-live="polite" />
+                  )}
+                </AnimatePresence>
               </form>
             </motion.div>
           </section>
@@ -321,10 +295,7 @@ function AppInner() {
       </main>
 
       <footer className="footer footer-dark" role="contentinfo">
-        <p>
-          6thSense — SenseProbe capture for custom tactile egocentric datasets: synchronized streams, calibration, QC,
-          and model-ready delivery for robotics teams.
-        </p>
+        <p>(c) 6thSense - Building the sixth sense.</p>
         <a href="#top">Back to top</a>
       </footer>
     </>

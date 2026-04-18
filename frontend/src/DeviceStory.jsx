@@ -7,11 +7,33 @@ import {
   useTransform
 } from "framer-motion";
 import { lazy, Suspense } from "react";
-import { storyPanels } from "./homeNarrative.js";
+import { heroCopy, storyPanels } from "./homeNarrative.js";
 import { StoryProgressProvider, useStoryProgressRef } from "./StoryProgressContext.jsx";
 import { usePretextBlockMetrics } from "./pretextMeasure.js";
 
 const ProbeCanvas = lazy(() => import("./ProbeCanvas.jsx"));
+
+const heroStagger = {
+  hidden: {},
+  shown: {
+    transition: {
+      delayChildren: 0.12,
+      staggerChildren: 0.08
+    }
+  }
+};
+
+const heroItem = {
+  hidden: { opacity: 0, y: 10 },
+  shown: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.48,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  }
+};
 
 function StoryOverlayBeat({ panel, range, scrollYProgress, reduceMotion, baseOverlayHeight }) {
   const overlayOpacity = useTransform(scrollYProgress, [range.start, range.hold, range.end], [0, 1, 0]);
@@ -98,17 +120,24 @@ function ScrollBridge() {
         <div className="device-story-sticky">
           <div className="device-story-stage-3d">
             <div className="device-story-canvas-layer">
-              <Suspense
-                fallback={
-                  <div
-                    className="probe-fallback probe-fallback--immersive"
-                    role="img"
-                    aria-label="Loading device visualization"
-                  />
-                }
+              <motion.div
+                className="device-story-canvas-fade"
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: reduceMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
               >
-                <ProbeCanvas />
-              </Suspense>
+                <Suspense
+                  fallback={
+                    <div
+                      className="probe-fallback probe-fallback--immersive"
+                      role="img"
+                      aria-label="Loading device visualization"
+                    />
+                  }
+                >
+                  <ProbeCanvas />
+                </Suspense>
+              </motion.div>
             </div>
           </div>
 
@@ -125,19 +154,39 @@ function ScrollBridge() {
               }}
             >
               <div className="device-hero-overlay-scrim" aria-hidden="true" />
-              <div className="device-hero-overlay-inner">
-                <p className="device-hero-kicker">{heroPanel.kicker}</p>
-                <h1 className="device-hero-title">{heroPanel.title}</h1>
-                <p className="device-hero-body">{heroPanel.body}</p>
-                <div className="device-hero-cta">
+              <motion.div
+                className="device-hero-overlay-inner"
+                variants={reduceMotion ? undefined : heroStagger}
+                initial={reduceMotion ? false : "hidden"}
+                animate={reduceMotion ? undefined : "shown"}
+              >
+                <motion.p className="device-hero-eyebrow" variants={reduceMotion ? undefined : heroItem}>
+                  Touch-aware human demonstration data
+                </motion.p>
+                <motion.h1
+                  className="device-hero-wordmark"
+                  aria-label={`${heroCopy.wordmark} - ${heroCopy.tagline}`}
+                  variants={reduceMotion ? undefined : heroItem}
+                >
+                  <span className="device-hero-wordmark-text" aria-hidden="true">
+                    {heroCopy.wordmark}
+                  </span>
+                </motion.h1>
+                <motion.p className="device-hero-tagline" variants={reduceMotion ? undefined : heroItem}>
+                  {heroCopy.tagline}
+                </motion.p>
+                <motion.p className="device-hero-deck" variants={reduceMotion ? undefined : heroItem}>
+                  {heroCopy.deck}
+                </motion.p>
+                <motion.div className="device-hero-cta" variants={reduceMotion ? undefined : heroItem}>
                   <a href="#waitlist" className="btn btn-hero-solid">
                     Start a conversation
                   </a>
                   <a href="#catalog" className="device-hero-cta-link">
                     See what we capture
                   </a>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </motion.div>
           ) : null}
 
