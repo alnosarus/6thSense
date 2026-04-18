@@ -36,8 +36,13 @@ Durable workspace facts and repeated preferences from sessions. **No secrets or 
 - Prefer **device-forward hero composition**: the probe/device and WebGL canvas should read as the primary focal point of the viewport, not a side panel next to a text column.
 - When iterating on the **frontend or landing**, keep **`npm run dev`** or **`npm run preview`** running and share the URL/port so the page can be reviewed in the browser or Cursor preview—not only code edits without a live build.
 - On **long scroll landings**, keep **backgrounds, gradients, and palette** feeling like one system across sections; avoid abrupt tonal jumps and muddy or banded gradients that break the editorial look.
+- **Landing color and navigation** are user-led; implementation should follow the locked **SASI Visual Identity** via **`frontend/src/styles.css`** tokens (`--sasi-1`…`--sasi-5` and semantic aliases such as `--ink` / `--accent`), not scattered one-off colors in components.
+- **Primary navigation** should behave in a scroll-aware way where appropriate: full bar near the top, **hide on scroll-down**, **compact centered “bubble” on scroll-up** (see `useRevealNav.js`), with **`prefers-reduced-motion`** falling back to a stable bar.
+- For **premium, non-generic layouts**, use **subtle skew, perspective, and angled frames** sparingly and consistently; keep **readable text upright** while containers or supporting shapes carry the attitude.
+- Prefer **scroll-emergent** affordances (progress, section cues) over **always-on side chrome** when both could achieve the same goal, so the interface feels tied to the scroll journey.
 
 ## Learned Workspace Facts
 
 - **Brand / company name:** **6thSense** (public-facing product and landing copy).
 - Large raw datasets and generated ML artifacts belong under **`data/`** with strict **`.gitignore`** coverage; accidental tracking inflates uncommitted line counts and should be corrected immediately.
+- **Public landing palette (SASI Visual Identity):** five swatches—**#262312**, **#736A3C**, **#A69A60**, **#BFB68A**, **#592202** (olive–sand ramp plus rust accent). RGBA/HSLA exports are mirrored as CSS variables in **`frontend/src/styles.css`** for parity with design tooling.

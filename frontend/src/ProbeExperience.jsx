@@ -17,6 +17,24 @@ import { damp3 } from "maath/easing";
 import gsap from "gsap";
 import { useStoryProgressRef } from "./StoryProgressContext.jsx";
 
+/** Three.js hex colors — SASI + semantic dark/paper (matches `styles.css` tokens). */
+const PAL = {
+  s1: "#262312",
+  s2: "#736a3c",
+  s3: "#a69a60",
+  s4: "#bfb68a",
+  s5: "#592202",
+  dark: "#14120c",
+  dark2: "#1f1d14",
+  paper: "#f3efe6",
+  paperWarm: "#f2ebe4",
+  fillMuted: "#ddd8cf",
+  rim: "#c4b8a8",
+  ambient: "#9a9080",
+  /** Intentional matte black for contact shadows. */
+  black: "#000000"
+};
+
 export function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
@@ -204,8 +222,8 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.148, 0.0014, 8, 80]} />
           <meshStandardMaterial
-            color="#77d1b5"
-            emissive="#2d6e5e"
+            color={PAL.s3}
+            emissive={PAL.s5}
             emissiveIntensity={0.45}
             transparent
             opacity={0.85}
@@ -214,8 +232,8 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh rotation={[Math.PI / 2, 0.5, 0]}>
           <torusGeometry args={[0.157, 0.0012, 8, 80]} />
           <meshStandardMaterial
-            color="#8fb8ff"
-            emissive="#345278"
+            color={PAL.s4}
+            emissive={PAL.s2}
             emissiveIntensity={0.42}
             transparent
             opacity={0.78}
@@ -224,8 +242,8 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh rotation={[Math.PI / 2, -0.4, 0]}>
           <torusGeometry args={[0.166, 0.0012, 8, 80]} />
           <meshStandardMaterial
-            color="#f0d28e"
-            emissive="#6d5630"
+            color={PAL.s4}
+            emissive={PAL.s2}
             emissiveIntensity={0.34}
             transparent
             opacity={0.7}
@@ -238,7 +256,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <sphereGeometry args={[0.42, 32, 32]} />
           <meshPhysicalMaterial
             ref={haloMat}
-            color="#2d4a47"
+            color={PAL.s1}
             transparent
             opacity={0}
             roughness={0.75}
@@ -253,18 +271,18 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh position={[0, 0, 0]}>
           <planeGeometry args={[0.55, 0.32]} />
           <meshStandardMaterial
-            color="#0e1014"
+            color={PAL.dark}
             roughness={0.6}
             metalness={0.15}
-            emissive="#1a2a28"
+            emissive={PAL.s1}
             emissiveIntensity={0.15}
           />
         </mesh>
         <mesh position={[0, 0, 0.004]}>
           <planeGeometry args={[0.48, 0.04]} />
           <meshStandardMaterial
-            color="#6b9e7d"
-            emissive="#2d4a38"
+            color={PAL.s3}
+            emissive={PAL.s2}
             emissiveIntensity={0.32}
             roughness={0.4}
             metalness={0}
@@ -280,7 +298,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <mesh castShadow receiveShadow position={[0, -0.28, 0]}>
             <cylinderGeometry args={[0.1133, 0.118, 0.32, 64]} />
             <meshPhysicalMaterial
-              color="#2a2f36"
+              color={PAL.s1}
               roughness={0.96}
               metalness={0.02}
               clearcoat={0.02}
@@ -291,7 +309,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <mesh castShadow receiveShadow position={[0, 0.03, 0]}>
             <cylinderGeometry args={[0.10855, 0.11327, 0.3, 64]} />
             <meshPhysicalMaterial
-              color="#2c323a"
+              color={PAL.s1}
               roughness={0.98}
               metalness={0.018}
               clearcoat={0.02}
@@ -302,7 +320,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <mesh castShadow receiveShadow position={[0, 0.31, 0]}>
             <cylinderGeometry args={[0.105, 0.10855, 0.26, 64]} />
             <meshPhysicalMaterial
-              color="#2a2f36"
+              color={PAL.s1}
               roughness={0.96}
               metalness={0.02}
               clearcoat={0.02}
@@ -314,7 +332,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <mesh position={[0, -0.12, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <torusGeometry args={[0.1138, 0.0014, 10, 64]} />
             <meshPhysicalMaterial
-              color="#101318"
+              color={PAL.dark}
               roughness={0.95}
               metalness={0.04}
               envMapIntensity={0.1}
@@ -323,7 +341,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <mesh position={[0, 0.18, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <torusGeometry args={[0.1092, 0.0014, 10, 64]} />
             <meshPhysicalMaterial
-              color="#101318"
+              color={PAL.dark}
               roughness={0.95}
               metalness={0.04}
               envMapIntensity={0.1}
@@ -333,7 +351,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <mesh castShadow position={[0, -0.438, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <torusGeometry args={[0.114, 0.0036, 12, 56]} />
             <meshPhysicalMaterial
-              color="#252a32"
+              color={PAL.dark2}
               roughness={0.84}
               metalness={0.07}
               envMapIntensity={0.3}
@@ -343,7 +361,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <mesh castShadow position={[0, 0.422, 0]} rotation={[Math.PI / 2, 0, 0]}>
             <torusGeometry args={[0.1036, 0.0026, 12, 56]} />
             <meshPhysicalMaterial
-              color="#252b34"
+              color={PAL.dark2}
               roughness={0.8}
               metalness={0.07}
               envMapIntensity={0.3}
@@ -353,7 +371,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
           <mesh position={[-0.112, 0, 0]}>
             <boxGeometry args={[0.002, 0.82, 0.014]} />
             <meshPhysicalMaterial
-              color="#161a21"
+              color={PAL.dark}
               roughness={0.92}
               metalness={0.04}
               envMapIntensity={0.14}
@@ -367,7 +385,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh castShadow position={[0, 0.492, 0]} rotation={[0, 0, 0]}>
           <cylinderGeometry args={[0.136, 0.124, 0.195, 64]} />
           <meshPhysicalMaterial
-            color="#23282f"
+            color={PAL.s1}
             roughness={0.66}
             metalness={0.06}
             clearcoat={0.05}
@@ -379,7 +397,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh castShadow position={[0, 0.388, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.116, 0.0075, 16, 80]} />
           <meshPhysicalMaterial
-            color="#7e868f"
+            color={PAL.s2}
             metalness={0.84}
             roughness={0.38}
             envMapIntensity={0.48}
@@ -390,7 +408,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh castShadow position={[0, 0.393, 0]}>
           <cylinderGeometry args={[0.128, 0.125, 0.02, 64]} />
           <meshPhysicalMaterial
-            color="#1b2028"
+            color={PAL.dark}
             roughness={0.74}
             metalness={0.1}
             envMapIntensity={0.3}
@@ -401,7 +419,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh position={[0, 0.468, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.127, 0.0019, 10, 72]} />
           <meshPhysicalMaterial
-            color="#0c0e12"
+            color={PAL.dark}
             roughness={0.94}
             metalness={0.04}
             envMapIntensity={0.12}
@@ -412,7 +430,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh castShadow position={[0, 0.505, 0.109]} rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.099, 0.003, 12, 64]} />
           <meshPhysicalMaterial
-            color="#656c74"
+            color={PAL.s2}
             metalness={0.8}
             roughness={0.36}
             envMapIntensity={0.4}
@@ -423,7 +441,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh position={[0, 0.505, 0.115]} rotation={[0, 0, 0]}>
           <circleGeometry args={[0.085, 48]} />
           <meshPhysicalMaterial
-            color="#030405"
+            color={PAL.dark}
             roughness={0.9}
             metalness={0.06}
             envMapIntensity={0.1}
@@ -435,7 +453,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh position={[0, 0.505, 0.122]}>
           <cylinderGeometry args={[0.103, 0.113, 0.0085, 64]} />
           <meshPhysicalMaterial
-            color="#1a3330"
+            color={PAL.s1}
             roughness={0.62}
             metalness={0.12}
             clearcoat={0.18}
@@ -448,7 +466,7 @@ function ClinicalProbe({ smoothProgress, reducedMotion }) {
         <mesh position={[0, 0.505, 0.13]}>
           <circleGeometry args={[0.087, 64]} />
           <meshPhysicalMaterial
-            color="#050607"
+            color={PAL.dark}
             roughness={0.22}
             metalness={0.42}
             clearcoat={0.88}
@@ -482,21 +500,21 @@ export function ProbeExperience({ reducedMotion, transparentStage = false }) {
     <>
       {transparentStage ? null : (
         <>
-          <color attach="background" args={["#08090b"]} />
-          <fogExp2 attach="fog" args={["#08090b", reducedMotion ? 0.02 : 0.03]} />
+          <color attach="background" args={[PAL.dark]} />
+          <fogExp2 attach="fog" args={[PAL.dark, reducedMotion ? 0.02 : 0.03]} />
         </>
       )}
 
       {!reducedMotion ? <SoftShadows focus={0.045} samples={12} size={18} /> : null}
 
-      <hemisphereLight args={["#d2dce8", "#050607", 0.38]} />
-      <ambientLight intensity={0.062} color="#9aa4b0" />
+      <hemisphereLight args={[PAL.s4, PAL.s1, 0.38]} />
+      <ambientLight intensity={0.062} color={PAL.ambient} />
       {/* Key: upper-right “beauty dish” — sculpts form, warm neutral (studio hardware). */}
       <directionalLight
         castShadow
         position={[4.6, 6.1, 3.35]}
         intensity={1.05}
-        color="#f2ebe4"
+        color={PAL.paperWarm}
         shadow-mapSize={[2048, 2048]}
         shadow-camera-far={26}
         shadow-camera-left={-3.2}
@@ -505,10 +523,10 @@ export function ProbeExperience({ reducedMotion, transparentStage = false }) {
         shadow-camera-bottom={-3.2}
         shadow-bias={-0.0002}
       />
-      {/* Soft neutral fill — avoids teal CG wash on medtech read. */}
-      <directionalLight position={[-2.4, 3.8, 2.6]} intensity={0.14} color="#cfd8e4" />
-      {/* Cool rim from camera-left rear — silhouette separation from backdrop. */}
-      <directionalLight position={[-4.8, 2.4, -2.2]} intensity={0.32} color="#aabccf" />
+      {/* Soft warm fill — aligns with SASI landing palette. */}
+      <directionalLight position={[-2.4, 3.8, 2.6]} intensity={0.14} color={PAL.fillMuted} />
+      {/* Rim — warm neutral separation from backdrop. */}
+      <directionalLight position={[-4.8, 2.4, -2.2]} intensity={0.32} color={PAL.rim} />
 
       <CameraRig reducedMotion={reducedMotion} smoothProgress={smoothProgress} />
 
@@ -521,7 +539,7 @@ export function ProbeExperience({ reducedMotion, transparentStage = false }) {
           scale={14}
           blur={2.9}
           far={8.5}
-          color="#000000"
+          color={PAL.black}
         />
       ) : null}
 
@@ -532,7 +550,7 @@ export function ProbeExperience({ reducedMotion, transparentStage = false }) {
           <shadowMaterial opacity={0.32} transparent />
         ) : (
           <meshStandardMaterial
-            color="#030405"
+            color={PAL.dark}
             roughness={0.98}
             metalness={0}
             envMapIntensity={0.08}
