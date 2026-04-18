@@ -6,6 +6,7 @@ import {
   BrainCircuit,
   Wrench
 } from "lucide-react";
+import { ScrollHero } from "./ScrollHero.jsx";
 import DeviceStory from "./DeviceStory.jsx";
 import Credibility from "./Credibility.jsx";
 import DataCatalog from "./DataCatalog.jsx";
@@ -141,6 +142,9 @@ function AppInner() {
 
       <main id="main" aria-label="6thSense">
         <div id="top" />
+        <section id="rig-tour" aria-label="Hardware scroll tour">
+          <ScrollHero />
+        </section>
         <DeviceStory />
 
         <div className="page-after-hero">

@@ -2,26 +2,24 @@ import { useEffect, useState } from "react";
 
 /** Section DOM ids in scroll order (top → bottom). */
 const SECTION_ORDER = [
+  "rig-tour",
   "story",
-  "proof",
   "problem",
   "system",
   "catalog",
   "credibility",
-  "fit",
   "faq",
   "waitlist"
 ];
 
 /** Map section id → nav link key (only keys that appear in the primary nav). */
 const SECTION_TO_NAV = {
+  "rig-tour": null,
   story: null,
-  proof: null,
   problem: null,
   system: "system",
   catalog: "catalog",
   credibility: "credibility",
-  fit: null,
   faq: "faq",
   waitlist: "waitlist"
 };
