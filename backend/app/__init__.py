@@ -1,1 +1,1 @@
-# SenseProbe HTTP API package
+# 6thSense HTTP API package

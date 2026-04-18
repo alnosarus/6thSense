@@ -2,10 +2,8 @@ import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { ProbeExperience, usePrefersReducedMotion } from "./ProbeExperience.jsx";
-import { useScrollProgress } from "./ScrollContext.jsx";
 
 export default function ProbeCanvas() {
-  const scrollProgress = useScrollProgress();
   const reducedMotion = usePrefersReducedMotion();
 
   return (
@@ -13,26 +11,25 @@ export default function ProbeCanvas() {
       <Canvas
         shadows
         dpr={reducedMotion ? [1, 1] : [1, 1.5]}
-        camera={{ position: [0, 0.12, 2.65], fov: 38, near: 0.1, far: 45 }}
+        camera={{ position: [0, -0.02, 2.46], fov: 30, near: 0.08, far: 40 }}
         gl={{
           antialias: true,
-          alpha: false,
+          alpha: true,
+          premultipliedAlpha: false,
           powerPreference: "high-performance",
           toneMapping: THREE.ACESFilmicToneMapping,
-          toneMappingExposure: 1.05
+          toneMappingExposure: 0.9
         }}
+        style={{ background: "transparent" }}
         onCreated={({ gl }) => {
           gl.outputColorSpace = THREE.SRGBColorSpace;
+          gl.setClearColor(0x000000, 0);
         }}
       >
         <Suspense fallback={null}>
-          <ProbeExperience
-            scrollProgress={scrollProgress}
-            reducedMotion={reducedMotion}
-          />
+          <ProbeExperience reducedMotion={reducedMotion} transparentStage />
         </Suspense>
       </Canvas>
-      <div className="probe-canvas-vignette" />
     </div>
   );
 }

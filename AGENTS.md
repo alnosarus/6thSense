@@ -1,4 +1,4 @@
-# SenseProbe — agent memory
+# 6thSense — agent memory
 
 Durable workspace facts and repeated preferences from sessions. **No secrets or API keys.** Omit transient troubleshooting.
 
@@ -27,3 +27,17 @@ Durable workspace facts and repeated preferences from sessions. **No secrets or 
 ## Git
 
 - **Default branch:** `main`. If `gh repo create … --remote=origin` fails because **`origin` already exists**, remove or repoint `origin` first, then push.
+
+## Learned User Preferences
+
+- For major landing or homepage work, sequence decisions before coding: lock product story and page structure, then visual and motion systems, then implementation—avoid jumping straight into implementation without that alignment.
+- Use scroll-driven, premium product storytelling (reference: https://wisprflow.ai) as an interaction-depth benchmark alongside **frontend-design** and **ui-ux-pro-max**.
+- For in-editor review in Cursor, serve the production build with **`npm run build`** then **`npm run preview`** in **`frontend/`** (default preview port **4173**; dev/preview may use another port if the default is in use).
+- Prefer **device-forward hero composition**: the probe/device and WebGL canvas should read as the primary focal point of the viewport, not a side panel next to a text column.
+- When iterating on the **frontend or landing**, keep **`npm run dev`** or **`npm run preview`** running and share the URL/port so the page can be reviewed in the browser or Cursor preview—not only code edits without a live build.
+- On **long scroll landings**, keep **backgrounds, gradients, and palette** feeling like one system across sections; avoid abrupt tonal jumps and muddy or banded gradients that break the editorial look.
+
+## Learned Workspace Facts
+
+- **Brand / company name:** **6thSense** (public-facing product and landing copy).
+- Large raw datasets and generated ML artifacts belong under **`data/`** with strict **`.gitignore`** coverage; accidental tracking inflates uncommitted line counts and should be corrected immediately.

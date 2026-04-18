@@ -1,4 +1,4 @@
-# SenseProbe backend
+# 6thSense backend
 
 Minimal **FastAPI** service for health checks and future APIs (e.g. waitlist). ML training lives in `ml/`, not here.
 

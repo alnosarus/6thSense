@@ -15,7 +15,7 @@ async def lifespan(_app: FastAPI):
 def create_app() -> FastAPI:
     settings = get_settings()
     application = FastAPI(
-        title="SenseProbe API",
+        title="6thSense API",
         version="0.1.0",
         lifespan=lifespan,
     )

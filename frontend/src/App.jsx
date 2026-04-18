@@ -1,19 +1,13 @@
-import { useState, lazy, Suspense } from "react";
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform
-} from "framer-motion";
-import { ScrollProvider } from "./ScrollContext.jsx";
-
-const ProbeCanvas = lazy(() => import("./ProbeCanvas.jsx"));
+import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import DeviceStory from "./DeviceStory.jsx";
+import { tractionItems, platformPillars } from "./homeNarrative.js";
 
 const fadeUp = {
-  initial: { opacity: 0, y: 36 },
+  initial: { opacity: 0, y: 28 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-80px" },
-  transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] }
+  viewport: { once: true, margin: "-72px" },
+  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
 };
 
 function useFadeUp() {
@@ -22,71 +16,27 @@ function useFadeUp() {
     return {
       initial: false,
       whileInView: { opacity: 1, y: 0 },
-      viewport: { once: true, margin: "-80px" },
+      viewport: { once: true, margin: "-72px" },
       transition: { duration: 0 }
     };
   }
   return fadeUp;
 }
 
-const verticals = [
-  {
-    title: "Surgical & interventional robotics",
-    body: "Pre-contact mechanical context plus live pressure control for instruments that must not guess tissue state."
-  },
-  {
-    title: "Soft-object manufacturing",
-    body: "Food, textiles, pharma — deformable materials where vision-only stacks fail and crush/drop errors are expensive."
-  },
-  {
-    title: "Consumer humanoids & service robots",
-    body: "Irregular objects at home need both surface feedback and internal state at consumer-viable BOM."
-  },
-  {
-    title: "Athletic & human performance",
-    body: "Continuous muscle and tissue state — not snapshot scans — when contact and volume matter together."
-  },
-  {
-    title: "Defense & exoskeletons",
-    body: "Operator-aware systems that adapt to real tissue and load state under stress."
-  },
-  {
-    title: "R&D & instrumentation partners",
-    body: "Paired datasets and integration paths for labs building the next generation of touch-capable machines."
-  }
-];
-
 const faq = [
   {
-    q: "How is this different from a tactile sensor startup?",
-    a: "Most teams ship surface sensing alone. SenseProbe treats surface contact and volumetric mechanical inference as one fused stack — closer to how biological motor control actually works."
+    q: "Are tactile signals perfect ground-truth force values?",
+    a: "Not always. We explicitly treat many streams as contact and pressure proxies, and document assumptions so model teams know how to use them."
   },
   {
-    q: "Do you need custom ultrasound hardware everywhere?",
-    a: "The roadmap couples research-grade sensing paths with pragmatic camera and signal paths where appropriate. The landing narrative is physics-first; deployment is stage-gated with partners."
+    q: "Do you only provide sensors or raw recording tools?",
+    a: "No. 6thSense is a full-stack data partner: hardware setup, synchronized capture, calibration, QC, and packaged model-ready datasets."
   },
   {
-    q: "What does the 3D visualization represent?",
-    a: "An abstract assembly: fingertip body, sensing ring, embedded plane, optical marker — not a literal CAD release. It rotates with page scroll to echo “different angles of the same system.”"
-  },
-  {
-    q: "Who is this for right now?",
-    a: "Robotics OEMs, surgical platforms, and advanced manufacturing groups running pilots — plus research collaborators supplying paired data and domain validation."
+    q: "What teams are the best fit?",
+    a: "Robotics teams running dexterous manipulation, imitation learning, multimodal policy training, or contact-aware evaluation workflows."
   }
 ];
-
-function HeroVisual() {
-  const reduce = useReducedMotion();
-  const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, 120]);
-  const op = useTransform(scrollY, [0, 400], [1, 0.15]);
-  if (reduce) {
-    return <div className="hero-parallax-blob" style={{ opacity: 0.45 }} />;
-  }
-  return (
-    <motion.div className="hero-parallax-blob" style={{ y: y1, opacity: op }} />
-  );
-}
 
 function AppInner() {
   const fadeUpProps = useFadeUp();
@@ -100,353 +50,128 @@ function AppInner() {
       setStatus("Enter a valid work email.");
       return;
     }
-    setStatus("Received. We will follow up for pilot fit.");
+    setStatus("Received. The 6thSense team will follow up with a dataset scoping call.");
     setEmail("");
   };
 
   return (
     <>
-      <a href="#main" className="skip-link">
+      <a href="#story" className="skip-link">
         Skip to content
       </a>
 
-      <div className="grain" aria-hidden="true" />
+      <div className="grain grain--dark" aria-hidden="true" />
 
-      <header className="hero" id="top" role="banner">
-        <HeroVisual />
-        <nav className="nav-bar" aria-label="Primary">
-          <span className="wordmark">SENSEPROBE</span>
-          <div className="nav-links">
-            <a href="#architecture">Architecture</a>
-            <a href="#explorer">System</a>
-            <a href="#proof">Proof</a>
-            <a href="#compare">Contrast</a>
-            <a href="#verticals">Markets</a>
-            <a href="#waitlist" className="nav-cta">
+      <header className="nav-flagship" role="banner">
+        <nav className="nav-flagship-inner" aria-label="Primary">
+          <a className="wordmark wordmark-on-dark" href="#top">
+            6THSENSE
+          </a>
+          <div className="nav-links nav-links-on-dark">
+            <a href="#story">Story</a>
+            <a href="#traction">Problem</a>
+            <a href="#platform">Platform</a>
+            <a href="#representation">Data semantics</a>
+            <a href="#faq">Questions</a>
+            <a href="#waitlist" className="nav-cta nav-cta-on-dark">
               Talk to us
             </a>
           </div>
         </nav>
-
-        <div className="hero-inner">
-          <motion.div className="hero-copy" {...fadeUpProps}>
-            <p className="kicker">Physical AI · Editorial preview</p>
-            <h1>
-              A complete artificial nervous system
-              <span className="hero-line2">for machines that must touch the world.</span>
-            </h1>
-            <p className="hero-deck">
-              We fuse <strong>surface tactile sensing</strong> with{" "}
-              <strong>volumetric mechanical inference</strong> — the two channels
-              biology uses together — into one deployable perception stack for
-              robotics beyond “cameras + motors.”
-            </p>
-            <div className="hero-actions">
-              <a href="#explorer" className="btn btn-solid">
-                See how it moves
-              </a>
-              <a href="#waitlist" className="btn btn-line">
-                Request a pilot conversation
-              </a>
-            </div>
-            <p className="scroll-hint" aria-hidden="true">
-              <span className="scroll-line" />
-              Scroll
-            </p>
-          </motion.div>
-        </div>
       </header>
 
-      <main id="main" aria-label="SenseProbe product narrative">
-        <section className="strip">
+      <main id="main" aria-label="6thSense">
+        <div id="top" />
+        <DeviceStory />
+
+        <div className="page-after-hero">
+        <section className="proof-strip" aria-label="Research basis">
           <p>
-            Research-grade thesis · Hardware-forward roadmap · ML that closes the loop between
-            contact and volume
+            <strong>We build custom tactile egocentric datasets for robotics teams</strong> by
+            delivering the full data collection stack: hardware, capture pipeline, calibration,
+            quality control, and model-ready packaging.
           </p>
         </section>
 
-        <section
-          id="architecture"
-          className="section arch-section"
-          aria-labelledby="arch-heading"
-        >
+        <section className="section traction-section" id="traction" aria-labelledby="traction-h">
           <motion.div {...fadeUpProps}>
-            <h2 id="arch-heading" className="section-title">
-              Three layers, one nervous system
+            <h2 id="traction-h" className="section-title">
+              The problem we solve
+            </h2>
+            <p className="lead tight traction-deck">
+              Most robot datasets miss the human-side contact signals that drive robust
+              manipulation. We focus on the missing layer between vision, action, and touch.
+            </p>
+            <ul className="traction-timeline">
+              {tractionItems.map((item) => (
+                <li key={item.label} className="traction-item">
+                  <span className="traction-label">{item.label}</span>
+                  <h3>{item.title}</h3>
+                  <p>{item.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        </section>
+
+        <section className="section platform-section" id="platform" aria-labelledby="platform-h">
+          <motion.div {...fadeUpProps}>
+            <h2 id="platform-h" className="section-title">
+              How we solve it
             </h2>
             <p className="lead tight">
-              Biology does not treat touch and mechanical state as separate products. SenseProbe
-              mirrors that structure: a <strong>peripheral</strong> contact channel, a{" "}
-              <strong>central</strong> volumetric channel, and a <strong>fusion</strong> layer
-              that closes the loop for control.
+              Our product is not a glove, camera rig, or raw file dump. It is a full-stack,
+              quality-controlled data pipeline for robot learning teams.
             </p>
-            <div className="arch-grid">
-              <article className="arch-card">
-                <p className="arch-badge">PNS · Peripheral</p>
-                <h3>Surface tactile sensing</h3>
-                <p>
-                  Piezoresistive tactility at the finger: pressure, shear, and slip at the contact
-                  patch—live feedback for manipulation, not a lab snapshot.
-                </p>
-              </article>
-              <article className="arch-card">
-                <p className="arch-badge">CNS · Central</p>
-                <h3>Volumetric mechanical inference</h3>
-                <p>
-                  Ultrasound-informed readouts of stiffness trends and boundaries beneath the
-                  surface—context before the end-effector commits.
-                </p>
-              </article>
-              <article className="arch-card arch-card-accent">
-                <p className="arch-badge">Fusion</p>
-                <h3>One interaction model</h3>
-                <p>
-                  Coupled observations for planners and policies: the same stack human hands use
-                  when contact and internal state must agree under uncertainty.
-                </p>
-              </article>
-            </div>
-          </motion.div>
-        </section>
-
-        <section id="explorer" className="explorer" aria-labelledby="explorer-heading">
-          <div className="explorer-sticky">
-            <Suspense
-              fallback={
-                <div className="probe-fallback" role="img" aria-label="Loading 3D visualization" />
-              }
-            >
-              <ProbeCanvas />
-            </Suspense>
-            <ol className="probe-legend">
-              <li>Surface: pressure, shear, slip</li>
-              <li>Volume: stiffness & boundaries</li>
-              <li>Fusion: one interaction model</li>
-            </ol>
-          </div>
-          <div className="explorer-copy">
-            <motion.article {...fadeUpProps}>
-              <h2 id="explorer-heading" className="section-title">
-                One product story, many angles
-              </h2>
-              <p className="lead">
-                As you move through this page, the assembly rotates — surface ring, embedded
-                plane, optical marker — a deliberate metaphor for “the same device, different
-                failure modes addressed.”
-              </p>
-            </motion.article>
-            <motion.div className="step-block" {...fadeUpProps}>
-              <span className="step-num">01</span>
-              <h3>Peripheral channel</h3>
-              <p>
-                Piezoresistive tactility at the contact patch: where force goes, how shear
-                develops, when slip begins. Built for real manipulation loops, not lab demos
-                alone.
-              </p>
-            </motion.div>
-            <motion.div className="step-block" {...fadeUpProps}>
-              <span className="step-num">02</span>
-              <h3>Central channel</h3>
-              <p>
-                Ultrasound-informed inference of mechanical state beneath the surface — stiffness
-                trends, boundaries, material context before the end-effector commits.
-              </p>
-            </motion.div>
-            <motion.div className="step-block" {...fadeUpProps}>
-              <span className="step-num">03</span>
-              <h3>Fusion & control</h3>
-              <p>
-                A unified representation for planners and policies: predictive map + live
-                correction — the same pairing human hands use when precision matters.
-              </p>
-            </motion.div>
-            <motion.div className="step-block" {...fadeUpProps}>
-              <span className="step-num">04</span>
-              <h3>Deployment path</h3>
-              <p>
-                Sub-$30 class tactile economics at the finger, camera-forward inference where
-                appropriate, integration lanes for industrial arms and clinical platforms.
-              </p>
-            </motion.div>
-          </div>
-        </section>
-
-        <section className="section editorial" id="problem" aria-labelledby="problem-heading">
-          <motion.div {...fadeUpProps}>
-            <h2 id="problem-heading" className="section-title">
-              Why “more cameras” stopped working
-            </h2>
-            <div className="two-col">
-              <div>
-                <p className="pull-quote">
-                  Robots have extraordinary vision and almost no sense of what objects are
-                  <em> made of</em> at depth.
-                </p>
-              </div>
-              <div className="body-col">
-                <p>
-                  Contact-only tactility wears, saturates, or misses subsurface state. Pure
-                  volumetric sensing without live contact struggles the moment the task needs
-                  human-level dexterity. SenseProbe is built around the union of both — not a
-                  modest sensor upgrade, but a different abstraction for physical AI.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </section>
-
-        <section id="proof" className="section proof-section" aria-labelledby="proof-heading">
-          <motion.div {...fadeUpProps}>
-            <h2 id="proof-heading" className="section-title">
-              Proof from the bench
-            </h2>
-            <p className="lead tight">
-              Claims tied to active R&amp;D in this repo—not slide hypotheticals.
-            </p>
-            <ol className="proof-list">
-              <li>
-                <strong>Stiffness signal from standard B-mode.</strong> ML experiments on paired
-                ultrasound data show recoverable mechanical contrast without dedicated elastography
-                hardware everywhere—see project experiments and results artifacts.
-              </li>
-              <li>
-                <strong>Tactile economics at the finger.</strong> Roadmap targets sub-$30 BOM-class
-                piezoresistive assemblies for deployable manipulation, not one-off lab stacks.
-              </li>
-              <li>
-                <strong>Fusion-shaped loop.</strong> Training and evaluation pipelines treat contact
-                streams and volumetric inference as coupled channels—aligned with how policies
-                should consume them.
-              </li>
-            </ol>
-          </motion.div>
-        </section>
-
-        <section className="section section-dark" id="compare" aria-labelledby="compare-heading">
-          <motion.div {...fadeUpProps}>
-            <h2 id="compare-heading" className="section-title light">
-              The contrast, made blunt
-            </h2>
-            <div className="compare-grid">
-              <div className="compare-card compare-muted">
-                <h3>Surface-only robotics</h3>
-                <ul>
-                  <li>Contact without volumetric context</li>
-                  <li>Surprise failures on soft tissue and deformables</li>
-                  <li>Harder safety cases in human-adjacent tasks</li>
-                </ul>
-              </div>
-              <div className="compare-card compare-accent">
-                <h3>SenseProbe stack</h3>
-                <ul>
-                  <li>Live contact + inferred internal state</li>
-                  <li>Richer priors for manipulation policies</li>
-                  <li>A story investors and safety reviewers can trace to physics</li>
-                </ul>
-              </div>
-            </div>
-          </motion.div>
-        </section>
-
-        <section className="section bento-wrap" id="system" aria-labelledby="system-heading">
-          <motion.div {...fadeUpProps}>
-            <h2 id="system-heading" className="section-title">
-              System surfaces
-            </h2>
-            <div className="bento">
-              <div className="bento-a">
-                <h3>Hardware</h3>
-                <p>
-                  Fingertip-scale assemblies, custom readout paths, integration targets from
-                  research benches to industrial arms.
-                </p>
-              </div>
-              <div className="bento-b">
-                <h3>Signal + optics</h3>
-                <p>
-                  Multiplexed acquisition, calibration discipline, optical cross-checks where the
-                  physics demands redundancy.
-                </p>
-              </div>
-              <div className="bento-c">
-                <h3>Models</h3>
-                <p>
-                  Fusion architectures that treat contact streams and volumetric inference as
-                  coupled observations — not two disconnected demos.
-                </p>
-              </div>
-              <div className="bento-d">
-                <h3>Data flywheel</h3>
-                <p>
-                  Paired supervision that becomes more valuable as deployments grow — the
-                  long-term moat is not a single model checkpoint.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </section>
-
-        <section className="section metrics" aria-labelledby="metrics-heading">
-          <h2 id="metrics-heading" className="visually-hidden">
-            At a glance
-          </h2>
-          <motion.div className="metrics-row" {...fadeUpProps}>
-            <div>
-              <span className="metric-val">2×</span>
-              <span className="metric-label">Sensing channels fused</span>
-            </div>
-            <div>
-              <span className="metric-val">Sub-$30</span>
-              <span className="metric-label">Tactile BOM class target</span>
-            </div>
-            <div>
-              <span className="metric-val">∞</span>
-              <span className="metric-label">Verticals where deformables dominate</span>
-            </div>
-          </motion.div>
-        </section>
-
-        <section className="section" id="verticals" aria-labelledby="verticals-heading">
-          <motion.div {...fadeUpProps}>
-            <h2 id="verticals-heading" className="section-title">
-              Where it lands first
-            </h2>
-            <p className="lead tight">
-              Long-horizon vision, near-term wedges. Same stack, different GTM skins — surgical
-              rigor, factory throughput, or human-scale robots at home.
-            </p>
-            <div className="vertical-grid">
-              {verticals.map((v) => (
-                <article key={v.title} className="vertical-card">
-                  <h3>{v.title}</h3>
-                  <p>{v.body}</p>
+            <div className="platform-grid">
+              {platformPillars.map((p) => (
+                <article key={p.title} className="platform-card">
+                  <h3>{p.title}</h3>
+                  <p>{p.body}</p>
                 </article>
               ))}
             </div>
           </motion.div>
         </section>
 
-        <section className="section quotes" aria-labelledby="quotes-heading">
+        <section className="section" id="representation" aria-labelledby="representation-h">
           <motion.div {...fadeUpProps}>
-            <h2 id="quotes-heading" className="section-title">
-              What partners are buying
+            <h2 id="representation-h" className="section-title">
+              What the data represents
             </h2>
-            <div className="quote-grid">
-              <blockquote>
-                “A manipulation story grounded in tissue and material physics — not another
-                generic ‘AI vision’ slide.”
-                <cite>— Robotics platform lead (pilot discussion)</cite>
-              </blockquote>
-              <blockquote>
-                “If contact and volume are actually one loop, safety and task success become
-                easier to reason about.”
-                <cite>— Clinical robotics advisor</cite>
-              </blockquote>
-              <blockquote>
-                “We do not need more pixels. We need state inside soft things before we break
-                them.”
-                <cite>— Manufacturing R&amp;D director</cite>
-              </blockquote>
+            <p className="lead tight">
+              We capture actionable contact structure: onset, offset, relative force trends, grasp
+              changes, and distribution shifts aligned with egocentric vision and motion.
+            </p>
+            <div className="platform-grid">
+              <article className="platform-card">
+                <h3>Delivered streams</h3>
+                <p>
+                  Tactile/contact proxy signals, egocentric video, hand motion data, synchronized
+                  timestamps, task segmentation, annotations, and quality metrics.
+                </p>
+              </article>
+              <article className="platform-card">
+                <h3>Use-case alignment</h3>
+                <p>
+                  Structured for imitation learning, behavior cloning, multimodal policy learning,
+                  contact-aware manipulation research, and benchmark evaluation.
+                </p>
+              </article>
+              <article className="platform-card">
+                <h3>Reliability over hype</h3>
+                <p>
+                  We document calibration boundaries and signal semantics so teams train against
+                  realistic contact representations, not fictional precision claims.
+                </p>
+              </article>
+              <article className="platform-card">
+                <h3>Tailored packaging</h3>
+                <p>
+                  Data format, metadata, and episode structure are adapted to each customer
+                  training stack and manipulation task family.
+                </p>
+              </article>
             </div>
           </motion.div>
         </section>
@@ -454,7 +179,30 @@ function AppInner() {
         <section className="section faq" id="faq" aria-labelledby="faq-heading">
           <motion.div {...fadeUpProps}>
             <h2 id="faq-heading" className="section-title">
-              Direct questions
+              Who this is for
+            </h2>
+            <p className="lead tight">
+              Teams building dexterous manipulation systems and contact-rich robot learning
+              pipelines that need better real-world human demonstration data.
+            </p>
+            <div className="platform-grid">
+              <article className="platform-card">
+                <h3>Current wedge</h3>
+                <p>
+                  Custom tactile egocentric datasets for robotics customers with specific
+                  manipulation objectives and quality bars.
+                </p>
+              </article>
+              <article className="platform-card">
+                <h3>Long-term vision</h3>
+                <p>
+                  Become the infrastructure layer for collecting and packaging multimodal
+                  contact-rich datasets that power robot foundation models.
+                </p>
+              </article>
+            </div>
+            <h2 className="section-title" style={{ marginTop: "2.5rem" }}>
+              Questions
             </h2>
             <div className="faq-list">
               {faq.map((item, i) => (
@@ -485,19 +233,19 @@ function AppInner() {
           </motion.div>
         </section>
 
-        <section className="section waitlist" id="waitlist" aria-labelledby="waitlist-heading">
+        <section className="section waitlist waitlist-final" id="waitlist" aria-labelledby="waitlist-heading">
           <motion.div {...fadeUpProps}>
             <h2 id="waitlist-heading" className="section-title">
-              Start a technical conversation
+              Start a dataset conversation
             </h2>
             <p className="lead tight">
-              We work with teams that can run pilots, supply paired data, or co-develop
-              integration on real platforms — not slide-only intros.
+              Tell us your manipulation task family, sensing requirements, and training pipeline.
+              We will scope the right tactile egocentric data program for your team.
             </p>
             <form className="waitlist-form" onSubmit={onSubmit} noValidate>
               <label htmlFor="email">Work email</label>
               <p className="form-hint" id="email-hint">
-                Used only to follow up on pilot fit. No marketing list.
+                Used only for technical follow-up and project scoping.
               </p>
               <input
                 id="email"
@@ -508,17 +256,21 @@ function AppInner() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <button type="submit">Request follow-up</button>
+              <button type="submit">Discuss your dataset</button>
               <p className="feedback" role="status" aria-live="polite">
                 {status}
               </p>
             </form>
           </motion.div>
         </section>
+        </div>
       </main>
 
-      <footer className="footer" role="contentinfo">
-        <p>SenseProbe — surface tactility + volumetric inference for physical AI.</p>
+      <footer className="footer footer-dark" role="contentinfo">
+        <p>
+          6thSense — custom tactile egocentric datasets with synchronized capture, calibration, QC,
+          and model-ready delivery for robotics teams.
+        </p>
         <a href="#top">Back to top</a>
       </footer>
     </>
@@ -526,9 +278,5 @@ function AppInner() {
 }
 
 export default function App() {
-  return (
-    <ScrollProvider>
-      <AppInner />
-    </ScrollProvider>
-  );
+  return <AppInner />;
 }

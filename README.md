@@ -1,19 +1,8 @@
-# SenseProbe
+# 6thSense
 
-Proving that B-mode ultrasound images contain recoverable stiffness signals using ML — eliminating the need for expensive elastography machines.
+**6thSense** builds **custom tactile egocentric datasets for robotics teams**: hardware, synchronized multimodal capture, calibration, quality control, and **model-ready packaged data** for contact-rich robot learning—not just raw sensors or generic recording tools.
 
-## Goal
-Can we predict tissue stiffness (kPa) from standard ultrasound images alone?
-
-## Approach
-1. Train models on paired B-mode + elastography data
-2. Classification: soft vs stiff
-3. Regression: predict stiffness (kPa)
-4. Models: ResNet18, EfficientNet-B0, basic CNN
-
-## Evaluation Targets
-- Classification: accuracy > 60% = signal exists
-- Regression: R² > 0.3 = promising, R² > 0.5 = very promising
+This repository hosts the **6thSense** product site and supporting tooling. Internal ML/config paths may still use legacy `senseprobe` filenames and `SENSEPROBE_*` environment variables for continuity with existing experiments; see **Data & ML configuration** below.
 
 ## Monorepo layout
 
@@ -24,6 +13,19 @@ Can we predict tissue stiffness (kPa) from standard ultrasound images alone?
 | Training / data prep | `ml/` |
 | Data bootstrap | `scripts/setup_data.py` |
 | Paths, datasets, model run lists | `config/senseprobe.defaults.yaml` |
+
+## ML research (ultrasound stiffness)
+
+The `ml/` package includes experiments that probe whether **B-mode ultrasound** images contain recoverable stiffness signals using ML (paired B-mode + elastography data; classification and regression with models such as ResNet18 and EfficientNet-B0).
+
+### Goal
+
+Can we predict tissue stiffness (kPa) from standard ultrasound images alone?
+
+### Evaluation targets (heuristic)
+
+- Classification: accuracy > 60% suggests recoverable signal
+- Regression: R² > 0.3 promising; R² > 0.5 very promising
 
 ## Data & ML configuration
 
@@ -51,7 +53,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## Frontend
 
-Public narrative site is a **React + Vite** app in `frontend/`, with **Framer Motion** for scroll-driven hero motion and **React Three Fiber** (`@react-three/fiber`, `drei`, `three`, **`@react-three/postprocessing`**, **GSAP**, **maath**) for an immersive scroll-linked 3D experience. **`three` is pinned to ~0.160** so `@react-three/postprocessing` v2 bundles cleanly with Vite. Typography uses **Syne** and **Cormorant Garamond** (Google Fonts in `frontend/index.html`).
+The public site is a **React + Vite** app in `frontend/`, with **Framer Motion** for scroll-driven motion and **React Three Fiber** (`@react-three/fiber`, `drei`, `three`, **`@react-three/postprocessing`**, **GSAP**, **maath**) for scroll-linked 3D. **`three` is pinned to ~0.160** so `@react-three/postprocessing` v2 bundles cleanly with Vite. Fonts are loaded in `frontend/index.html`.
 
 ```bash
 cd frontend
@@ -61,4 +63,4 @@ npm run dev -- --host 0.0.0.0 --port 4173
 
 Production build: `cd frontend && npm run build` (output in `frontend/dist/`).
 
-Core files: `frontend/src/App.jsx`, `ProbeCanvas.jsx`, `ProbeExperience.jsx`, `ScrollContext.jsx`, `styles.css`, `main.jsx`.
+Core entry points: `frontend/src/App.jsx`, `DeviceStory.jsx`, `ProbeCanvas.jsx`, `ProbeExperience.jsx`, `homeNarrative.js`, `styles.css`, `main.jsx`.
