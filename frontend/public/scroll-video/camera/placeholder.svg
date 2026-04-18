@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="960" viewBox="0 0 540 960" role="img" aria-label="Head-and-chest camera rig placeholder">
+  <g fill="none" stroke="#736A3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Head: side-profile oval -->
+    <path d="M 222 192 Q 186 212 186 278 Q 186 332 214 352 Q 238 368 240 392 L 252 416" />
+    <path d="M 222 192 Q 278 168 312 196 Q 334 216 334 254" />
+    <!-- Ear -->
+    <circle cx="242" cy="278" r="10" />
+    <!-- Jaw to neck -->
+    <path d="M 252 416 L 248 444 L 226 460" />
+    <!-- Head-mount strap -->
+    <path d="M 196 214 Q 260 182 324 218" stroke-dasharray="6 4" />
+    <!-- Head-mount camera module (forehead) -->
+    <rect x="248" y="184" width="58" height="28" rx="3" />
+    <circle cx="277" cy="198" r="6" />
+    <!-- Shoulders and torso outline -->
+    <path d="M 226 460 L 156 500 L 132 600 L 132 820" />
+    <path d="M 226 460 Q 278 452 330 466 L 404 508 L 420 600 L 420 820" />
+    <!-- Torso centerline (sternum) -->
+    <line x1="276" y1="500" x2="276" y2="684" stroke-dasharray="4 6" />
+    <!-- Chest-mount harness strap -->
+    <path d="M 140 590 L 412 590" stroke-dasharray="6 4" />
+    <path d="M 152 680 L 400 680" stroke-dasharray="6 4" />
+    <!-- Chest camera module -->
+    <rect x="232" y="600" width="92" height="64" rx="4" />
+    <circle cx="278" cy="632" r="14" />
+    <circle cx="278" cy="632" r="7" />
+    <!-- Small label strokes (meta-ui hint) -->
+    <line x1="358" y1="632" x2="398" y2="632" />
+    <line x1="358" y1="644" x2="384" y2="644" />
+  </g>
+</svg>

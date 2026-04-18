@@ -71,3 +71,6 @@ frontend/dist/
 frontend/node_modules/
 landing/dist/
 landing/node_modules/
+
+# Superpowers design/plan docs — local only, not committed
+docs/superpowers/

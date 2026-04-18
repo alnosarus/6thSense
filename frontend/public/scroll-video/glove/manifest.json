@@ -1,0 +1,9 @@
+{
+  "slug": "glove",
+  "frameCount": 96,
+  "width": 540,
+  "height": 960,
+  "posterSrc": "/scroll-video/glove/poster.jpg",
+  "framePathFull": "/scroll-video/glove/full/frame-{NNN}.webp",
+  "framePathMobile": "/scroll-video/glove/mobile/frame-{NNN}.webp"
+}

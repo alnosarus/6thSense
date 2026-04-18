@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="960" viewBox="0 0 540 960" role="img" aria-label="Jetson Orin Nano dev-kit placeholder">
+  <g fill="none" stroke="#736A3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Carrier board outline (centered, portrait-friendly landscape block) -->
+    <rect x="90" y="360" width="360" height="240" rx="6" />
+    <!-- Mounting holes -->
+    <circle cx="110" cy="380" r="5" />
+    <circle cx="430" cy="380" r="5" />
+    <circle cx="110" cy="580" r="5" />
+    <circle cx="430" cy="580" r="5" />
+    <!-- SoM module on top (Orin Nano module) -->
+    <rect x="170" y="396" width="200" height="130" rx="4" />
+    <!-- Heatsink fins on module -->
+    <g>
+      <line x1="186" y1="408" x2="186" y2="514" />
+      <line x1="202" y1="408" x2="202" y2="514" />
+      <line x1="218" y1="408" x2="218" y2="514" />
+      <line x1="234" y1="408" x2="234" y2="514" />
+      <line x1="250" y1="408" x2="250" y2="514" />
+      <line x1="266" y1="408" x2="266" y2="514" />
+      <line x1="282" y1="408" x2="282" y2="514" />
+      <line x1="298" y1="408" x2="298" y2="514" />
+      <line x1="314" y1="408" x2="314" y2="514" />
+      <line x1="330" y1="408" x2="330" y2="514" />
+      <line x1="346" y1="408" x2="346" y2="514" />
+    </g>
+    <!-- USB / Ethernet port block (right side) -->
+    <rect x="388" y="420" width="40" height="22" />
+    <rect x="388" y="452" width="40" height="22" />
+    <rect x="388" y="484" width="40" height="16" />
+    <!-- GPIO header pins (bottom edge) -->
+    <g>
+      <line x1="120" y1="564" x2="120" y2="580" />
+      <line x1="134" y1="564" x2="134" y2="580" />
+      <line x1="148" y1="564" x2="148" y2="580" />
+      <line x1="162" y1="564" x2="162" y2="580" />
+      <line x1="176" y1="564" x2="176" y2="580" />
+      <line x1="190" y1="564" x2="190" y2="580" />
+      <line x1="204" y1="564" x2="204" y2="580" />
+      <line x1="218" y1="564" x2="218" y2="580" />
+      <line x1="232" y1="564" x2="232" y2="580" />
+      <line x1="246" y1="564" x2="246" y2="580" />
+    </g>
+    <!-- Power indicator LED -->
+    <circle cx="112" cy="540" r="4" />
+    <!-- Silkscreen mark -->
+    <text x="190" y="556" font-family="ui-monospace, monospace" font-size="12" fill="#736A3C" stroke="none" letter-spacing="2">ORIN NANO</text>
+  </g>
+</svg>
