@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 /** Section DOM ids in scroll order (top → bottom). */
 const SECTION_ORDER = [
-  "rig-tour",
   "story",
   "problem",
   "system",
@@ -14,7 +13,6 @@ const SECTION_ORDER = [
 
 /** Map section id → nav link key (only keys that appear in the primary nav). */
 const SECTION_TO_NAV = {
-  "rig-tour": null,
   story: null,
   problem: null,
   system: "system",

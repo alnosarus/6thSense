@@ -6,7 +6,7 @@ Durable workspace facts and repeated preferences from sessions. **No secrets or 
 
 - **`ml/`:** Training and data prep (`experiment.py`, `train_robust.py`, `prepare_data.py`, `research.py`, `sanity_check.py`). Paths and datasets come from **`config/senseprobe.defaults.yaml`** + env (`SENSEPROBE_*`); see `ml/senseprobe_config.py`.
 - **`data/`:** Raw/processed data (mostly gitignored); conventions in `data/README.md`.
-- **`frontend/`:** Public narrative site — **Vite + React**. Uses **React Three Fiber**, **drei**, **@react-three/postprocessing** (v2), **GSAP**, **maath**; **`three` is pinned to ~0.160.x** so postprocessing bundles cleanly under Vite.
+- **`frontend/`:** Public narrative site — **Vite + React**. The primary hero is a **scroll-scrubbed 2D canvas “rig tour”** (frame sequence + sticky stage) using **Framer Motion**, **lucide-react**, and assets under **`frontend/public/scroll-video/`** — not a WebGL/Three.js hero.
 - **`backend/`:** Minimal FastAPI service (health, future API).
 - **`.planning/`:** GSD-style artifacts (local; often untracked) — `ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, `PROJECT.md`, phase folders.
 
@@ -33,7 +33,8 @@ Durable workspace facts and repeated preferences from sessions. **No secrets or 
 - For major landing or homepage work, sequence decisions before coding: lock product story and page structure, then visual and motion systems, then implementation—avoid jumping straight into implementation without that alignment.
 - Use scroll-driven, premium product storytelling (reference: https://wisprflow.ai) as an interaction-depth benchmark alongside **frontend-design** and **ui-ux-pro-max**.
 - For in-editor review in Cursor, serve the production build with **`npm run build`** then **`npm run preview`** in **`frontend/`** (default preview port **4173**; dev/preview may use another port if the default is in use).
-- Prefer **device-forward hero composition**: the probe/device and WebGL canvas should read as the primary focal point of the viewport, not a side panel next to a text column.
+- Prefer **device-forward hero composition**: the **scroll-scrubbed hardware (glove) tour** and its canvas should read as the primary focal point of the viewport, with wordmark and CTAs layered over it—not a side column layout that competes with the hero.
+- When building **cards, pipeline tiles, or overlays** on the landing, ensure **referenced CSS variables exist** (e.g. paper/surface tokens like `--paper-1`); **undefined custom properties read as transparent** and can let the dark hero/canvas show through, which looks like stray “hardware” in the background—also mind **stacking context** (`z-index` / `isolation`) between `#story` and `.page-after-hero`.
 - When iterating on the **frontend or landing**, keep **`npm run dev`** or **`npm run preview`** running and share the URL/port so the page can be reviewed in the browser or Cursor preview—not only code edits without a live build.
 - On **long scroll landings**, keep **backgrounds, gradients, and palette** feeling like one system across sections; avoid abrupt tonal jumps and muddy or banded gradients that break the editorial look.
 - **Landing color and navigation** are user-led; implementation should follow the locked **SASI Visual Identity** via **`frontend/src/styles.css`** tokens (`--sasi-1`…`--sasi-5` and semantic aliases such as `--ink` / `--accent`), not scattered one-off colors in components.
@@ -46,3 +47,5 @@ Durable workspace facts and repeated preferences from sessions. **No secrets or 
 - **Brand / company name:** **6thSense** (public-facing product and landing copy).
 - Large raw datasets and generated ML artifacts belong under **`data/`** with strict **`.gitignore`** coverage; accidental tracking inflates uncommitted line counts and should be corrected immediately.
 - **Public landing palette (SASI Visual Identity):** five swatches—**#262312**, **#736A3C**, **#A69A60**, **#BFB68A**, **#592202** (olive–sand ramp plus rust accent). RGBA/HSLA exports are mirrored as CSS variables in **`frontend/src/styles.css`** for parity with design tooling.
+- **Cofounder scroll-video assets** for the hardware tour live under **`frontend/public/scroll-video/`** (frame sequences and related art such as pipeline/Jetson placeholders).
+- The **marketing page** after the hero is composed to **coexist with** the cofounder rig tour (single `#story` hero, then `.page-after-hero` sections)—integrate new sections without breaking scroll-scrub progress or nav section IDs.

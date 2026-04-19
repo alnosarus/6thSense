@@ -24,6 +24,12 @@
   width: 100%;
   pointer-events: none;
   z-index: 1;
+  isolation: isolate;
+}
+
+/* Wordmark + CTAs sit above the canvas; inherits .device-hero-overlay from styles.css */
+.scroll-hero-copy {
+  z-index: 2;
 }
 
 .scroll-stage-canvas {

@@ -7,33 +7,6 @@ export const heroCopy = {
   deck: "Touch-aware demonstration data for the next generation of dexterous robots."
 };
 
-export const storyPanels = [
-  {
-    id: "hero",
-    kicker: "6thSense",
-    title: heroCopy.tagline,
-    body: heroCopy.deck,
-    phase: "hero",
-    layout: "left"
-  },
-  {
-    id: "capture",
-    kicker: "Capture stack",
-    title: "Custom tactile + egocentric capture systems",
-    body: "Wearable rigs record what humans see, do, and feel during contact-rich tasks.",
-    phase: "signal",
-    layout: "left"
-  },
-  {
-    id: "alignment",
-    kicker: "Aligned episodes",
-    title: "Every modality lands on the same clock",
-    body: "Visual, tactile, motion, and metadata streams remain synchronized so each episode trains coherent behavior.",
-    phase: "context",
-    layout: "center"
-  }
-];
-
 /** Problem framing — keep claims verifiable when replacing placeholders. */
 export const tractionItems = [
   {

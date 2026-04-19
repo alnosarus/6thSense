@@ -7,7 +7,6 @@ import {
   Wrench
 } from "lucide-react";
 import { ScrollHero } from "./ScrollHero.jsx";
-import DeviceStory from "./DeviceStory.jsx";
 import Credibility from "./Credibility.jsx";
 import DataCatalog from "./DataCatalog.jsx";
 import PlatformPipeline from "./PlatformPipeline.jsx";
@@ -142,10 +141,9 @@ function AppInner() {
 
       <main id="main" aria-label="6thSense">
         <div id="top" />
-        <section id="rig-tour" aria-label="Hardware scroll tour">
+        <section id="story" aria-label="6thSense hero">
           <ScrollHero />
         </section>
-        <DeviceStory />
 
         <div className="page-after-hero">
           <section className="section traction-section" id="problem" aria-labelledby="problem-h">
