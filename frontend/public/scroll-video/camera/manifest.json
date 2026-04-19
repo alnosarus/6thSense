@@ -1,0 +1,9 @@
+{
+  "slug": "camera",
+  "frameCount": 96,
+  "width": 1440,
+  "height": 398,
+  "posterSrc": "/scroll-video/camera/poster.jpg",
+  "framePathFull": "/scroll-video/camera/full/frame-{NNN}.webp",
+  "framePathMobile": "/scroll-video/camera/mobile/frame-{NNN}.webp"
+}

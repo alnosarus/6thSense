@@ -12,7 +12,8 @@ export const scrollStages = [
     kicker: "02 / OPTICS",
     title: "VISION",
     body: "Head-and-chest mount captures first-person geometry and task context at frame-locked timestamps.",
-    placeholderSvg: "/scroll-video/camera/placeholder.svg"
+    frameDir: "/scroll-video/camera",
+    frameCount: 96
   },
   {
     id: "jetson",
