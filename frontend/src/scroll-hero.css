@@ -25,6 +25,8 @@
   pointer-events: none;
   z-index: 1;
   isolation: isolate;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
 }
 
 .scroll-stage-canvas {
@@ -33,6 +35,24 @@
   width: 100%;
   height: 100%;
   display: block;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+.scroll-stage-canvas--glove {
+  z-index: 2;
+  transform: translateY(var(--glove-lift, 0%));
+  opacity: var(--glove-opacity, 1);
+}
+
+.scroll-stage-canvas--main {
+  z-index: 1;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transform:
+    rotateY(var(--main-rotateY, 0deg))
+    scale(var(--main-scale, 1));
+  opacity: var(--main-opacity, 0);
 }
 
 .scroll-stop {
