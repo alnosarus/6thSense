@@ -9,7 +9,7 @@ const iconByGlyph = {
   package: PackageCheck
 };
 
-const JETSON_ILLUS = "/scroll-video/jetson/placeholder.svg";
+const JETSON_ILLUS = "/pipeline/jetson-placeholder.svg";
 
 export default function PlatformPipeline() {
   const reduceMotion = useReducedMotion();
