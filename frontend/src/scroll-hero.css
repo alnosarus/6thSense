@@ -1,15 +1,57 @@
 /* Single-stage scroll hero: counting → logo reassembly → CTA. Black throughout. */
 
+@font-face {
+  font-family: "Heming";
+  src: url("/fonts/Heming Variable.ttf") format("truetype-variations"),
+       url("/fonts/Heming Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Chillax";
+  src: url("/fonts/Chillax-Variable.ttf") format("truetype-variations"),
+       url("/fonts/Chillax-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 .scroll-hero {
   --ink-1: #000;
   --paper: var(--sasi-4);
-  --font-display: "Anton", system-ui, sans-serif;
+  /* Heming for big/bold display copy; Chillax for body + UI. */
+  --font-display: "Heming", "Anton", system-ui, sans-serif;
+  --font-body: "Chillax", system-ui, sans-serif;
+  --font-ui: "Chillax", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --gutter: clamp(1.5rem, 4vw, 3.5rem);
 
   position: relative;
   background: #000;
   height: 300vh;
+  cursor: none;
+}
+
+/* Kill text selection & cursor flicker across the whole hero so the particle
+   trail is the only cursor. Only form controls opt back in. */
+.scroll-hero,
+.scroll-hero * {
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: none;
+}
+.scroll-hero input,
+.scroll-hero textarea {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+.scroll-hero button,
+.scroll-hero a {
+  cursor: pointer;
 }
 
 .scroll-hero-sticky {

@@ -2,12 +2,25 @@
 // Canvas2D "constellation" background: sparse colored nodes drift slowly,
 // nearby nodes link with faint edges, nodes near the pointer grow.
 
-const NODE_COUNT = 48;
+const NODE_COUNT = 288;
 const LINK_DISTANCE = 180;     // CSS px — nodes closer than this get an edge
 const HOVER_RADIUS = 140;      // CSS px — nodes inside this scale up on hover
 const HOVER_SCALE = 1.8;       // max scale multiplier under the pointer
 const DRIFT_SPEED = 0.22;      // CSS px per frame (60 fps ≈ 13 px/s)
 const EDGE_ALPHA = 0.22;       // peak edge opacity; fades with distance
+const TWINKLE_ALPHA = 0.35;    // ±alpha swing from the twinkle wave
+const TWINKLE_SIZE = 0.22;     // ±size swing (fraction of base)
+const BOB_AMPLITUDE = 2.5;     // CSS px — sub-pixel water ripple
+
+// Cursor trail — random digits 1–9 are dropped at the pointer each few frames
+// and fade out in place. Reads like code printing under the hand.
+const TRAIL_SPAWN_EVERY = 12;      // spawn one digit every N frames
+const TRAIL_MAX = 40;
+const TRAIL_LIFE_DECAY = 0.006;    // ~2.8 s life at 60 fps
+const TRAIL_FONT_PX = 16;
+const TRAIL_FONT =
+  "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
+const TRAIL_COLOR = "#ffffff";
 const EDGE_COLOR = "197, 224, 99";   // #c5e063 lime, as r,g,b for rgba()
 const NODE_PALETTE = [
   "#c5e063", // brand lime
@@ -22,6 +35,8 @@ export function initTactileField(canvas) {
   if (!ctx) return null;
 
   const nodes = [];
+  const trailDigits = [];       // transient { x, y, digit, life } trail glyphs
+  let trailFrameCounter = 0;
 
   const state = {
     w: 0, h: 0,                // CSS pixels
@@ -43,7 +58,15 @@ export function initTactileField(canvas) {
         vx: Math.cos(angle) * DRIFT_SPEED,
         vy: Math.sin(angle) * DRIFT_SPEED,
         color: NODE_PALETTE[Math.floor(Math.random() * NODE_PALETTE.length)],
-        baseSize: 3 + Math.random() * 2.5   // 3–5.5 CSS px square
+        baseSize: 3 + Math.random() * 2.5,    // 3–5.5 CSS px dot
+        // Per-node shimmer params — each particle has its own phase/frequency
+        // so the field twinkles asynchronously instead of pulsing in unison.
+        twPhase: Math.random() * Math.PI * 2,
+        twFreq:  0.5 + Math.random() * 1.2,   // twinkle rad/s
+        bobPhaseX: Math.random() * Math.PI * 2,
+        bobPhaseY: Math.random() * Math.PI * 2,
+        bobFreqX:  0.25 + Math.random() * 0.45,
+        bobFreqY:  0.25 + Math.random() * 0.45
       });
     }
   };
@@ -73,53 +96,101 @@ export function initTactileField(canvas) {
       const { w, h } = state;
       if (w === 0 || h === 0) return;
 
-      // Step motion. Reduced-motion users get a much slower drift.
-      const speed = state.reduced ? 0.25 : 1.0;
+      // Step drift motion. Reduced-motion users get a calmer drift.
+      const motionScale = state.reduced ? 0.25 : 1.0;
       for (const n of nodes) {
-        n.x += n.vx * speed;
-        n.y += n.vy * speed;
+        n.x += n.vx * motionScale;
+        n.y += n.vy * motionScale;
         if (n.x < -10) n.x = w + 10;
         else if (n.x > w + 10) n.x = -10;
         if (n.y < -10) n.y = h + 10;
         else if (n.y > h + 10) n.y = -10;
       }
 
+      // Per-node rendered positions (drift + bob). Cached so edges & nodes stay
+      // in sync without two sin() calls per pair.
+      const rxs = new Float32Array(nodes.length);
+      const rys = new Float32Array(nodes.length);
+      const twinkles = new Float32Array(nodes.length);
+      const bobAmp = BOB_AMPLITUDE * motionScale;
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        rxs[i] = n.x + Math.sin(timeSec * n.bobFreqX + n.bobPhaseX) * bobAmp;
+        rys[i] = n.y + Math.sin(timeSec * n.bobFreqY + n.bobPhaseY) * bobAmp;
+        // Twinkle wave in 0..1. Reduced motion mutes the swing.
+        twinkles[i] = (Math.sin(timeSec * n.twFreq + n.twPhase) * 0.5 + 0.5)
+                    * motionScale;
+      }
+
       ctx.clearRect(0, 0, w, h);
 
       // Edges first so nodes overdraw them.
       ctx.lineWidth = 1;
+      const linkD2 = LINK_DISTANCE * LINK_DISTANCE;
       for (let i = 0; i < nodes.length; i++) {
-        const a = nodes[i];
+        const ax = rxs[i], ay = rys[i];
         for (let j = i + 1; j < nodes.length; j++) {
-          const b = nodes[j];
-          const dx = a.x - b.x, dy = a.y - b.y;
+          const dx = ax - rxs[j], dy = ay - rys[j];
           const d2 = dx * dx + dy * dy;
-          if (d2 > LINK_DISTANCE * LINK_DISTANCE) continue;
+          if (d2 > linkD2) continue;
           const d = Math.sqrt(d2);
           const alpha = (1 - d / LINK_DISTANCE) * EDGE_ALPHA;
           ctx.strokeStyle = `rgba(${EDGE_COLOR}, ${alpha.toFixed(3)})`;
           ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(rxs[j], rys[j]);
           ctx.stroke();
         }
       }
 
-      // Nodes as small filled squares; grow + brighten near the pointer.
-      for (const n of nodes) {
-        const dx = n.x - state.pointerX, dy = n.y - state.pointerY;
+      // Nodes as small filled circles with twinkle + hover brightening.
+      for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        const rx = rxs[i], ry = rys[i];
+        const dx = rx - state.pointerX, dy = ry - state.pointerY;
         const d = Math.sqrt(dx * dx + dy * dy);
         const hover =
-          d < HOVER_RADIUS
-            ? (1 - d / HOVER_RADIUS) * state.pressure
-            : 0;
-        const size = n.baseSize * (1 + hover * (HOVER_SCALE - 1));
-        const half = size / 2;
-        ctx.globalAlpha = 0.65 + 0.35 * hover;
+          d < HOVER_RADIUS ? (1 - d / HOVER_RADIUS) * state.pressure : 0;
+        const tw = twinkles[i];
+        const radius =
+          (n.baseSize * (1 + hover * (HOVER_SCALE - 1) + TWINKLE_SIZE * (tw - 0.5) * 2)) / 2;
+        ctx.globalAlpha = 0.55 + TWINKLE_ALPHA * tw + 0.3 * hover;
         ctx.fillStyle = n.color;
-        ctx.fillRect(n.x - half, n.y - half, size, size);
+        ctx.beginPath();
+        ctx.arc(rx, ry, radius, 0, Math.PI * 2);
+        ctx.fill();
       }
-      ctx.globalAlpha = 1;
+
+      // Cursor trail — drop a random digit 1–9 at the pointer every few frames
+      // and fade it out in place.
+      trailFrameCounter++;
+      if (state.pressure > 0.1
+          && trailFrameCounter % TRAIL_SPAWN_EVERY === 0
+          && trailDigits.length < TRAIL_MAX) {
+        trailDigits.push({
+          x: state.pointerX,
+          y: state.pointerY,
+          digit: String(1 + Math.floor(Math.random() * 9)),
+          life: 1.0
+        });
+      }
+      if (trailDigits.length > 0) {
+        ctx.font = `${TRAIL_FONT_PX}px ${TRAIL_FONT}`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = TRAIL_COLOR;
+        for (let i = trailDigits.length - 1; i >= 0; i--) {
+          const d = trailDigits[i];
+          d.life -= TRAIL_LIFE_DECAY;
+          if (d.life <= 0) {
+            trailDigits.splice(i, 1);
+            continue;
+          }
+          ctx.globalAlpha = d.life * 0.9;
+          ctx.fillText(d.digit, d.x, d.y);
+        }
+        ctx.globalAlpha = 1;
+      }
 
       state.lastT = timeSec;
     },

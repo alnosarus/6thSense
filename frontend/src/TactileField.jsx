@@ -44,7 +44,13 @@ export function TactileField() {
       const rect = canvas.getBoundingClientRect();
       pointerX = e.clientX - rect.left;
       pointerY = e.clientY - rect.top;
-      targetPressure = 1;
+      // The emitter is active only where CSS has hidden the real cursor. If
+      // the element under the pointer has any other cursor (text, pointer,
+      // auto…), let the native cursor do the talking.
+      const cursor = e.target
+        ? window.getComputedStyle(e.target).cursor
+        : "none";
+      targetPressure = cursor === "none" ? 1 : 0;
     };
     const handleLeave = () => { targetPressure = 0; };
 
