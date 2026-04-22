@@ -137,17 +137,17 @@ export function ScrollStage({ progressRef, heroRef }) {
         ? (p >= SHIFT_START ? 1 : 0)
         : clamp01((p - SHIFT_START) / (SHIFT_END - SHIFT_START));
 
-      // ---- Active blurb index (for the right-side copy) ----
-      // 0..5 map to counting beats; 6 = "building the sixth"; 7 = final CTA state.
+      // ---- Active blurb index (kept in lockstep with the frame index so the
+      //      copy label always matches the pose on screen) ----
       let blurb;
-      if (p < 0.04) blurb = 0;           // opening tagline fragment
-      else if (p < 0.14) blurb = 1;       // 1 finger → Sight
-      else if (p < 0.23) blurb = 2;       // 2 → Sound
-      else if (p < 0.32) blurb = 3;       // 3 → Smell
-      else if (p < 0.41) blurb = 4;       // 4 → Taste
-      else if (p < 0.55) blurb = 5;       // 5 → Touch
-      else if (p < SHIFT_START) blurb = 6; // "and the sixth"
-      else blurb = 7;                    // CTA
+      if (p >= SHIFT_START) blurb = 7;
+      else if (p >= ASSEMBLE_START) blurb = 6;
+      else if (s0.frames) {
+        const count = s0.frames.length;
+        blurb = Math.round(framesP * (count - 1)); // 0..5 ↔ fist..Touch
+      } else {
+        blurb = 0;
+      }
 
       writeVars({
         "--stop-progress": p.toFixed(4),
