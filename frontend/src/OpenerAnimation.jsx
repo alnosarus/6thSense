@@ -40,12 +40,17 @@ export function OpenerAnimation() {
 
     // Total: 5 trail dots (ends ~1.08s) + 6th ignite (0.95 + 1.9 = 2.85s) = hold until ~3.0s
     const startFade = setTimeout(() => setPhase("fading"), 3000);
-    // Fade is 0.8s; unmount after it completes.
-    const unmount = setTimeout(() => setPhase("done"), 3800);
+    // Fade is 0.8s; restore scroll + hide overlay after it completes.
+    // Overflow restore runs HERE (not in cleanup) because returning null from
+    // the render keeps the component mounted — cleanup would never fire.
+    const finish = setTimeout(() => {
+      document.body.style.overflow = bodyOverflowRef.current;
+      setPhase("done");
+    }, 3800);
 
     return () => {
       clearTimeout(startFade);
-      clearTimeout(unmount);
+      clearTimeout(finish);
       document.body.style.overflow = bodyOverflowRef.current;
     };
     // phase is only read once on mount; intentionally omitted from deps.
