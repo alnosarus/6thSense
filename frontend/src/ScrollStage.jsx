@@ -2,11 +2,10 @@ import { useEffect, useRef } from "react";
 import { scrollStages } from "./scrollStages.js";
 import { useFramePreloader } from "./useFramePreloader.js";
 
-// Paint-time zoom on the glove frames (avoids CSS-scale upscaling blur).
-const GLOVE_ZOOM = 1.5;
+// Paint-time zoom on the glove frames.
+const GLOVE_ZOOM = 0.8;
 // Vertical anchor in [0, 1]: 0 = top-align, 0.5 = center, 1 = bottom-align.
-// Higher values push the glove toward the bottom of the viewport.
-const GLOVE_Y_ANCHOR = 0.9;
+const GLOVE_Y_ANCHOR = 1.0;
 
 // Olive-dot ignition zone (fraction of total scroll progress).
 const IGNITE_START = 0.80;
