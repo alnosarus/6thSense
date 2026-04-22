@@ -9,30 +9,12 @@ const iconByGlyph = {
   package: PackageCheck
 };
 
-const JETSON_ILLUS = "/scroll-video/jetson/placeholder.svg";
-
 export default function PlatformPipeline() {
   const reduceMotion = useReducedMotion();
   const glyphViewport = { once: true, margin: "-96px" };
 
   return (
     <div className="platform-pipeline-layout">
-      <figure className="platform-pipeline-jetson">
-        <div className="platform-pipeline-jetson-skew">
-          <img
-            src={JETSON_ILLUS}
-            alt=""
-            width={540}
-            height={960}
-            decoding="async"
-            loading="lazy"
-          />
-        </div>
-        <figcaption className="platform-pipeline-jetson-caption">
-          On-device capture &amp; QC — Jetson-class edge compute in the loop
-        </figcaption>
-      </figure>
-
       <div className="platform-pipeline-main">
         <figure className="platform-pipeline" aria-label="Four-stage data pipeline">
           <svg className="platform-pipeline-flow" viewBox="0 0 1000 60" aria-hidden="true">

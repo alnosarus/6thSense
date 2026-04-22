@@ -74,3 +74,6 @@ landing/node_modules/
 
 # Superpowers design/plan docs — local only, not committed
 docs/superpowers/
+
+# Superpowers brainstorm visual companion session files — local only
+.superpowers/

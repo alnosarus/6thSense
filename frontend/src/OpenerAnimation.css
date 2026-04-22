@@ -1,0 +1,89 @@
+/* OpenerAnimation — 6-dot brand opener. Plays once per session. */
+
+.opener-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0b0b0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.opener-root[data-phase="fading"] {
+  animation: opener-fade 0.8s var(--ease-out) forwards;
+}
+
+@keyframes opener-fade {
+  to { opacity: 0; }
+}
+
+/* Dot grid sized so each dot is ~32px at desktop, scales on small viewports. */
+.opener-grid {
+  position: relative;
+  width: clamp(140px, 18vmin, 220px);
+  height: clamp(140px, 18vmin, 220px);
+}
+
+.opener-dot {
+  position: absolute;
+  width: 18%;
+  height: 18%;
+  border-radius: 50%;
+  background: #4a2418;
+  opacity: 0;
+}
+
+/* Stair-step positions, mirroring /public/Logo_Alpha.png:
+   5 brown dots climbing up-right, 6th (olive) at top-right. */
+.opener-dot--1 { left: 6%;   top: 72%; }
+.opener-dot--2 { left: 30%;  top: 72%; }
+.opener-dot--3 { left: 30%;  top: 44%; }
+.opener-dot--4 { left: 54%;  top: 44%; }
+.opener-dot--5 { left: 54%;  top: 16%; }
+.opener-dot--6 { left: 78%;  top: 16%; background: #7a8f3a; }
+
+/* Browns trail in from lower-left on a diagonal. */
+.opener-root[data-phase="playing"] .opener-dot--1 { animation: opener-trail 0.5s cubic-bezier(.22,1,.36,1) 0.10s forwards; }
+.opener-root[data-phase="playing"] .opener-dot--2 { animation: opener-trail 0.5s cubic-bezier(.22,1,.36,1) 0.22s forwards; }
+.opener-root[data-phase="playing"] .opener-dot--3 { animation: opener-trail 0.5s cubic-bezier(.22,1,.36,1) 0.34s forwards; }
+.opener-root[data-phase="playing"] .opener-dot--4 { animation: opener-trail 0.5s cubic-bezier(.22,1,.36,1) 0.46s forwards; }
+.opener-root[data-phase="playing"] .opener-dot--5 { animation: opener-trail 0.5s cubic-bezier(.22,1,.36,1) 0.58s forwards; }
+
+@keyframes opener-trail {
+  from { opacity: 0; transform: translate(-14px, 14px) scale(0.6); }
+  to   { opacity: 1; transform: translate(0,0) scale(1); }
+}
+
+/* 6th dot: one continuous arc — dim → peak → settle. Glow only, no scale. */
+.opener-root[data-phase="playing"] .opener-dot--6 {
+  animation: opener-ignite 1.9s cubic-bezier(.22,1,.36,1) 0.95s forwards;
+}
+
+@keyframes opener-ignite {
+  0% {
+    opacity: 0;
+    transform: translate(-10px, 10px);
+    background: #3d4a1e;
+    box-shadow: 0 0 0 rgba(197, 224, 99, 0);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(0, 0);
+    background: #4a5a22;
+    box-shadow: 0 0 6px rgba(197, 224, 99, 0.2);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(0, 0);
+    background: #c5e063;
+    box-shadow: 0 0 40px rgba(197, 224, 99, 0.75);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0);
+    background: #7a8f3a;
+    box-shadow: 0 0 0 rgba(197, 224, 99, 0);
+  }
+}
