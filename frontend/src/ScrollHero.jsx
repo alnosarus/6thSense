@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { ScrollStage } from "./ScrollStage.jsx";
 import { HeroBlurbs } from "./HeroBlurbs.jsx";
 import { HeroFinale } from "./HeroFinale.jsx";
+import { TactileField } from "./TactileField.jsx";
 import { useScrollProgress } from "./useScrollProgress.js";
 
 /**
@@ -17,6 +18,7 @@ export function ScrollHero() {
   return (
     <div className="scroll-hero" ref={heroRef}>
       <div className="scroll-hero-sticky">
+        <TactileField />
         <div className="scroll-hero-canvas-wrap">
           <ScrollStage progressRef={progressRef} heroRef={heroRef} />
         </div>
