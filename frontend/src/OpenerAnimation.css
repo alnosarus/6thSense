@@ -3,17 +3,16 @@
 .opener-root {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 9999;
   background: #0b0b0b;
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
   overflow: hidden;
 }
 
 .opener-root[data-phase="fading"] {
-  animation: opener-fade 0.8s ease forwards;
+  animation: opener-fade 0.8s var(--ease-out) forwards;
 }
 
 @keyframes opener-fade {

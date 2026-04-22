@@ -3,26 +3,30 @@ import "./OpenerAnimation.css";
 
 const SESSION_FLAG = "sixthsense.openerSeen";
 
+function computeInitialPhase() {
+  if (typeof window === "undefined") return "init";
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const alreadySeen = sessionStorage.getItem(SESSION_FLAG) === "1";
+  const deepLinked = window.scrollY > 0;
+  if (reduce || alreadySeen || deepLinked) return "done";
+  return "init";
+}
+
 /**
  * Full-screen brand opener. Plays once per browser session — skipped on
  * in-tab refresh, re-plays in new tabs or after browser close. Also skipped
  * on deep-link arrivals (scrollY > 0) and when prefers-reduced-motion is set.
  */
 export function OpenerAnimation() {
-  const [phase, setPhase] = useState("init"); // init → playing → fading → done
+  const [phase, setPhase] = useState(computeInitialPhase);
   const bodyOverflowRef = useRef("");
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    // Skip conditions — all resolved to "done" immediately.
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const alreadySeen = sessionStorage.getItem(SESSION_FLAG) === "1";
-    const deepLinked = window.scrollY > 0;
-
-    if (reduce || alreadySeen || deepLinked) {
-      sessionStorage.setItem(SESSION_FLAG, "1");
-      setPhase("done");
+    if (phase !== "init") {
+      // Skip path — mark the flag so subsequent mounts stay consistent, then bail.
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(SESSION_FLAG, "1");
+      }
       return;
     }
 
@@ -44,14 +48,9 @@ export function OpenerAnimation() {
       clearTimeout(unmount);
       document.body.style.overflow = bodyOverflowRef.current;
     };
+    // phase is only read once on mount; intentionally omitted from deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Restore body overflow on unmount / when done.
-  useEffect(() => {
-    if (phase === "done" && document.body.style.overflow === "hidden") {
-      document.body.style.overflow = bodyOverflowRef.current;
-    }
-  }, [phase]);
 
   if (phase === "init" || phase === "done") return null;
 
