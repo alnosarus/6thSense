@@ -41,7 +41,7 @@
 
 .scroll-stage-canvas--glove {
   z-index: 2;
-  transform: translateY(var(--glove-lift, 0%));
+  transform: translateY(var(--glove-lift, 0%)) scale(var(--glove-scale, 1.6));
   opacity: var(--glove-opacity, 1);
 }
 
