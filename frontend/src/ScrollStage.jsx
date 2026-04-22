@@ -2,13 +2,19 @@ import { useEffect, useRef } from "react";
 import { scrollStages } from "./scrollStages.js";
 import { useFramePreloader } from "./useFramePreloader.js";
 
-// Paint-time zoom on the glove frames.
-const GLOVE_ZOOM = 0.8;
-// Vertical anchor in [0, 1]: 0 = top-align, 0.5 = center, 1 = bottom-align.
-const GLOVE_Y_ANCHOR = 1.0;
+// Scroll-progress phase boundaries.
+const FRAMES_END = 0.55;        // counting 1→5 done by here
+const ASSEMBLE_START = 0.55;    // logo dots rise + hand descends start
+const ASSEMBLE_END = 0.80;      // dots arrive at logo positions, hand offscreen
+const SHIFT_START = 0.80;       // finished logo shifts + CTA slides in
+const SHIFT_END = 0.95;
 
-// Olive-dot ignition zone (fraction of total scroll progress).
-const IGNITE_START = 0.80;
+// Glove canvas layout.
+const GLOVE_ZOOM_BASE = 0.60;   // base paint-time zoom
+const GLOVE_X_ANCHOR = 0.25;    // 25% from left
+const GLOVE_Y_ANCHOR = 1.18;    // >1 pushes image below viewport bottom
+// Per-frame zoom multiplier (fist was generated bigger than extended poses).
+const PER_FRAME_ZOOM = [0.82, 1.0, 1.0, 1.0, 1.0, 1.0];
 
 function usePrefersReducedMotion() {
   const ref = useRef(false);
@@ -25,14 +31,14 @@ function usePrefersReducedMotion() {
   return ref;
 }
 
-function paintCentered(ctx, img, cw, ch, alpha, zoom = 1, yAnchor = 0.5) {
+function paintAnchored(ctx, img, cw, ch, alpha, zoom, xAnchor, yAnchor) {
   if (!img || !img.complete || !img.naturalWidth) return;
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
   const scale = Math.min(cw / iw, ch / ih) * zoom;
   const dw = iw * scale;
   const dh = ih * scale;
-  const dx = (cw - dw) / 2;
+  const dx = (cw - dw) * xAnchor;
   const dy = (ch - dh) * yAnchor;
   const prev = ctx.globalAlpha;
   ctx.globalAlpha = alpha;
@@ -78,7 +84,10 @@ export function ScrollStage({ progressRef, heroRef }) {
       const p = clamp01(progressRef.current);
       const reduce = reducedRef.current;
 
-      // ---- Paint canvas: crossfade between adjacent frames ----
+      // Frame-sequence progress — counting plays over 0..FRAMES_END.
+      const framesP = clamp01(p / FRAMES_END);
+
+      // ---- Paint canvas: crossfade adjacent frames with per-frame zoom ----
       const cw = canvas.clientWidth;
       const ch = canvas.clientHeight;
       ctx.clearRect(0, 0, cw, ch);
@@ -86,39 +95,64 @@ export function ScrollStage({ progressRef, heroRef }) {
       if (s0.frames) {
         const frames = s0.frames;
         const count = frames.length;
-        const rawIndex = p * (count - 1);
+        const rawIndex = framesP * (count - 1);
         const i = Math.floor(rawIndex);
         const f = rawIndex - i;
         const nextI = Math.min(count - 1, i + 1);
 
+        const zoomFor = (idx) =>
+          GLOVE_ZOOM_BASE * (PER_FRAME_ZOOM[idx] ?? 1);
+
         if (reduce) {
-          // Reduced motion: snap to nearest frame, no crossfade.
           const idx = Math.round(rawIndex);
-          paintCentered(ctx, frames[idx], cw, ch, 1, GLOVE_ZOOM, GLOVE_Y_ANCHOR);
+          paintAnchored(
+            ctx, frames[idx], cw, ch, 1,
+            zoomFor(idx), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR
+          );
         } else {
-          paintCentered(ctx, frames[i], cw, ch, 1 - f, GLOVE_ZOOM, GLOVE_Y_ANCHOR);
-          if (f > 0) paintCentered(ctx, frames[nextI], cw, ch, f, GLOVE_ZOOM, GLOVE_Y_ANCHOR);
+          paintAnchored(
+            ctx, frames[i], cw, ch, 1 - f,
+            zoomFor(i), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR
+          );
+          if (f > 0) {
+            paintAnchored(
+              ctx, frames[nextI], cw, ch, f,
+              zoomFor(nextI), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR
+            );
+          }
         }
       }
 
-      // ---- Olive dot ignite vars (final 20% of scroll) ----
-      // opacity: fades in 0→1 across first half of ignite zone, holds at 1.
-      // glow-scale: 0 → 1 across first 60% of ignite, 1 → 0 across last 40%.
-      let oliveOpacity = 0;
-      let oliveGlowScale = 0;
-      if (!reduce && p >= IGNITE_START) {
-        const ip = clamp01((p - IGNITE_START) / (1 - IGNITE_START));
-        oliveOpacity = Math.min(1, ip / 0.5);
-        oliveGlowScale = ip < 0.6 ? ip / 0.6 : Math.max(0, 1 - (ip - 0.6) / 0.4);
-      } else if (reduce && p >= 0.95) {
-        oliveOpacity = 1;
-        oliveGlowScale = 0;
-      }
+      // ---- Hand descent: canvas translateY from 0 → 100vh across assemble phase ----
+      const assembleP = reduce
+        ? (p >= ASSEMBLE_START ? 1 : 0)
+        : clamp01((p - ASSEMBLE_START) / (ASSEMBLE_END - ASSEMBLE_START));
+      const handDescendVh = assembleP * 110; // push off-screen with margin
+
+      // ---- Shift phase: logo slides right, CTA fades in ----
+      const shiftP = reduce
+        ? (p >= SHIFT_START ? 1 : 0)
+        : clamp01((p - SHIFT_START) / (SHIFT_END - SHIFT_START));
+
+      // ---- Active blurb index (for the right-side copy) ----
+      // 0..5 map to counting beats; 6 = "building the sixth"; 7 = final CTA state.
+      let blurb;
+      if (p < 0.04) blurb = 0;           // opening tagline fragment
+      else if (p < 0.14) blurb = 1;       // 1 finger → Sight
+      else if (p < 0.23) blurb = 2;       // 2 → Sound
+      else if (p < 0.32) blurb = 3;       // 3 → Smell
+      else if (p < 0.41) blurb = 4;       // 4 → Taste
+      else if (p < 0.55) blurb = 5;       // 5 → Touch
+      else if (p < SHIFT_START) blurb = 6; // "and the sixth"
+      else blurb = 7;                    // CTA
 
       writeVars({
         "--stop-progress": p.toFixed(4),
-        "--olive-opacity": oliveOpacity.toFixed(3),
-        "--olive-glow-scale": oliveGlowScale.toFixed(3)
+        "--frames-p": framesP.toFixed(4),
+        "--assemble-p": assembleP.toFixed(4),
+        "--shift-p": shiftP.toFixed(4),
+        "--hand-descend": `${handDescendVh.toFixed(2)}vh`,
+        "--active-blurb": String(blurb)
       });
 
       raf = requestAnimationFrame(tick);

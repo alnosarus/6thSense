@@ -125,8 +125,8 @@ body,
 body {
   font-family: var(--font-body);
   font-size: clamp(1.05rem, 2.2vw, 1.2rem);
-  color: var(--ink);
-  background: var(--paper);
+  color: #f1f1ec;
+  background: #000;
   line-height: 1.55;
   font-optical-sizing: auto;
 }

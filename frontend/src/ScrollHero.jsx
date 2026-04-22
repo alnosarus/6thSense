@@ -1,11 +1,14 @@
 import { useRef } from "react";
 import { ScrollStage } from "./ScrollStage.jsx";
+import { HeroBlurbs } from "./HeroBlurbs.jsx";
+import { HeroFinale } from "./HeroFinale.jsx";
 import { useScrollProgress } from "./useScrollProgress.js";
 
 /**
- * Scroll-scrub hero: single glove canvas that counts fingers 1→5, clenches back
- * to a fist, and fires an olive "sixth sense" dot as the payoff. Brand-moment
- * opener lives in OpenerAnimation (mounted in App), not here.
+ * Scroll-scrub hero. Left half: glove canvas counting 1→5. Right half: scroll-
+ * driven blurbs during counting, replaced by the reassembled 6-dot logo + CTA
+ * during the finale. Brand-moment opener (sessionStorage-gated) lives in
+ * OpenerAnimation (mounted in App).
  */
 export function ScrollHero() {
   const heroRef = useRef(null);
@@ -14,8 +17,11 @@ export function ScrollHero() {
   return (
     <div className="scroll-hero" ref={heroRef}>
       <div className="scroll-hero-sticky">
-        <ScrollStage progressRef={progressRef} heroRef={heroRef} />
-        <div className="hero-olive-dot" aria-hidden="true" />
+        <div className="scroll-hero-canvas-wrap">
+          <ScrollStage progressRef={progressRef} heroRef={heroRef} />
+        </div>
+        <HeroBlurbs />
+        <HeroFinale />
       </div>
     </div>
   );
