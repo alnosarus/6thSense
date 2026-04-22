@@ -1646,52 +1646,9 @@ main .section[id] {
   line-height: 1.5;
 }
 
-/* System section: pipeline + skewed Jetson reference (uses existing rig placeholder art) */
+/* System section: four-stage data pipeline. */
 .platform-pipeline-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
-  gap: clamp(1.25rem, 3.5vw, 2.25rem);
-  align-items: start;
   margin-top: 0.5rem;
-}
-
-.platform-pipeline-jetson {
-  margin: 0;
-  padding: 0;
-  border: none;
-  position: sticky;
-  top: calc(var(--nav-h) + 1rem);
-}
-
-.platform-pipeline-jetson-skew {
-  position: relative;
-  transform: skewY(-2.5deg);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--line);
-  background: linear-gradient(145deg, var(--paper-2), rgb(var(--sasi-4-rgb) / 0.22));
-  box-shadow: var(--shadow-lift);
-  overflow: hidden;
-  max-width: min(280px, 100%);
-}
-
-.platform-pipeline-jetson-skew img {
-  display: block;
-  width: 100%;
-  height: auto;
-  transform: skewY(2.5deg) scale(1.02);
-  transform-origin: center;
-}
-
-.platform-pipeline-jetson-caption {
-  margin: 0.65rem 0 0;
-  font-family: var(--font-ui);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgb(var(--sasi-2-rgb) / 0.95);
-  max-width: 16rem;
-  line-height: 1.45;
 }
 
 .platform-pipeline-main {
@@ -2343,18 +2300,6 @@ main .section[id] {
 }
 
 @media (max-width: 760px) {
-  .platform-pipeline-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .platform-pipeline-jetson {
-    position: relative;
-    top: auto;
-    justify-self: center;
-    max-width: 240px;
-    margin-bottom: 0.25rem;
-  }
-
   .platform-pipeline-flow {
     display: none;
   }
