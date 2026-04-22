@@ -3,7 +3,10 @@ import { scrollStages } from "./scrollStages.js";
 import { useFramePreloader } from "./useFramePreloader.js";
 
 // Paint-time zoom on the glove frames (avoids CSS-scale upscaling blur).
-const GLOVE_ZOOM = 3;
+const GLOVE_ZOOM = 1.5;
+// Vertical anchor in [0, 1]: 0 = top-align, 0.5 = center, 1 = bottom-align.
+// Higher values push the glove toward the bottom of the viewport.
+const GLOVE_Y_ANCHOR = 0.9;
 
 // Olive-dot ignition zone (fraction of total scroll progress).
 const IGNITE_START = 0.80;
@@ -23,7 +26,7 @@ function usePrefersReducedMotion() {
   return ref;
 }
 
-function paintCentered(ctx, img, cw, ch, alpha, zoom = 1) {
+function paintCentered(ctx, img, cw, ch, alpha, zoom = 1, yAnchor = 0.5) {
   if (!img || !img.complete || !img.naturalWidth) return;
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
@@ -31,7 +34,7 @@ function paintCentered(ctx, img, cw, ch, alpha, zoom = 1) {
   const dw = iw * scale;
   const dh = ih * scale;
   const dx = (cw - dw) / 2;
-  const dy = (ch - dh) / 2;
+  const dy = (ch - dh) * yAnchor;
   const prev = ctx.globalAlpha;
   ctx.globalAlpha = alpha;
   ctx.drawImage(img, dx, dy, dw, dh);
@@ -92,10 +95,10 @@ export function ScrollStage({ progressRef, heroRef }) {
         if (reduce) {
           // Reduced motion: snap to nearest frame, no crossfade.
           const idx = Math.round(rawIndex);
-          paintCentered(ctx, frames[idx], cw, ch, 1, GLOVE_ZOOM);
+          paintCentered(ctx, frames[idx], cw, ch, 1, GLOVE_ZOOM, GLOVE_Y_ANCHOR);
         } else {
-          paintCentered(ctx, frames[i], cw, ch, 1 - f, GLOVE_ZOOM);
-          if (f > 0) paintCentered(ctx, frames[nextI], cw, ch, f, GLOVE_ZOOM);
+          paintCentered(ctx, frames[i], cw, ch, 1 - f, GLOVE_ZOOM, GLOVE_Y_ANCHOR);
+          if (f > 0) paintCentered(ctx, frames[nextI], cw, ch, f, GLOVE_ZOOM, GLOVE_Y_ANCHOR);
         }
       }
 
