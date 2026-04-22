@@ -23,6 +23,18 @@
   isolation: isolate;
 }
 
+/* Tactile pressure surface: shader-driven particle grid behind the glove.
+   Fills the sticky viewport, never intercepts pointer events. */
+.tactile-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
 /* Canvas lives on top, descends below viewport during assemble phase. */
 .scroll-hero-canvas-wrap {
   position: absolute;
@@ -58,7 +70,7 @@
 
 .hero-blurb {
   position: absolute;
-  left: var(--gutter);
+  left: calc(var(--gutter) + 10vw);
   max-width: 28ch;
   margin: 0;
   color: #f1f1ec;
@@ -110,6 +122,10 @@
 }
 
 .finale-dot--brown {
+  /* Start at the fingertip: glove origin + normalized tip * glove size.
+     --glove-x/y/w/h are published by ScrollStage per resize. */
+  --start-left: calc(var(--glove-x, 0%) + var(--tip-u) * var(--glove-w, 0%));
+  --start-top: calc(var(--glove-y, 0%) + var(--tip-v) * var(--glove-h, 0%));
   background: #4a2418;
   opacity: var(--assemble-fade-p, 0);
 }
