@@ -12,8 +12,8 @@
 
   position: relative;
   background: var(--ink-1);
-  /* 4 stops × 200vh */
-  height: 800vh;
+  /* 2 stops × 200vh */
+  height: 400vh;
 }
 
 .scroll-hero-sticky {

@@ -14,20 +14,6 @@ export const scrollStages = [
     body: "Head-and-chest mount captures first-person geometry and task context at frame-locked timestamps.",
     frameDir: "/scroll-video/camera",
     frameCount: 96
-  },
-  {
-    id: "jetson",
-    kicker: "03 / COMPUTE",
-    title: "ONBOARD",
-    body: "Jetson Orin Nano runs capture, calibration, and on-device QC — no laptop tether, no lost demos.",
-    placeholderSvg: "/scroll-video/jetson/placeholder.svg"
-  },
-  {
-    id: "software",
-    kicker: "04 / DELIVERY",
-    title: "PIPELINE",
-    body: "Episodes packaged to your training stack's schema. Calibration, QC metrics, and provenance ship with the data.",
-    placeholderSvg: "/scroll-video/software/placeholder.svg"
   }
 ];
 

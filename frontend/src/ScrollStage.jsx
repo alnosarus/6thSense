@@ -48,9 +48,7 @@ export function ScrollStage({ progressRef, heroRef }) {
   // Preloaders — glove belongs to its own canvas; the rest feed the main canvas.
   const s0 = useFramePreloader(scrollStages[0], true);
   const s1 = useFramePreloader(scrollStages[1], true);
-  const s2 = useFramePreloader(scrollStages[2], true);
-  const s3 = useFramePreloader(scrollStages[3], true);
-  const mainStopData = [null, s1, s2, s3]; // indexed by activeStop; entry 0 unused
+  const mainStopData = [null, s1]; // indexed by activeStop; entry 0 unused
 
   const writeVars = (vars) => {
     const root = heroRef.current;
@@ -216,7 +214,7 @@ export function ScrollStage({ progressRef, heroRef }) {
     };
     // stopData identity changes per render; we only need the mount-time refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [s0.ready, s1.ready, s2.ready, s3.ready]);
+  }, [s0.ready, s1.ready]);
 
   return (
     <>
