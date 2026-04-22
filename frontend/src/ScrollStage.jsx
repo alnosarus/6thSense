@@ -178,6 +178,21 @@ export function ScrollStage({ progressRef, heroRef }) {
         mainScale = activeStop === 1 ? STOP1_SCALE : 1;
       }
 
+      // Tagline flip — mirrors the glove's fade during the flip zone but
+      // rotates in the opposite direction (tagline "turns away" clockwise
+      // while main canvas rotates in from the other side).
+      let taglineRotateY = 0;
+      let taglineOpacity = 1;
+      if (!reduce && activeStop === 0 && stopProgress >= FLIP_START) {
+        const flipP = clamp01((stopProgress - FLIP_START) / (FLIP_END - FLIP_START));
+        taglineRotateY = flipP * 90;
+        taglineOpacity = 1 - flipP;
+      } else if (activeStop > 0) {
+        // Past stop 0 — tagline is gone. Keep it hidden so it can't re-show
+        // on scrollback (CSS handles re-show naturally when we scroll back).
+        taglineOpacity = 0;
+      }
+
       writeVars({
         "--active-stop": String(activeStop),
         "--stop-progress": stopProgress.toFixed(4),
@@ -186,7 +201,9 @@ export function ScrollStage({ progressRef, heroRef }) {
         "--glove-opacity": gloveOpacity.toFixed(3),
         "--main-rotateY": `${mainRotateY.toFixed(2)}deg`,
         "--main-opacity": mainOpacity.toFixed(3),
-        "--main-scale": mainScale.toFixed(3)
+        "--main-scale": mainScale.toFixed(3),
+        "--tagline-rotateY": `${taglineRotateY.toFixed(2)}deg`,
+        "--tagline-opacity": taglineOpacity.toFixed(3)
       });
 
       raf = requestAnimationFrame(tick);
