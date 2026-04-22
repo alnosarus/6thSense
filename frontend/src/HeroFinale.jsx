@@ -14,13 +14,14 @@ import { useState } from "react";
  * fingertip spots when the open hand is rendered at x-anchor 0.25.
  */
 const dots = [
-  // Compact stair on the upper-left. Ordered bottom-left → top-right (olive).
-  { startLeft: 32, startTop: 54, endLeft: 18, endTop: 48, color: "brown" },
-  { startLeft: 28, startTop: 48, endLeft: 24, endTop: 48, color: "brown" },
-  { startLeft: 25, startTop: 46, endLeft: 24, endTop: 38, color: "brown" },
-  { startLeft: 22, startTop: 48, endLeft: 30, endTop: 38, color: "brown" },
-  { startLeft: 19, startTop: 56, endLeft: 30, endTop: 28, color: "brown" },
-  { startLeft: 36, startTop: 28, endLeft: 36, endTop: 28, color: "olive" }
+  // Compact logo stair in upper-left, mirroring the opener's 180px grid.
+  // Ordered bottom-left → top-right (olive last).
+  { startLeft: 32, startTop: 54, endLeft: 18, endTop: 43, color: "brown" },
+  { startLeft: 28, startTop: 48, endLeft: 21, endTop: 43, color: "brown" },
+  { startLeft: 25, startTop: 46, endLeft: 21, endTop: 37, color: "brown" },
+  { startLeft: 22, startTop: 48, endLeft: 24, endTop: 37, color: "brown" },
+  { startLeft: 19, startTop: 56, endLeft: 24, endTop: 30, color: "brown" },
+  { startLeft: 28, startTop: 30, endLeft: 28, endTop: 30, color: "olive" }
 ];
 
 export function HeroFinale() {

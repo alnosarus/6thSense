@@ -100,7 +100,7 @@
    start drifting after fade-in is complete. */
 .finale-dot {
   position: absolute;
-  width: clamp(22px, 2.6vmin, 36px);
+  width: clamp(28px, 3.2vmin, 44px);
   aspect-ratio: 1;
   border-radius: 50%;
   top: calc(var(--start-top) + (var(--end-top) - var(--start-top)) * var(--assemble-move-p, 0));
