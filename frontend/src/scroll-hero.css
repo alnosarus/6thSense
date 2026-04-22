@@ -41,7 +41,9 @@
 
 .scroll-stage-canvas--glove {
   z-index: 2;
-  transform: translateY(var(--glove-lift, 0%)) scale(var(--glove-scale, 3));
+  /* Zoom happens at paint time in ScrollStage.jsx (GLOVE_ZOOM) for sharper
+     rendering. This element only translates. */
+  transform: translateY(var(--glove-lift, 0%));
   opacity: var(--glove-opacity, 1);
 }
 

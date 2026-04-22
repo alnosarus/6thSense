@@ -7,6 +7,13 @@ const FLIP_START = 0.65;
 const FLIP_END = 0.85;
 const LIFT_END = 0.55; // stop 0 glove finishes lifting at 55%
 
+// Paint-time zoom on the glove frames (avoids CSS-scale upscaling blur).
+const GLOVE_ZOOM = 3;
+
+// Enough lift to clear the zoomed glove from viewport. A 3x-scaled element
+// extends ±150% beyond center, so we translate a full 2x its own height up.
+const GLOVE_LIFT_MAX = -220;
+
 // Stop 1 zoom level.
 const STOP1_SCALE = 2.4;
 
@@ -23,11 +30,11 @@ function usePrefersReducedMotion() {
   return ref;
 }
 
-function paintCentered(ctx, img, cw, ch, alpha) {
+function paintCentered(ctx, img, cw, ch, alpha, zoom = 1) {
   if (!img || !img.complete || !img.naturalWidth) return;
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
-  const scale = Math.min(cw / iw, ch / ih);
+  const scale = Math.min(cw / iw, ch / ih) * zoom;
   const dw = iw * scale;
   const dh = ih * scale;
   const dx = (cw - dw) / 2;
@@ -72,7 +79,10 @@ export function ScrollStage({ progressRef, heroRef }) {
         const h = canvas.clientHeight;
         canvas.width = Math.max(1, Math.round(w * dpr));
         canvas.height = Math.max(1, Math.round(h * dpr));
-        canvas.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0);
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
       }
     };
     resize();
@@ -96,7 +106,7 @@ export function ScrollStage({ progressRef, heroRef }) {
         const frameIndex = reduce
           ? Math.min(count - 1, Math.floor(count / 2))
           : Math.round(stopProgress * (count - 1));
-        paintCentered(gCtx, s0.frames[frameIndex], gw, gh, 1);
+        paintCentered(gCtx, s0.frames[frameIndex], gw, gh, 1, GLOVE_ZOOM);
       }
 
       // ---- Paint main canvas (stops 1,2,3 with crossfade between them) ----
@@ -143,9 +153,9 @@ export function ScrollStage({ progressRef, heroRef }) {
       let mainScale = 1;
 
       if (activeStop === 0) {
-        // Phase A: lift (0 → LIFT_END)
+        // Phase A: lift (0 → LIFT_END). Lift far enough to clear the zoomed glove.
         const liftP = clamp01(stopProgress / LIFT_END);
-        gloveLift = -115 * liftP;
+        gloveLift = GLOVE_LIFT_MAX * liftP;
 
         if (stopProgress >= FLIP_START) {
           const flipP = clamp01((stopProgress - FLIP_START) / (FLIP_END - FLIP_START));
