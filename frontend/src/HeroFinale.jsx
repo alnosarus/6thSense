@@ -1,35 +1,52 @@
+import { useState } from "react";
+
 /**
- * Finale scene: 5 brown dots rise from fingertip positions and assemble into
- * a compact 6-dot logo stair in the upper-right; the olive 6th dot fades in
- * as the browns settle; the finished logo then shifts slightly right while a
- * "Start a dataset conversation" CTA slides in from off-right.
+ * Finale scene: 5 brown dots rise from fingertip positions to form the 6-dot
+ * logo stair on the LEFT side of the viewport. The olive 6th dot materializes
+ * as the browns settle. On the RIGHT, a dataset-conversation form fades in.
  *
- * All positioning/opacity driven by --assemble-p and --shift-p, written by
- * ScrollStage.
+ * Phase timing (driven by CSS vars from ScrollStage):
+ *   0.55–0.85  assemble: hand canvas descends, dots fade in (30%) then
+ *              move (70%) to their logo stair positions on the left.
+ *   0.80–0.95  shift: waitlist form fades in on the right.
  *
- * Start positions (%): fingertip spots when the open hand is rendered at
- * x-anchor 0.25. End positions: compact logo stair in upper-right area,
- * above the CTA. Keep the stair tight (~20% viewport span) so it reads
- * as a logo, not a scattered constellation.
+ * Positions are percentages of viewport. Start positions approximate the
+ * fingertip spots when the open hand is rendered at x-anchor 0.25.
  */
 const dots = [
-  // Mirror opener stair — bottom-left first, top-right last (olive).
-  { startLeft: 42, startTop: 54, endLeft: 62, endTop: 42, color: "brown" },  // d1
-  { startLeft: 36, startTop: 50, endLeft: 67, endTop: 42, color: "brown" },  // d2
-  { startLeft: 30, startTop: 46, endLeft: 67, endTop: 34, color: "brown" },  // d3
-  { startLeft: 24, startTop: 50, endLeft: 72, endTop: 34, color: "brown" },  // d4
-  { startLeft: 20, startTop: 72, endLeft: 72, endTop: 26, color: "brown" },  // d5 (thumb)
-  { startLeft: 77, startTop: 26, endLeft: 77, endTop: 26, color: "olive" }   // d6
+  // Compact stair on the upper-left. Ordered bottom-left → top-right (olive).
+  { startLeft: 32, startTop: 54, endLeft: 18, endTop: 48, color: "brown" },
+  { startLeft: 28, startTop: 48, endLeft: 24, endTop: 48, color: "brown" },
+  { startLeft: 25, startTop: 46, endLeft: 24, endTop: 38, color: "brown" },
+  { startLeft: 22, startTop: 48, endLeft: 30, endTop: 38, color: "brown" },
+  { startLeft: 19, startTop: 56, endLeft: 30, endTop: 28, color: "brown" },
+  { startLeft: 36, startTop: 28, endLeft: 36, endTop: 28, color: "olive" }
 ];
 
 export function HeroFinale() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("");
+  const [tone, setTone] = useState("idle");
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    if (!email || !email.includes("@")) {
+      setStatus("Enter a valid work email.");
+      setTone("error");
+      return;
+    }
+    setStatus("Received. The 6thSense team will follow up with a dataset scoping call.");
+    setTone("success");
+    setEmail("");
+  };
+
   return (
-    <div className="hero-finale" aria-hidden="true">
+    <div className="hero-finale">
       {dots.map((d, i) => (
         <span
           key={i}
           className={`finale-dot finale-dot--${d.color}`}
-          data-dot={i + 1}
+          aria-hidden="true"
           style={{
             "--start-left": `${d.startLeft}%`,
             "--start-top": `${d.startTop}%`,
@@ -38,10 +55,43 @@ export function HeroFinale() {
           }}
         />
       ))}
-      <a href="#waitlist" className="hero-finale-cta">
-        Start a dataset conversation
-        <span aria-hidden="true"> →</span>
-      </a>
+
+      <form className="hero-finale-form" onSubmit={onSubmit} noValidate>
+        <h2 className="hero-finale-title">Start a dataset conversation</h2>
+        <p className="hero-finale-subtitle">
+          Tell us about the task. We&rsquo;ll scope the data.
+        </p>
+        <label className="hero-finale-label" htmlFor="hero-email">
+          Work email
+        </label>
+        <p className="hero-finale-hint" id="hero-email-hint">
+          Used only for technical follow-up and project scoping.
+        </p>
+        <input
+          id="hero-email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          aria-describedby="hero-email-hint"
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (tone === "error") setTone("idle");
+          }}
+          required
+        />
+        <button type="submit" className="hero-finale-submit">
+          Discuss your dataset
+        </button>
+        {status ? (
+          <p
+            className={`hero-finale-status hero-finale-status--${tone}`}
+            role="status"
+            aria-live="polite"
+          >
+            {status}
+          </p>
+        ) : null}
+      </form>
     </div>
   );
 }

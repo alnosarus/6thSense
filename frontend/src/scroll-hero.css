@@ -86,7 +86,7 @@
   transform: translateY(0);
 }
 
-/* ---- Finale: dots + CTA ---- */
+/* ---- Finale: dots (left) + form (right) ---- */
 
 .hero-finale {
   position: absolute;
@@ -95,21 +95,23 @@
   pointer-events: none;
 }
 
+/* Dots fade IN first (at fingertip positions), then MOVE to logo stair.
+   The position interpolation is driven by --assemble-move-p so they only
+   start drifting after fade-in is complete. */
 .finale-dot {
   position: absolute;
   width: clamp(22px, 2.6vmin, 36px);
   aspect-ratio: 1;
   border-radius: 50%;
-  top: calc(var(--start-top) + (var(--end-top) - var(--start-top)) * var(--assemble-p, 0));
-  left: calc(var(--start-left) + (var(--end-left) - var(--start-left)) * var(--assemble-p, 0));
-  transform: translate(-50%, -50%)
-             translateX(calc(18vw * var(--shift-p, 0)));
-  will-change: top, left, transform, opacity;
+  top: calc(var(--start-top) + (var(--end-top) - var(--start-top)) * var(--assemble-move-p, 0));
+  left: calc(var(--start-left) + (var(--end-left) - var(--start-left)) * var(--assemble-move-p, 0));
+  transform: translate(-50%, -50%);
+  will-change: top, left, opacity;
 }
 
 .finale-dot--brown {
   background: #4a2418;
-  opacity: clamp(0, var(--assemble-p, 0), 1);
+  opacity: var(--assemble-fade-p, 0);
 }
 
 .finale-dot--olive {
@@ -117,46 +119,118 @@
   box-shadow:
     0 0 calc(28px * var(--shift-p, 0))
     rgba(197, 224, 99, calc(0.6 * var(--shift-p, 0)));
-  /* Olive fades in only once brown dots are nearly assembled. */
-  opacity: clamp(0, calc((var(--assemble-p, 0) - 0.6) / 0.4), 1);
+  /* Olive waits until browns are moved into place, then fades in. */
+  opacity: clamp(0, calc((var(--assemble-p, 0) - 0.7) / 0.3), 1);
 }
 
-.hero-finale-cta {
+/* Finale form sits on the right half, fades in during the shift phase. */
+.hero-finale-form {
   position: absolute;
-  left: 50%;
-  top: 78%;
-  transform: translate(-50%, 0) translateX(calc(18vw * var(--shift-p, 0) - 6vw));
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45em;
-  padding: 0.75rem 1.5rem;
-  color: #0b0b0b;
-  background: #f1f1ec;
-  border-radius: 999px;
+  top: 50%;
+  left: 55%;
+  right: var(--gutter);
+  transform: translateY(-50%) translateX(calc(-1 * (1 - var(--shift-p, 0)) * 6vw));
+  max-width: 34rem;
+  opacity: var(--shift-p, 0);
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hero-finale-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: #f1f1ec;
+}
+
+.hero-finale-subtitle {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.5;
+  color: rgba(241, 241, 236, 0.72);
+  max-width: 32ch;
+}
+
+.hero-finale-label {
+  margin-top: 0.25rem;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(241, 241, 236, 0.6);
+}
+
+.hero-finale-hint {
+  margin: 0.15rem 0 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: rgba(241, 241, 236, 0.52);
+  line-height: 1.4;
+}
+
+.hero-finale-form input[type="email"] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: #f1f1ec;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.hero-finale-form input[type="email"]:focus-visible {
+  border-color: #c5e063;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hero-finale-submit {
+  margin-top: 0.6rem;
+  align-self: flex-start;
+  padding: 0.8rem 1.6rem;
   font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.95rem;
   letter-spacing: 0.01em;
-  text-decoration: none;
-  white-space: nowrap;
-  opacity: var(--shift-p, 0);
-  pointer-events: auto;
+  color: #0b0b0b;
+  background: #f1f1ec;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-.hero-finale-cta:hover,
-.hero-finale-cta:focus-visible {
+.hero-finale-submit:hover,
+.hero-finale-submit:focus-visible {
   background: #c5e063;
-  color: #0b0b0b;
+  outline: none;
 }
+
+.hero-finale-status {
+  margin: 0.6rem 0 0;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.hero-finale-status--success { color: #c5e063; }
+.hero-finale-status--error { color: #ff8888; }
 
 /* Reduced motion — simplify the blurbs and finale to static states. */
 @media (prefers-reduced-motion: reduce) {
-  .hero-blurb {
-    transition: none;
-  }
+  .hero-blurb,
   .finale-dot,
-  .hero-finale-cta {
+  .hero-finale-form {
     transition: none;
   }
 }

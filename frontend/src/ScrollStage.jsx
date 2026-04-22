@@ -31,14 +31,17 @@ function usePrefersReducedMotion() {
   return ref;
 }
 
-function paintAnchored(ctx, img, cw, ch, alpha, zoom, xAnchor, yAnchor) {
+function paintAnchored(ctx, img, cw, ch, alpha, zoom, xAnchor, yAnchor, refCenterX) {
   if (!img || !img.complete || !img.naturalWidth) return;
   const iw = img.naturalWidth;
   const ih = img.naturalHeight;
   const scale = Math.min(cw / iw, ch / ih) * zoom;
   const dw = iw * scale;
   const dh = ih * scale;
-  const dx = (cw - dw) * xAnchor;
+  // Normal x-anchor math, except when refCenterX is provided — then force
+  // this frame's horizontal center to land at that reference (keeps the fist
+  // and the finger-extended frames aligned despite different zoom factors).
+  const dx = refCenterX != null ? refCenterX - dw / 2 : (cw - dw) * xAnchor;
   const dy = (ch - dh) * yAnchor;
   const prev = ctx.globalAlpha;
   ctx.globalAlpha = alpha;
@@ -103,33 +106,47 @@ export function ScrollStage({ progressRef, heroRef }) {
         const zoomFor = (idx) =>
           GLOVE_ZOOM_BASE * (PER_FRAME_ZOOM[idx] ?? 1);
 
+        // Pick a reference image center (use frame 1's zoom as the anchor
+        // since frames 1–5 share the same zoom). All frames paint at this
+        // same center X regardless of their own zoom, so the glove doesn't
+        // jump horizontally between the fist and the finger-extended shots.
+        const refImg = frames[1] ?? frames[0];
+        const refFitScale = Math.min(cw / refImg.naturalWidth, ch / refImg.naturalHeight);
+        const refDw = refImg.naturalWidth * refFitScale * zoomFor(1);
+        const refCenterX = (cw - refDw) * GLOVE_X_ANCHOR + refDw / 2;
+
         if (reduce) {
           const idx = Math.round(rawIndex);
           paintAnchored(
             ctx, frames[idx], cw, ch, 1,
-            zoomFor(idx), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR
+            zoomFor(idx), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR, refCenterX
           );
         } else {
           paintAnchored(
             ctx, frames[i], cw, ch, 1 - f,
-            zoomFor(i), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR
+            zoomFor(i), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR, refCenterX
           );
           if (f > 0) {
             paintAnchored(
               ctx, frames[nextI], cw, ch, f,
-              zoomFor(nextI), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR
+              zoomFor(nextI), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR, refCenterX
             );
           }
         }
       }
 
-      // ---- Hand descent: canvas translateY from 0 → 100vh across assemble phase ----
+      // ---- Assemble phase: hand descends, dots fade-in first, then move ----
       const assembleP = reduce
         ? (p >= ASSEMBLE_START ? 1 : 0)
         : clamp01((p - ASSEMBLE_START) / (ASSEMBLE_END - ASSEMBLE_START));
-      const handDescendVh = assembleP * 110; // push off-screen with margin
+      const handDescendVh = assembleP * 110;
+      // Split into two sub-phases so dots pop into existence at fingertips
+      // BEFORE drifting to the logo stair. First 30% of the assemble window
+      // handles the fade; remaining 70% handles the movement.
+      const assembleFadeP = clamp01(assembleP / 0.3);
+      const assembleMoveP = clamp01((assembleP - 0.3) / 0.7);
 
-      // ---- Shift phase: logo slides right, CTA fades in ----
+      // ---- Shift phase: finale form fades in on the right ----
       const shiftP = reduce
         ? (p >= SHIFT_START ? 1 : 0)
         : clamp01((p - SHIFT_START) / (SHIFT_END - SHIFT_START));
@@ -150,6 +167,8 @@ export function ScrollStage({ progressRef, heroRef }) {
         "--stop-progress": p.toFixed(4),
         "--frames-p": framesP.toFixed(4),
         "--assemble-p": assembleP.toFixed(4),
+        "--assemble-fade-p": assembleFadeP.toFixed(4),
+        "--assemble-move-p": assembleMoveP.toFixed(4),
         "--shift-p": shiftP.toFixed(4),
         "--hand-descend": `${handDescendVh.toFixed(2)}vh`,
         "--active-blurb": String(blurb)
