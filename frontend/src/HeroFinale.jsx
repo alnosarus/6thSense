@@ -13,15 +13,18 @@ import { useState } from "react";
  * Positions are percentages of viewport. Start positions approximate the
  * fingertip spots when the open hand is rendered at x-anchor 0.25.
  */
+// Start positions (%): measured fingertip spots on the open-hand frame,
+//   thumb/index/middle/ring/pinky from left to right as the palm faces camera.
+// End positions: tight stair on upper-left with 3% horizontal + 6% vertical
+//   step, mirroring the opener's 180px logo grid.
+// Ordered bottom-left → top-right (olive last).
 const dots = [
-  // Compact logo stair in upper-left, mirroring the opener's 180px grid.
-  // Ordered bottom-left → top-right (olive last).
-  { startLeft: 32, startTop: 54, endLeft: 18, endTop: 43, color: "brown" },
-  { startLeft: 28, startTop: 48, endLeft: 21, endTop: 43, color: "brown" },
-  { startLeft: 25, startTop: 46, endLeft: 21, endTop: 37, color: "brown" },
-  { startLeft: 22, startTop: 48, endLeft: 24, endTop: 37, color: "brown" },
-  { startLeft: 19, startTop: 56, endLeft: 24, endTop: 30, color: "brown" },
-  { startLeft: 28, startTop: 30, endLeft: 28, endTop: 30, color: "olive" }
+  { startLeft: 33, startTop: 47, endLeft: 18, endTop: 43, color: "brown" }, // pinky
+  { startLeft: 30, startTop: 44, endLeft: 21, endTop: 43, color: "brown" }, // ring
+  { startLeft: 26, startTop: 42, endLeft: 21, endTop: 37, color: "brown" }, // middle
+  { startLeft: 23, startTop: 44, endLeft: 24, endTop: 37, color: "brown" }, // index
+  { startLeft: 20, startTop: 60, endLeft: 24, endTop: 31, color: "brown" }, // thumb
+  { startLeft: 27, startTop: 31, endLeft: 27, endTop: 31, color: "olive" }
 ];
 
 export function HeroFinale() {

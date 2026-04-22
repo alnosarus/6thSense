@@ -90,7 +90,7 @@ export function ScrollStage({ progressRef, heroRef }) {
       // Frame-sequence progress — counting plays over 0..FRAMES_END.
       const framesP = clamp01(p / FRAMES_END);
 
-      // ---- Paint canvas: crossfade adjacent frames with per-frame zoom ----
+      // ---- Paint canvas: snap to nearest beat (no crossfade) ----
       const cw = canvas.clientWidth;
       const ch = canvas.clientHeight;
       ctx.clearRect(0, 0, cw, ch);
@@ -98,10 +98,6 @@ export function ScrollStage({ progressRef, heroRef }) {
       if (s0.frames) {
         const frames = s0.frames;
         const count = frames.length;
-        const rawIndex = framesP * (count - 1);
-        const i = Math.floor(rawIndex);
-        const f = rawIndex - i;
-        const nextI = Math.min(count - 1, i + 1);
 
         const zoomFor = (idx) =>
           GLOVE_ZOOM_BASE * (PER_FRAME_ZOOM[idx] ?? 1);
@@ -115,36 +111,26 @@ export function ScrollStage({ progressRef, heroRef }) {
         const refDw = refImg.naturalWidth * refFitScale * zoomFor(1);
         const refCenterX = (cw - refDw) * GLOVE_X_ANCHOR + refDw / 2;
 
-        if (reduce) {
-          const idx = Math.round(rawIndex);
-          paintAnchored(
-            ctx, frames[idx], cw, ch, 1,
-            zoomFor(idx), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR, refCenterX
-          );
-        } else {
-          paintAnchored(
-            ctx, frames[i], cw, ch, 1 - f,
-            zoomFor(i), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR, refCenterX
-          );
-          if (f > 0) {
-            paintAnchored(
-              ctx, frames[nextI], cw, ch, f,
-              zoomFor(nextI), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR, refCenterX
-            );
-          }
-        }
+        // Snap to the nearest beat — no crossfade between adjacent frames.
+        // Each pose reads crisp; no hybrid finger counts.
+        const idx = Math.round(framesP * (count - 1));
+        paintAnchored(
+          ctx, frames[idx], cw, ch, 1,
+          zoomFor(idx), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR, refCenterX
+        );
       }
 
-      // ---- Assemble phase: hand descends, dots fade-in first, then move ----
+      // ---- Assemble phase: dots fade in at fingertips first, then move
+      //      while hand descends off-screen ----
       const assembleP = reduce
         ? (p >= ASSEMBLE_START ? 1 : 0)
         : clamp01((p - ASSEMBLE_START) / (ASSEMBLE_END - ASSEMBLE_START));
-      const handDescendVh = assembleP * 110;
-      // Split into two sub-phases so dots pop into existence at fingertips
-      // BEFORE drifting to the logo stair. First 30% of the assemble window
-      // handles the fade; remaining 70% handles the movement.
+      // Sub-phases:
+      //   0.0 → 0.3  fade:  dots materialize at fingertips, glove stationary
+      //   0.3 → 1.0  move:  dots drift to logo, glove descends simultaneously
       const assembleFadeP = clamp01(assembleP / 0.3);
       const assembleMoveP = clamp01((assembleP - 0.3) / 0.7);
+      const handDescendVh = assembleMoveP * 110;
 
       // ---- Shift phase: finale form fades in on the right ----
       const shiftP = reduce
