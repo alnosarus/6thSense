@@ -7,6 +7,7 @@ import {
   Wrench
 } from "lucide-react";
 import { ScrollHero } from "./ScrollHero.jsx";
+import { OpenerAnimation } from "./OpenerAnimation.jsx";
 import Credibility from "./Credibility.jsx";
 import DataCatalog from "./DataCatalog.jsx";
 import PlatformPipeline from "./PlatformPipeline.jsx";
@@ -106,6 +107,7 @@ function AppInner() {
 
   return (
     <>
+      <OpenerAnimation />
       <ScrollProgress pastStory={pastStory} />
 
       <a href="#story" className="skip-link">
