@@ -1,28 +1,21 @@
 import { useEffect, useRef } from "react";
-import { scrollStages, STOP_COUNT, TRANSITION_ZONE } from "./scrollStages.js";
+import { scrollStages } from "./scrollStages.js";
 import { useFramePreloader } from "./useFramePreloader.js";
-
-// Stop 0 → Stop 1 flip zone (fraction of stop 0's own progress).
-const FLIP_START = 0.65;
-const FLIP_END = 0.85;
-const LIFT_END = 0.55; // stop 0 glove finishes lifting at 55%
 
 // Paint-time zoom on the glove frames (avoids CSS-scale upscaling blur).
 const GLOVE_ZOOM = 3;
 
-// Enough lift to clear the zoomed glove from viewport. A 3x-scaled element
-// extends ±150% beyond center, so we translate a full 2x its own height up.
-const GLOVE_LIFT_MAX = -220;
-
-// Stop 1 zoom level.
-const STOP1_SCALE = 2.4;
+// Olive-dot ignition zone (fraction of total scroll progress).
+const IGNITE_START = 0.80;
 
 function usePrefersReducedMotion() {
   const ref = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => { ref.current = mq.matches; };
+    const sync = () => {
+      ref.current = mq.matches;
+    };
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
@@ -48,14 +41,9 @@ function paintCentered(ctx, img, cw, ch, alpha, zoom = 1) {
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
 
 export function ScrollStage({ progressRef, heroRef }) {
-  const gloveCanvasRef = useRef(null);
-  const mainCanvasRef = useRef(null);
+  const canvasRef = useRef(null);
   const reducedRef = usePrefersReducedMotion();
-
-  // Preloaders — glove belongs to its own canvas; the rest feed the main canvas.
   const s0 = useFramePreloader(scrollStages[0], true);
-  const s1 = useFramePreloader(scrollStages[1], true);
-  const mainStopData = [null, s1]; // indexed by activeStop; entry 0 unused
 
   const writeVars = (vars) => {
     const root = heroRef.current;
@@ -66,152 +54,69 @@ export function ScrollStage({ progressRef, heroRef }) {
   };
 
   useEffect(() => {
-    const gloveCanvas = gloveCanvasRef.current;
-    const mainCanvas = mainCanvasRef.current;
-    if (!gloveCanvas || !mainCanvas) return;
-    const gCtx = gloveCanvas.getContext("2d");
-    const mCtx = mainCanvas.getContext("2d");
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      for (const canvas of [gloveCanvas, mainCanvas]) {
-        const w = canvas.clientWidth;
-        const h = canvas.clientHeight;
-        canvas.width = Math.max(1, Math.round(w * dpr));
-        canvas.height = Math.max(1, Math.round(h * dpr));
-        const ctx = canvas.getContext("2d");
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-      }
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
     };
     resize();
     window.addEventListener("resize", resize);
 
     let raf = 0;
     const tick = () => {
-      const p = progressRef.current;
-      const scaled = p * STOP_COUNT;
-      const activeStop = Math.min(STOP_COUNT - 1, Math.floor(scaled));
-      const stopProgress = clamp01(scaled - activeStop);
+      const p = clamp01(progressRef.current);
       const reduce = reducedRef.current;
 
-      // ---- Paint glove canvas (only ever shows stop 0) ----
-      const gw = gloveCanvas.clientWidth;
-      const gh = gloveCanvas.clientHeight;
-      gCtx.clearRect(0, 0, gw, gh);
-      if (activeStop === 0 && s0.frames) {
-        const stage = scrollStages[0];
-        const count = stage.frameCount;
-        const frameIndex = reduce
-          ? Math.min(count - 1, Math.floor(count / 2))
-          : Math.round(stopProgress * (count - 1));
-        paintCentered(gCtx, s0.frames[frameIndex], gw, gh, 1, GLOVE_ZOOM);
-      }
+      // ---- Paint canvas: crossfade between adjacent frames ----
+      const cw = canvas.clientWidth;
+      const ch = canvas.clientHeight;
+      ctx.clearRect(0, 0, cw, ch);
 
-      // ---- Paint main canvas (stops 1,2,3 with crossfade between them) ----
-      const mw = mainCanvas.clientWidth;
-      const mh = mainCanvas.clientHeight;
-      mCtx.clearRect(0, 0, mw, mh);
+      if (s0.frames) {
+        const frames = s0.frames;
+        const count = frames.length;
+        const rawIndex = p * (count - 1);
+        const i = Math.floor(rawIndex);
+        const f = rawIndex - i;
+        const nextI = Math.min(count - 1, i + 1);
 
-      // During activeStop 0 we preview stop 1 frame 0 (only ever visible under
-      // --main-opacity driven by the flip — otherwise invisible).
-      const mainActive = activeStop === 0 ? 1 : activeStop;
-      const currentStage = scrollStages[mainActive];
-      const currentFrames = mainStopData[mainActive]?.frames;
-      const count = currentStage.placeholderSvg ? 1 : currentStage.frameCount;
-
-      const progressForMain = activeStop === 0 ? 0 : stopProgress;
-      const frameIdx = reduce
-        ? Math.min(count - 1, Math.floor(count / 2))
-        : Math.round(progressForMain * (count - 1));
-
-      // Crossfade between main-canvas stops (1→2, 2→3). Only while activeStop >= 1.
-      let blend = 0;
-      if (
-        !reduce &&
-        activeStop >= 1 &&
-        activeStop < STOP_COUNT - 1 &&
-        stopProgress > 1 - TRANSITION_ZONE
-      ) {
-        blend = (stopProgress - (1 - TRANSITION_ZONE)) / TRANSITION_ZONE;
-      }
-
-      if (currentFrames?.[frameIdx]) {
-        paintCentered(mCtx, currentFrames[frameIdx], mw, mh, 1 - blend);
-      }
-      if (blend > 0) {
-        const nextFrames = mainStopData[mainActive + 1]?.frames;
-        if (nextFrames?.[0]) paintCentered(mCtx, nextFrames[0], mw, mh, blend);
-      }
-
-      // ---- Compute CSS vars for transforms ----
-      let gloveLift = 0;      // % of canvas height (negative = up)
-      let gloveOpacity = 1;
-      let mainRotateY = -90;  // deg
-      let mainOpacity = 0;
-      let mainScale = 1;
-
-      if (activeStop === 0) {
-        // Phase A: lift (0 → LIFT_END). Lift far enough to clear the zoomed glove.
-        const liftP = clamp01(stopProgress / LIFT_END);
-        gloveLift = GLOVE_LIFT_MAX * liftP;
-
-        if (stopProgress >= FLIP_START) {
-          const flipP = clamp01((stopProgress - FLIP_START) / (FLIP_END - FLIP_START));
-          gloveOpacity = 1 - flipP;
-          mainRotateY = -90 + flipP * 90;
-          mainOpacity = clamp01((flipP - 0.4) / 0.6);
-          mainScale = 1 + flipP * (STOP1_SCALE - 1);
+        if (reduce) {
+          // Reduced motion: snap to nearest frame, no crossfade.
+          const idx = Math.round(rawIndex);
+          paintCentered(ctx, frames[idx], cw, ch, 1, GLOVE_ZOOM);
+        } else {
+          paintCentered(ctx, frames[i], cw, ch, 1 - f, GLOVE_ZOOM);
+          if (f > 0) paintCentered(ctx, frames[nextI], cw, ch, f, GLOVE_ZOOM);
         }
-      } else if (activeStop === 1) {
-        gloveOpacity = 0;
-        mainRotateY = 0;
-        mainOpacity = 1;
-        mainScale = STOP1_SCALE;
-      } else {
-        // Stops 2, 3
-        gloveOpacity = 0;
-        mainRotateY = 0;
-        mainOpacity = 1;
-        mainScale = 1;
       }
 
-      if (reduce) {
-        // Reduced motion: no lift, no flip — just crossfade canvas visibility.
-        gloveLift = 0;
-        gloveOpacity = activeStop === 0 ? 1 : 0;
-        mainRotateY = 0;
-        mainOpacity = activeStop >= 1 ? 1 : 0;
-        mainScale = activeStop === 1 ? STOP1_SCALE : 1;
-      }
-
-      // Tagline flip — mirrors the glove's fade during the flip zone but
-      // rotates in the opposite direction (tagline "turns away" clockwise
-      // while main canvas rotates in from the other side).
-      let taglineRotateY = 0;
-      let taglineOpacity = 1;
-      if (!reduce && activeStop === 0 && stopProgress >= FLIP_START) {
-        const flipP = clamp01((stopProgress - FLIP_START) / (FLIP_END - FLIP_START));
-        taglineRotateY = flipP * 90;
-        taglineOpacity = 1 - flipP;
-      } else if (activeStop > 0) {
-        // Past stop 0 — tagline is gone. Keep it hidden so it can't re-show
-        // on scrollback (CSS handles re-show naturally when we scroll back).
-        taglineOpacity = 0;
+      // ---- Olive dot ignite vars (final 20% of scroll) ----
+      // opacity: fades in 0→1 across first half of ignite zone, holds at 1.
+      // glow-scale: 0 → 1 across first 60% of ignite, 1 → 0 across last 40%.
+      let oliveOpacity = 0;
+      let oliveGlowScale = 0;
+      if (!reduce && p >= IGNITE_START) {
+        const ip = clamp01((p - IGNITE_START) / (1 - IGNITE_START));
+        oliveOpacity = Math.min(1, ip / 0.5);
+        oliveGlowScale = ip < 0.6 ? ip / 0.6 : Math.max(0, 1 - (ip - 0.6) / 0.4);
+      } else if (reduce && p >= 0.95) {
+        oliveOpacity = 1;
+        oliveGlowScale = 0;
       }
 
       writeVars({
-        "--active-stop": String(activeStop),
-        "--stop-progress": stopProgress.toFixed(4),
-        "--transition-blend": blend.toFixed(4),
-        "--glove-lift": `${gloveLift.toFixed(2)}%`,
-        "--glove-opacity": gloveOpacity.toFixed(3),
-        "--main-rotateY": `${mainRotateY.toFixed(2)}deg`,
-        "--main-opacity": mainOpacity.toFixed(3),
-        "--main-scale": mainScale.toFixed(3),
-        "--tagline-rotateY": `${taglineRotateY.toFixed(2)}deg`,
-        "--tagline-opacity": taglineOpacity.toFixed(3)
+        "--stop-progress": p.toFixed(4),
+        "--olive-opacity": oliveOpacity.toFixed(3),
+        "--olive-glow-scale": oliveGlowScale.toFixed(3)
       });
 
       raf = requestAnimationFrame(tick);
@@ -222,22 +127,8 @@ export function ScrollStage({ progressRef, heroRef }) {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
     };
-    // stopData identity changes per render; we only need the mount-time refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [s0.ready, s1.ready]);
+  }, [s0.ready]);
 
-  return (
-    <>
-      <canvas
-        ref={gloveCanvasRef}
-        className="scroll-stage-canvas scroll-stage-canvas--glove"
-        aria-hidden="true"
-      />
-      <canvas
-        ref={mainCanvasRef}
-        className="scroll-stage-canvas scroll-stage-canvas--main"
-        aria-hidden="true"
-      />
-    </>
-  );
+  return <canvas ref={canvasRef} className="scroll-stage-canvas" aria-hidden="true" />;
 }
