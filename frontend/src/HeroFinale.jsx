@@ -10,21 +10,22 @@ import { useState } from "react";
  *              move (70%) to their logo stair positions on the left.
  *   0.80–0.95  shift: waitlist form fades in on the right.
  *
- * Positions are percentages of viewport. Start positions approximate the
- * fingertip spots when the open hand is rendered at x-anchor 0.25.
+ * Brown dot start positions track the glove's paint rect (--glove-x/y/w/h)
+ * exposed by ScrollStage: start = glove-origin + tip * glove-size, so the dots
+ * stay on the fingertips regardless of viewport size or glove zoom.
  */
-// Start positions (%): measured fingertip spots on the open-hand frame,
-//   thumb/index/middle/ring/pinky from left to right as the palm faces camera.
+// Fingertip coords are normalized (u, v) in the source PNG (2752×1536),
+// measured once by alpha-scanning the open-hand frame (frame-005).
 // End positions: tight stair on upper-left with 3% horizontal + 6% vertical
-//   step, mirroring the opener's 180px logo grid.
+// step, mirroring the opener's 180px logo grid.
 // Ordered bottom-left → top-right (olive last).
 const dots = [
-  { startLeft: 33, startTop: 47, endLeft: 18, endTop: 43, color: "brown" }, // pinky
-  { startLeft: 30, startTop: 44, endLeft: 21, endTop: 43, color: "brown" }, // ring
-  { startLeft: 26, startTop: 42, endLeft: 21, endTop: 37, color: "brown" }, // middle
-  { startLeft: 23, startTop: 44, endLeft: 24, endTop: 37, color: "brown" }, // index
-  { startLeft: 20, startTop: 60, endLeft: 24, endTop: 31, color: "brown" }, // thumb
-  { startLeft: 27, startTop: 31, endLeft: 27, endTop: 31, color: "olive" }
+  { tipU: 0.6235, tipV: 0.1810, endLeft: 18, endTop: 56, color: "brown" }, // pinky
+  { tipU: 0.5683, tipV: 0.0879, endLeft: 21, endTop: 56, color: "brown" }, // ring
+  { tipU: 0.5058, tipV: 0.0417, endLeft: 21, endTop: 50, color: "brown" }, // middle
+  { tipU: 0.4415, tipV: 0.0703, endLeft: 24, endTop: 50, color: "brown" }, // index
+  { tipU: 0.3656, tipV: 0.3151, endLeft: 24, endTop: 44, color: "brown" }, // thumb
+  { startLeft: 27, startTop: 44, endLeft: 27, endTop: 44, color: "olive" }
 ];
 
 export function HeroFinale() {
@@ -46,19 +47,29 @@ export function HeroFinale() {
 
   return (
     <div className="hero-finale">
-      {dots.map((d, i) => (
-        <span
-          key={i}
-          className={`finale-dot finale-dot--${d.color}`}
-          aria-hidden="true"
-          style={{
-            "--start-left": `${d.startLeft}%`,
-            "--start-top": `${d.startTop}%`,
-            "--end-left": `${d.endLeft}%`,
-            "--end-top": `${d.endTop}%`
-          }}
-        />
-      ))}
+      {dots.map((d, i) => {
+        const style = d.color === "brown"
+          ? {
+              "--tip-u": d.tipU,
+              "--tip-v": d.tipV,
+              "--end-left": `${d.endLeft}%`,
+              "--end-top": `${d.endTop}%`
+            }
+          : {
+              "--start-left": `${d.startLeft}%`,
+              "--start-top": `${d.startTop}%`,
+              "--end-left": `${d.endLeft}%`,
+              "--end-top": `${d.endTop}%`
+            };
+        return (
+          <span
+            key={i}
+            className={`finale-dot finale-dot--${d.color}`}
+            aria-hidden="true"
+            style={style}
+          />
+        );
+      })}
 
       <form className="hero-finale-form" onSubmit={onSubmit} noValidate>
         <h2 className="hero-finale-title">Start a dataset conversation</h2>

@@ -9,10 +9,17 @@ const ASSEMBLE_END = 0.80;      // dots arrive at logo positions, hand offscreen
 const SHIFT_START = 0.80;       // finished logo shifts + CTA slides in
 const SHIFT_END = 0.95;
 
-// Glove canvas layout.
-const GLOVE_ZOOM_BASE = 0.60;   // base paint-time zoom
-const GLOVE_X_ANCHOR = 0.25;    // 25% from left
-const GLOVE_Y_ANCHOR = 1.18;    // >1 pushes image below viewport bottom
+// Glove canvas layout. Pivot-based anchoring: each frame's wrist-bottom
+// (PIVOT_U, PER_FRAME_PIVOT_V[i]) is painted at viewport (PIVOT_X, PIVOT_Y).
+// Anchoring on the wrist keeps the hand vertically aligned across frames even
+// though the fist image (frame 0) has its visible pixels cropped ~5% earlier
+// than the extended-finger frames.
+const GLOVE_ZOOM_BASE = 1.8;    // base paint-time zoom
+const GLOVE_PIVOT_U = 0.5;      // image horizontal center (all frames ~= 0.5)
+const GLOVE_PIVOT_X = 0.30;     // viewport x (fraction of cw)
+const GLOVE_PIVOT_Y = 1.95;     // viewport y (fraction of ch) — wrist-bottom lands well below viewport, keeping fingers visible up top
+// v-coord of each frame's visible wrist bottom (measured by alpha-scan).
+const PER_FRAME_PIVOT_V = [0.9505, 0.9993, 0.9993, 0.9993, 0.9993, 0.9993];
 // Per-frame zoom multiplier (fist was generated bigger than extended poses).
 const PER_FRAME_ZOOM = [0.82, 1.0, 1.0, 1.0, 1.0, 1.0];
 
@@ -31,18 +38,23 @@ function usePrefersReducedMotion() {
   return ref;
 }
 
-function paintAnchored(ctx, img, cw, ch, alpha, zoom, xAnchor, yAnchor, refCenterX) {
-  if (!img || !img.complete || !img.naturalWidth) return;
-  const iw = img.naturalWidth;
-  const ih = img.naturalHeight;
+// Computes the destination rect (in canvas pixels) the image paints into.
+// Pivot-based: image point (PIVOT_U, pivotV) lands at viewport (PIVOT_X, PIVOT_Y),
+// so the glove grows around a fixed viewport anchor as zoom changes.
+function computePaintRect(iw, ih, cw, ch, zoom, pivotV) {
   const scale = Math.min(cw / iw, ch / ih) * zoom;
   const dw = iw * scale;
   const dh = ih * scale;
-  // Normal x-anchor math, except when refCenterX is provided — then force
-  // this frame's horizontal center to land at that reference (keeps the fist
-  // and the finger-extended frames aligned despite different zoom factors).
-  const dx = refCenterX != null ? refCenterX - dw / 2 : (cw - dw) * xAnchor;
-  const dy = (ch - dh) * yAnchor;
+  const dx = GLOVE_PIVOT_X * cw - GLOVE_PIVOT_U * dw;
+  const dy = GLOVE_PIVOT_Y * ch - pivotV * dh;
+  return { dx, dy, dw, dh };
+}
+
+function paintAnchored(ctx, img, cw, ch, alpha, zoom, pivotV) {
+  if (!img || !img.complete || !img.naturalWidth) return;
+  const { dx, dy, dw, dh } = computePaintRect(
+    img.naturalWidth, img.naturalHeight, cw, ch, zoom, pivotV
+  );
   const prev = ctx.globalAlpha;
   ctx.globalAlpha = alpha;
   ctx.drawImage(img, dx, dy, dw, dh);
@@ -69,6 +81,26 @@ export function ScrollStage({ progressRef, heroRef }) {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
 
+    const publishGloveRect = (w, h) => {
+      const frames = s0.frames;
+      if (!frames) return;
+      // Dots are measured in the open-hand frame (index 5) — publish its rect.
+      const refIdx = 5;
+      const ref = frames[refIdx] ?? frames[0];
+      if (!ref || !ref.naturalWidth) return;
+      const refZoom = GLOVE_ZOOM_BASE * (PER_FRAME_ZOOM[refIdx] ?? 1);
+      const refPivotV = PER_FRAME_PIVOT_V[refIdx] ?? 0.9993;
+      const { dx, dy, dw, dh } = computePaintRect(
+        ref.naturalWidth, ref.naturalHeight, w, h, refZoom, refPivotV
+      );
+      writeVars({
+        "--glove-x": `${(dx / w * 100).toFixed(3)}%`,
+        "--glove-y": `${(dy / h * 100).toFixed(3)}%`,
+        "--glove-w": `${(dw / w * 100).toFixed(3)}%`,
+        "--glove-h": `${(dh / h * 100).toFixed(3)}%`
+      });
+    };
+
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = canvas.clientWidth;
@@ -78,6 +110,7 @@ export function ScrollStage({ progressRef, heroRef }) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
+      publishGloveRect(w, h);
     };
     resize();
     window.addEventListener("resize", resize);
@@ -102,21 +135,13 @@ export function ScrollStage({ progressRef, heroRef }) {
         const zoomFor = (idx) =>
           GLOVE_ZOOM_BASE * (PER_FRAME_ZOOM[idx] ?? 1);
 
-        // Pick a reference image center (use frame 1's zoom as the anchor
-        // since frames 1–5 share the same zoom). All frames paint at this
-        // same center X regardless of their own zoom, so the glove doesn't
-        // jump horizontally between the fist and the finger-extended shots.
-        const refImg = frames[1] ?? frames[0];
-        const refFitScale = Math.min(cw / refImg.naturalWidth, ch / refImg.naturalHeight);
-        const refDw = refImg.naturalWidth * refFitScale * zoomFor(1);
-        const refCenterX = (cw - refDw) * GLOVE_X_ANCHOR + refDw / 2;
-
         // Snap to the nearest beat — no crossfade between adjacent frames.
-        // Each pose reads crisp; no hybrid finger counts.
+        // Per-frame pivotV aligns each frame's wrist bottom at (PIVOT_X, PIVOT_Y)
+        // so the hand stays vertically locked across poses.
         const idx = Math.round(framesP * (count - 1));
         paintAnchored(
           ctx, frames[idx], cw, ch, 1,
-          zoomFor(idx), GLOVE_X_ANCHOR, GLOVE_Y_ANCHOR, refCenterX
+          zoomFor(idx), PER_FRAME_PIVOT_V[idx] ?? 0.9993
         );
       }
 

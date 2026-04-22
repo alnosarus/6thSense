@@ -1,7 +1,7 @@
 // frontend/src/TactileField.jsx
-// Mounts the tactile pressure surface behind the hero content. Drives resize,
+// Mounts the constellation background behind the hero content. Drives resize,
 // pointer state, and a reduced-motion flag. Falls back to transparent (black
-// hero background stays visible) when WebGL is unavailable.
+// hero background stays visible) if the 2D context is unavailable.
 
 import { useEffect, useRef } from "react";
 import { initTactileField } from "./tactileField.js";
@@ -18,42 +18,33 @@ export function TactileField() {
     const field = initTactileField(canvas);
     if (!field) {
       if (typeof console !== "undefined") {
-        console.warn("TactileField: WebGL unavailable, skipping effect.");
+        console.warn("TactileField: 2D context unavailable, skipping effect.");
       }
       return;
     }
 
-    // Reduced-motion gate for the ambient shimmer.
+    // Reduced-motion gate slows the drift (motion still exists, just calmer).
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     field.setReduced(mq.matches);
     const onMq = () => field.setReduced(mq.matches);
     mq.addEventListener("change", onMq);
 
-    // Size tracking. DPR capped at 2 (matches the glove canvas).
-    const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = Math.max(1, Math.round(canvas.clientWidth * dpr));
-      const h = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      field.setSize(w, h);
-    };
+    // Size tracking. Module handles DPR internally.
+    const resize = () => field.setSize();
     resize();
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    // Pointer state. Pressure decays exponentially when the pointer leaves.
-    let pointerX = 2, pointerY = 2;   // NDC; 2 is far offscreen
+    // Pointer state in CSS pixels relative to the canvas.
+    let pointerX = -9999, pointerY = -9999;
     let targetPressure = 0;
     let currentPressure = 0;
-    let pointerLastSeen = 0;
 
     const handlePointer = (e) => {
       const rect = canvas.getBoundingClientRect();
-      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
-      pointerX = nx;
-      pointerY = ny;
+      pointerX = e.clientX - rect.left;
+      pointerY = e.clientY - rect.top;
       targetPressure = 1;
-      pointerLastSeen = performance.now();
     };
     const handleLeave = () => { targetPressure = 0; };
 
