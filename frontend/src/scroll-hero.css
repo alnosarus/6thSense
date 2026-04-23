@@ -196,6 +196,79 @@
   gap: 0.5rem;
 }
 
+/* Stat block — two big numerals with label "wings" on the outside, arrow between.
+   The labels hug the digits so the whole unit reads as one typographic mark. */
+.hero-finale-stat {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.55rem, 1.8vw, 1.1rem);
+  margin: 0 0 0.15rem;
+}
+
+.hero-finale-stat-unit {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.hero-finale-stat-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3rem, 9.5vw, 5.4rem);
+  line-height: 0.85;
+  letter-spacing: -0.045em;
+  color: #f1f1ec;
+  display: inline-flex;
+  align-items: flex-start;
+}
+
+.hero-finale-stat-pct {
+  font-size: 0.46em;
+  font-weight: 500;
+  color: rgba(241, 241, 236, 0.42);
+  margin-left: 0.04em;
+  padding-top: 0.15em;
+}
+
+.hero-finale-stat-unit--accent .hero-finale-stat-num {
+  color: #c5e063;
+}
+
+.hero-finale-stat-label {
+  font-family: var(--font-ui);
+  font-size: clamp(0.62rem, 1.1vw, 0.72rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(241, 241, 236, 0.5);
+}
+
+.hero-finale-stat-label--left {
+  text-align: right;
+}
+
+.hero-finale-stat-label--right {
+  text-align: left;
+}
+
+.hero-finale-stat-arrow {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(1.3rem, 3.2vw, 2rem);
+  line-height: 1;
+  color: rgba(241, 241, 236, 0.38);
+}
+
+.hero-finale-stat-attr {
+  margin: 0 0 1rem;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: rgba(241, 241, 236, 0.5);
+  letter-spacing: 0.02em;
+}
+
 .hero-finale-title {
   margin: 0;
   font-family: var(--font-display);
@@ -343,6 +416,38 @@
     /* Rebuild the shift transform so translateY doesn't also have to carry
        the -50% center trick used on desktop. */
     transform: translateY(calc((1 - var(--shift-p, 0)) * 4vh));
+  }
+
+  /* Darken the tactile-field behind the form so the stat numerals + labels
+     stay legible against the bright particle mesh. */
+  .hero-finale-form::before {
+    content: "";
+    position: absolute;
+    inset: -1.25rem -1rem;
+    z-index: -1;
+    background: radial-gradient(
+      ellipse 110% 80% at 50% 55%,
+      rgba(0, 0, 0, 0.78) 0%,
+      rgba(0, 0, 0, 0.55) 55%,
+      rgba(0, 0, 0, 0) 90%
+    );
+    pointer-events: none;
+  }
+
+  /* Mobile stat typography: tighten labels, keep two-up on one row. */
+  .hero-finale-stat {
+    gap: 0.6rem;
+    margin: 0 0 0.25rem;
+  }
+  .hero-finale-stat-unit {
+    gap: 0.4rem;
+  }
+  .hero-finale-stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.14em;
+  }
+  .hero-finale-stat-arrow {
+    font-size: 1.25rem;
   }
   .hero-finale-title {
     font-size: clamp(1.6rem, 6vw, 2.2rem);
