@@ -6,16 +6,14 @@
 export function HeroBlurbs() {
   return (
     <div className="hero-blurbs" aria-live="polite">
-      <p className="hero-blurb" data-index="0">
-        Robots have five senses.
-      </p>
-      <p className="hero-blurb" data-index="1">Sight</p>
-      <p className="hero-blurb" data-index="2">Sound</p>
-      <p className="hero-blurb" data-index="3">Smell</p>
-      <p className="hero-blurb" data-index="4">Taste</p>
-      <p className="hero-blurb" data-index="5">Touch</p>
+      <p className="hero-blurb" data-index="0">Robots can see.</p>
+      <p className="hero-blurb" data-index="1">Hear.</p>
+      <p className="hero-blurb" data-index="2">Speak.</p>
+      <p className="hero-blurb" data-index="3">Plan.</p>
+      <p className="hero-blurb" data-index="4">Move.</p>
+      <p className="hero-blurb" data-index="5">Grasp.</p>
       <p className="hero-blurb" data-index="6">
-        We&rsquo;re building the sixth.
+        They still can&rsquo;t feel what they hold.
       </p>
     </div>
   );
