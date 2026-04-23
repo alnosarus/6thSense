@@ -2315,6 +2315,24 @@ main .section[id] {
   }
 }
 
+@media (max-width: 720px) {
+  /* Collapse the pill to wordmark + CTA only — the 4 middle links wrap to a
+     second row otherwise, doubling the pill's height and clipping hero copy. */
+  .nav-flagship--pill .nav-links-on-dark a:not(.nav-cta) {
+    display: none;
+  }
+
+  .nav-flagship--pill {
+    width: min(94vw, 420px);
+    padding: 0.38rem 0.85rem 0.44rem;
+  }
+
+  .nav-flagship-inner {
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+  }
+}
+
 @media (max-width: 640px) {
   .nav-links {
     justify-content: flex-start;

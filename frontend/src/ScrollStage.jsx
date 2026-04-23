@@ -14,10 +14,38 @@ const SHIFT_END = 0.95;
 // Anchoring on the wrist keeps the hand vertically aligned across frames even
 // though the fist image (frame 0) has its visible pixels cropped ~5% earlier
 // than the extended-finger frames.
-const GLOVE_ZOOM_BASE = 1.8;    // base paint-time zoom
+const GLOVE_ZOOM_BASE = 1.8;    // base paint-time zoom (desktop)
 const GLOVE_PIVOT_U = 0.5;      // image horizontal center (all frames ~= 0.5)
 const GLOVE_PIVOT_X = 0.30;     // viewport x (fraction of cw)
 const GLOVE_PIVOT_Y = 1.95;     // viewport y (fraction of ch) — wrist-bottom lands well below viewport, keeping fingers visible up top
+
+// Mobile/portrait override: on narrow viewports, desktop pivots paint the hand
+// off-screen (scale tied to cw forces a tiny image whose wrist anchor is far
+// below the viewport). Recenter horizontally, anchor wrist at viewport bottom,
+// and bump zoom so the fingers fill the upper portion of the screen.
+const MOBILE_MAX_W = 720;
+const GLOVE_PIVOT_X_MOBILE = 0.5;
+const GLOVE_PIVOT_Y_MOBILE = 1.02;
+const GLOVE_ZOOM_BASE_MOBILE = 2.6;
+
+function isMobileViewport(cw) {
+  return cw < MOBILE_MAX_W;
+}
+
+function pivotsFor(cw) {
+  if (isMobileViewport(cw)) {
+    return {
+      pivotX: GLOVE_PIVOT_X_MOBILE,
+      pivotY: GLOVE_PIVOT_Y_MOBILE,
+      zoomBase: GLOVE_ZOOM_BASE_MOBILE
+    };
+  }
+  return {
+    pivotX: GLOVE_PIVOT_X,
+    pivotY: GLOVE_PIVOT_Y,
+    zoomBase: GLOVE_ZOOM_BASE
+  };
+}
 // v-coord of each frame's visible wrist bottom (measured by alpha-scan).
 const PER_FRAME_PIVOT_V = [0.9505, 0.9993, 0.9993, 0.9993, 0.9993, 0.9993];
 // Per-frame zoom multiplier (fist was generated bigger than extended poses).
@@ -42,11 +70,12 @@ function usePrefersReducedMotion() {
 // Pivot-based: image point (PIVOT_U, pivotV) lands at viewport (PIVOT_X, PIVOT_Y),
 // so the glove grows around a fixed viewport anchor as zoom changes.
 function computePaintRect(iw, ih, cw, ch, zoom, pivotV) {
+  const { pivotX, pivotY } = pivotsFor(cw);
   const scale = Math.min(cw / iw, ch / ih) * zoom;
   const dw = iw * scale;
   const dh = ih * scale;
-  const dx = GLOVE_PIVOT_X * cw - GLOVE_PIVOT_U * dw;
-  const dy = GLOVE_PIVOT_Y * ch - pivotV * dh;
+  const dx = pivotX * cw - GLOVE_PIVOT_U * dw;
+  const dy = pivotY * ch - pivotV * dh;
   return { dx, dy, dw, dh };
 }
 
@@ -88,7 +117,8 @@ export function ScrollStage({ progressRef, heroRef }) {
       const refIdx = 5;
       const ref = frames[refIdx] ?? frames[0];
       if (!ref || !ref.naturalWidth) return;
-      const refZoom = GLOVE_ZOOM_BASE * (PER_FRAME_ZOOM[refIdx] ?? 1);
+      const { zoomBase } = pivotsFor(w);
+      const refZoom = zoomBase * (PER_FRAME_ZOOM[refIdx] ?? 1);
       const refPivotV = PER_FRAME_PIVOT_V[refIdx] ?? 0.9993;
       const { dx, dy, dw, dh } = computePaintRect(
         ref.naturalWidth, ref.naturalHeight, w, h, refZoom, refPivotV
@@ -132,8 +162,9 @@ export function ScrollStage({ progressRef, heroRef }) {
         const frames = s0.frames;
         const count = frames.length;
 
+        const { zoomBase } = pivotsFor(cw);
         const zoomFor = (idx) =>
-          GLOVE_ZOOM_BASE * (PER_FRAME_ZOOM[idx] ?? 1);
+          zoomBase * (PER_FRAME_ZOOM[idx] ?? 1);
 
         // Snap to the nearest beat — no crossfade between adjacent frames.
         // Per-frame pivotV aligns each frame's wrist bottom at (PIVOT_X, PIVOT_Y)
