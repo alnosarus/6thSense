@@ -356,10 +356,11 @@
     text-align: center;
   }
 
-  /* Logo-stair dots: shrink so the 3%/6% step spacing still reads as a stair
-     instead of one overlapping blob on narrow screens. */
+  /* Drop the dot-to-logo reassembly on mobile — at phone scale the tight 3%/6%
+     stair reads as a cluster, not a logo, and crowds the finale form. The hand
+     descend and form fade-in still run. */
   .finale-dot {
-    width: clamp(14px, 3.6vw, 24px);
+    display: none;
   }
 }
 
