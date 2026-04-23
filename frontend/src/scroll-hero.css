@@ -293,17 +293,88 @@
   }
 }
 
-/* Narrow viewports: stack or shrink the right-half copy. */
-@media (max-width: 720px) {
+/* ---- Tablet: shrink the split-column geometry ---- */
+@media (max-width: 960px) {
   .hero-blurbs {
-    padding: 0 1rem;
+    padding: 0 clamp(1rem, 3vw, 2rem);
   }
   .hero-blurb {
-    font-size: clamp(1.6rem, 7vw, 2.6rem);
-    max-width: 16ch;
+    left: calc(var(--gutter) + 4vw);
+    font-size: clamp(2rem, 6vw, 3.6rem);
+    max-width: 20ch;
   }
-  .hero-finale-cta {
-    font-size: 0.85rem;
-    padding: 0.6rem 1.2rem;
+  .hero-finale-form {
+    left: 52%;
+    right: clamp(1rem, 3vw, 2rem);
+  }
+}
+
+/* ---- Mobile: collapse the split layout ---- */
+@media (max-width: 720px) {
+  .scroll-hero {
+    /* Shorter scroll budget so mobile users don't hit an endless sticky. */
+    height: 240vh;
+  }
+
+  /* Blurbs become a full-width centered column that sits above the glove. */
+  .hero-blurbs {
+    left: 0;
+    width: 100%;
+    padding: calc(var(--nav-h, 3.5rem) + 1.5rem) 1.25rem 0;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .hero-blurb {
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    padding: 0 0.5rem;
+    text-align: center;
+    font-size: clamp(2rem, 9vw, 3.2rem);
+  }
+
+  /* Finale form becomes a full-width bottom card. */
+  .hero-finale-form {
+    top: auto;
+    left: 1rem;
+    right: 1rem;
+    bottom: 1.75rem;
+    max-width: none;
+    /* Rebuild the shift transform so translateY doesn't also have to carry
+       the -50% center trick used on desktop. */
+    transform: translateY(calc((1 - var(--shift-p, 0)) * 4vh));
+  }
+  .hero-finale-title {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+  }
+  .hero-finale-subtitle {
+    font-size: 0.95rem;
+  }
+  .hero-finale-submit {
+    align-self: stretch;
+    min-height: 48px;
+    text-align: center;
+  }
+
+  /* Logo-stair dots: shrink so the 3%/6% step spacing still reads as a stair
+     instead of one overlapping blob on narrow screens. */
+  .finale-dot {
+    width: clamp(14px, 3.6vw, 24px);
+  }
+}
+
+/* ---- Touch devices: restore native cursor + don't rely on hover ---- */
+@media (hover: none), (pointer: coarse) {
+  .scroll-hero,
+  .scroll-hero * {
+    cursor: auto;
+  }
+  .scroll-hero button,
+  .scroll-hero a {
+    cursor: pointer;
+  }
+  .scroll-hero input,
+  .scroll-hero textarea {
+    cursor: text;
   }
 }
