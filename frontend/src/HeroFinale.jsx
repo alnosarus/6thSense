@@ -45,9 +45,14 @@ export function HeroFinale() {
     setEmail("");
   };
 
+  // Dots → logo-stair assemble animation is currently stashed (the `dots`
+  // array above and the related --assemble-*-p CSS plumbing stay in place
+  // as an artifact; toggle this flag to re-enable).
+  const SHOW_ASSEMBLE_DOTS = false;
+
   return (
     <div className="hero-finale">
-      {dots.map((d, i) => {
+      {SHOW_ASSEMBLE_DOTS && dots.map((d, i) => {
         const style = d.color === "brown"
           ? {
               "--tip-u": d.tipU,

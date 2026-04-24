@@ -146,14 +146,21 @@
 }
 
 .hero-stat {
-  left: 50%;
-  width: 50%;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
+  text-align: center;
   gap: 0.6rem;
   opacity: var(--stat-p, 0);
   transform: translateY(calc((1 - var(--stat-p, 0)) * 12px));
+}
+
+.hero-finale-stat-logo {
+  height: clamp(1.9rem, 3vw, 2.6rem);
+  width: auto;
+  margin-top: 0.65rem;
+  opacity: 0.72;
+  filter: brightness(0) invert(1);
 }
 
 .hero-pipeline {
@@ -205,11 +212,10 @@
 }
 
 .hero-video {
-  left: 50%;
-  width: 50%;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
+  text-align: center;
   gap: 1.25rem;
   opacity: var(--video-p, 0);
   transform: translateY(calc((1 - var(--video-p, 0)) * 12px));
@@ -286,18 +292,19 @@
   opacity: clamp(0, calc((var(--assemble-p, 0) - 0.7) / 0.3), 1);
 }
 
-/* Finale form sits on the right half, fades in during the shift phase. */
+/* Finale form: centered column, settles up into place as it fades in. */
 .hero-finale-form {
   position: absolute;
   top: 50%;
-  left: 55%;
-  right: var(--gutter);
-  transform: translateY(-50%) translateX(calc(-1 * (1 - var(--form-p, 0)) * 6vw));
-  max-width: 34rem;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + (1 - var(--form-p, 0)) * 12px));
+  width: min(34rem, calc(100% - 2 * var(--gutter)));
   opacity: var(--form-p, 0);
   pointer-events: auto;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 0.5rem;
 }
 
@@ -432,7 +439,7 @@
 
 .hero-finale-submit {
   margin-top: 0.6rem;
-  align-self: flex-start;
+  align-self: center;
   padding: 0.8rem 1.6rem;
   font-family: var(--font-ui);
   font-weight: 600;
@@ -517,9 +524,9 @@
     left: 1rem;
     right: 1rem;
     bottom: 1.75rem;
-    max-width: none;
-    /* Rebuild the shift transform so translateY doesn't also have to carry
-       the -50% center trick used on desktop. */
+    width: auto;
+    /* Reset the -50% center trick used on desktop; mobile anchors via
+       left/right/bottom and only carries the fade-up translate. */
     transform: translateY(calc((1 - var(--form-p, 0)) * 4vh));
   }
 

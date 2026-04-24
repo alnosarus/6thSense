@@ -30,8 +30,15 @@ export function StatSection() {
           </span>
         </div>
       </div>
+      <img
+        className="hero-finale-stat-logo"
+        src="/amazon-robotics-logo.png"
+        alt="Amazon Robotics"
+        width="705"
+        height="350"
+      />
       <p className="hero-finale-stat-attr">
-        Amazon Vulcan &middot; manipulation tasks
+        Vulcan &middot; manipulation tasks
       </p>
     </section>
   );
