@@ -95,7 +95,7 @@ export function PipelineSection() {
   return (
     <section className="hero-section hero-pipeline">
       <h2 className="hero-pipeline-title">
-        Label tactile data end&nbsp;to&nbsp;end.
+        We label tactile data end&nbsp;to&nbsp;end.
       </h2>
       <ol className="hero-pipeline-row">
         <li>Collect</li>
