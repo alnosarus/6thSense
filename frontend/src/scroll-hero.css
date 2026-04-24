@@ -31,7 +31,7 @@
 
   position: relative;
   background: #000;
-  height: 560vh;
+  height: 820vh;
 }
 
 /* Suppress accidental text selection across the hero (still feels like a
@@ -145,22 +145,57 @@
   transition: opacity 0.4s ease, transform 0.5s cubic-bezier(.22,1,.36,1);
 }
 
-.hero-stat {
+/* Quote beats — uniform "sentence + logo + attribution" layout for each
+   research citation (Amazon Vulcan, Columbia, Stanford, Meta AI). Each beat
+   aliases its own progress var onto --quote-p via inline style, so all four
+   share a single opacity/transform rule. */
+.hero-quote {
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 0.6rem;
-  opacity: var(--stat-p, 0);
-  transform: translateY(calc((1 - var(--stat-p, 0)) * 12px));
+  gap: clamp(1rem, 2.2vw, 1.75rem);
+  opacity: var(--quote-p, 0);
+  transform: translateY(calc((1 - var(--quote-p, 0)) * 12px));
 }
 
-.hero-finale-stat-logo {
-  height: clamp(2.8rem, 4.5vw, 4rem);
+.hero-quote-text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.8rem, 3.6vw, 3rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: #f1f1ec;
+  max-width: 24ch;
+  text-wrap: balance;
+}
+
+.hero-quote-text em {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.hero-quote-text em.hero-quote-accent {
+  color: #c5e063;
+}
+
+.hero-quote-logo {
+  height: clamp(2.4rem, 4vw, 3.4rem);
   width: auto;
-  margin-top: 0.9rem;
-  opacity: 0.82;
+  max-width: min(22rem, 70vw);
+  object-fit: contain;
+  opacity: 0.78;
   filter: brightness(0) invert(1);
+}
+
+.hero-quote-attr {
+  margin: -0.15rem 0 0;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: rgba(241, 241, 236, 0.5);
 }
 
 .hero-pipeline {
@@ -308,79 +343,6 @@
   gap: 0.5rem;
 }
 
-/* Stat block — two big numerals with label "wings" on the outside, arrow between.
-   The labels hug the digits so the whole unit reads as one typographic mark. */
-.hero-finale-stat {
-  display: flex;
-  align-items: center;
-  gap: clamp(0.55rem, 1.8vw, 1.1rem);
-  margin: 0 0 0.15rem;
-}
-
-.hero-finale-stat-unit {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.hero-finale-stat-num {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(3rem, 9.5vw, 5.4rem);
-  line-height: 0.85;
-  letter-spacing: -0.045em;
-  color: #f1f1ec;
-  display: inline-flex;
-  align-items: flex-start;
-}
-
-.hero-finale-stat-pct {
-  font-size: 0.46em;
-  font-weight: 500;
-  color: rgba(241, 241, 236, 0.42);
-  margin-left: 0.04em;
-  padding-top: 0.15em;
-}
-
-.hero-finale-stat-unit--accent .hero-finale-stat-num {
-  color: #c5e063;
-}
-
-.hero-finale-stat-label {
-  font-family: var(--font-ui);
-  font-size: clamp(0.62rem, 1.1vw, 0.72rem);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(241, 241, 236, 0.5);
-}
-
-.hero-finale-stat-label--left {
-  text-align: right;
-}
-
-.hero-finale-stat-label--right {
-  text-align: left;
-}
-
-.hero-finale-stat-arrow {
-  font-family: var(--font-display);
-  font-weight: 200;
-  font-size: clamp(1.3rem, 3.2vw, 2rem);
-  line-height: 1;
-  color: rgba(241, 241, 236, 0.38);
-}
-
-.hero-finale-stat-attr {
-  margin: 0 0 1rem;
-  font-family: var(--font-body);
-  font-style: italic;
-  font-size: 0.8rem;
-  color: rgba(241, 241, 236, 0.5);
-  letter-spacing: 0.02em;
-}
-
 .hero-finale-title {
   margin: 0;
   font-family: var(--font-display);
@@ -498,7 +460,7 @@
 @media (max-width: 720px) {
   .scroll-hero {
     /* Shorter scroll budget so mobile users don't hit an endless sticky. */
-    height: 460vh;
+    height: 680vh;
   }
 
   /* Blurbs become a full-width centered column that sits above the glove. */
@@ -546,21 +508,6 @@
     pointer-events: none;
   }
 
-  /* Mobile stat typography: tighten labels, keep two-up on one row. */
-  .hero-finale-stat {
-    gap: 0.6rem;
-    margin: 0 0 0.25rem;
-  }
-  .hero-finale-stat-unit {
-    gap: 0.4rem;
-  }
-  .hero-finale-stat-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.14em;
-  }
-  .hero-finale-stat-arrow {
-    font-size: 1.25rem;
-  }
   .hero-finale-title {
     font-size: clamp(1.6rem, 6vw, 2.2rem);
   }
@@ -581,11 +528,19 @@
   }
 
   /* ---- Mobile new beats: full-width, stacked ---- */
-  .hero-stat,
+  .hero-quote,
   .hero-video {
-    left: 0;
-    width: 100%;
     padding: calc(var(--nav-h, 3.5rem) + 1.5rem) 1.25rem 1.5rem;
+  }
+
+  .hero-quote-text {
+    font-size: clamp(1.4rem, 6vw, 2.1rem);
+    max-width: 20ch;
+  }
+
+  .hero-quote-logo {
+    height: clamp(2rem, 6vw, 2.8rem);
+    max-width: 80vw;
   }
 
   .hero-pipeline {

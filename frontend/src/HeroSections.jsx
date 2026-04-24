@@ -1,46 +1,93 @@
 /**
- * Three scrubbed beats inserted between the hero's assemble and form phases.
+ * Scrubbed beats inserted between the hero's assemble and form phases.
  * Each is a positioned-absolute layer inside .scroll-hero-sticky, gated by
- * its own progress var (--stat-p / --pipeline-p / --video-p) written by
- * ScrollStage's rAF tick. Pipeline and Video are added in subsequent tasks.
+ * its own progress var written by ScrollStage's rAF tick.
+ *
+ *   --vulcan-p / --columbia-p / --stanford-p / --meta-p  → QuoteBeat opacity
+ *   --pipeline-p                                         → PipelineSection
+ *   --video-p                                            → VideoSection
  */
 
-export function StatSection() {
+/**
+ * Shared typographic "quote + logo" layout used for all four research citations.
+ * The progressVar is aliased onto a local --quote-p so .hero-quote's CSS only
+ * references one variable regardless of which beat is active.
+ */
+function QuoteBeat({ progressVar, logoSrc, logoAlt, attribution, children }) {
   return (
     <section
-      className="hero-section hero-stat"
-      aria-label="Vision alone solves 30 percent of manipulation tasks; with touch, 90 percent. Amazon Vulcan."
+      className="hero-section hero-quote"
+      style={{ "--quote-p": `var(${progressVar})` }}
     >
-      <div className="hero-finale-stat">
-        <div className="hero-finale-stat-unit">
-          <span className="hero-finale-stat-label hero-finale-stat-label--left">
-            vision<br />alone
-          </span>
-          <span className="hero-finale-stat-num">
-            30<span className="hero-finale-stat-pct">%</span>
-          </span>
-        </div>
-        <span className="hero-finale-stat-arrow" aria-hidden="true">→</span>
-        <div className="hero-finale-stat-unit hero-finale-stat-unit--accent">
-          <span className="hero-finale-stat-num">
-            90<span className="hero-finale-stat-pct">%</span>
-          </span>
-          <span className="hero-finale-stat-label hero-finale-stat-label--right">
-            with<br />touch
-          </span>
-        </div>
-      </div>
+      <p className="hero-quote-text">{children}</p>
       <img
-        className="hero-finale-stat-logo"
-        src="/amazon-robotics-logo.png"
-        alt="Amazon Robotics"
-        width="705"
-        height="350"
+        className="hero-quote-logo"
+        src={logoSrc}
+        alt={logoAlt}
+        loading="lazy"
       />
-      <p className="hero-finale-stat-attr">
-        Vulcan &middot; manipulation tasks
-      </p>
+      {attribution ? (
+        <p className="hero-quote-attr">{attribution}</p>
+      ) : null}
     </section>
+  );
+}
+
+export function VulcanQuote() {
+  return (
+    <QuoteBeat
+      progressVar="--vulcan-p"
+      logoSrc="/amazon-robotics-logo.png"
+      logoAlt="Amazon Robotics"
+      attribution="Vulcan · manipulation tasks"
+    >
+      Vision alone solves <em>30%</em> of manipulation tasks.
+      Touch raises it to <em className="hero-quote-accent">90%</em>.
+    </QuoteBeat>
+  );
+}
+
+export function ColumbiaQuote() {
+  return (
+    <QuoteBeat
+      progressVar="--columbia-p"
+      logoSrc="/Columbia.png"
+      logoAlt="Columbia Engineering · Robotic Manipulation and Mobility Lab"
+      attribution="Matei Ciocarlie"
+    >
+      Robot hands can be highly dexterous —{" "}
+      <em className="hero-quote-accent">based on touch sensing alone</em>.
+    </QuoteBeat>
+  );
+}
+
+export function StanfordQuote() {
+  return (
+    <QuoteBeat
+      progressVar="--stanford-p"
+      logoSrc="/stanford.avif"
+      logoAlt="Stanford"
+      attribution="DenseTact · Kennedy Lab"
+    >
+      Dexterity depends on{" "}
+      <em className="hero-quote-accent">continuous, soft-contact</em>{" "}
+      touch feedback.
+    </QuoteBeat>
+  );
+}
+
+export function MetaQuote() {
+  return (
+    <QuoteBeat
+      progressVar="--meta-p"
+      logoSrc="/Meta.png"
+      logoAlt="Meta AI"
+      attribution="DIGIT · PyTouch"
+    >
+      Touch is how robots will{" "}
+      <em className="hero-quote-accent">perceive, understand, and interact</em>{" "}
+      with the physical world.
+    </QuoteBeat>
   );
 }
 

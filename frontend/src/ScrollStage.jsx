@@ -2,17 +2,24 @@ import { useEffect, useRef } from "react";
 import { scrollStages } from "./scrollStages.js";
 import { useFramePreloader } from "./useFramePreloader.js";
 
-// Scroll-progress phase boundaries. Six beats fit a 560vh sticky budget.
-const FRAMES_END = 0.42;
-const ASSEMBLE_START = 0.42;
-const ASSEMBLE_END = 0.55;
-const STAT_START = 0.55;
-const STAT_END = 0.68;
-const PIPELINE_START = 0.68;
-const PIPELINE_END = 0.81;
-const VIDEO_START = 0.81;
-const VIDEO_END = 0.92;
-const FORM_START = 0.92;
+// Scroll-progress phase boundaries. Nine beats across a 820vh sticky budget.
+// Each quote beat is a ~10% slice (~82vh) that matches the pacing of a blurb.
+const FRAMES_END = 0.28;
+const ASSEMBLE_START = 0.28;
+const ASSEMBLE_END = 0.36;    // hand descends off-screen, dots suppressed
+const VULCAN_START = 0.36;
+const VULCAN_END = 0.46;
+const COLUMBIA_START = 0.46;
+const COLUMBIA_END = 0.56;
+const STANFORD_START = 0.56;
+const STANFORD_END = 0.66;
+const META_START = 0.66;
+const META_END = 0.76;
+const PIPELINE_START = 0.76;
+const PIPELINE_END = 0.86;
+const VIDEO_START = 0.86;
+const VIDEO_END = 0.94;
+const FORM_START = 0.94;
 const FORM_END = 1.00;
 
 // Glove canvas layout. Tip-anchored: each frame's highest visible image point
@@ -201,7 +208,10 @@ export function ScrollStage({ progressRef, heroRef }) {
       //      its window. Binary (in/out) — the CSS transition on
       //      .hero-section smooths the edges. Same pattern as --active-blurb. ----
       const windowP = (start, end) => (p >= start && p < end ? 1 : 0);
-      const statP = windowP(STAT_START, STAT_END);
+      const vulcanP = windowP(VULCAN_START, VULCAN_END);
+      const columbiaP = windowP(COLUMBIA_START, COLUMBIA_END);
+      const stanfordP = windowP(STANFORD_START, STANFORD_END);
+      const metaP = windowP(META_START, META_END);
       const pipelineP = windowP(PIPELINE_START, PIPELINE_END);
       const videoP = windowP(VIDEO_START, VIDEO_END);
       // Form is the terminal beat — keep its progressive fade-in so the CTA
@@ -213,9 +223,9 @@ export function ScrollStage({ progressRef, heroRef }) {
       // ---- Active blurb index (kept in lockstep with the frame index so the
       //      copy label always matches the pose on screen) ----
       // Blurb 6 ("They still can't feel…") rides the assemble beat; once the
-      // stat beat begins all blurbs fade out (no CSS rule matches index 7+).
+      // Vulcan quote begins all blurbs fade out (no CSS rule matches index 7+).
       let blurb;
-      if (p >= STAT_START) blurb = 7;
+      if (p >= VULCAN_START) blurb = 7;
       else if (p >= ASSEMBLE_START) blurb = 6;
       else if (s0.frames) {
         const count = s0.frames.length;
@@ -230,7 +240,10 @@ export function ScrollStage({ progressRef, heroRef }) {
         "--assemble-p": assembleP.toFixed(4),
         "--assemble-fade-p": assembleFadeP.toFixed(4),
         "--assemble-move-p": assembleMoveP.toFixed(4),
-        "--stat-p": statP.toFixed(4),
+        "--vulcan-p": vulcanP.toFixed(4),
+        "--columbia-p": columbiaP.toFixed(4),
+        "--stanford-p": stanfordP.toFixed(4),
+        "--meta-p": metaP.toFixed(4),
         "--pipeline-p": pipelineP.toFixed(4),
         "--video-p": videoP.toFixed(4),
         "--form-p": formP.toFixed(4),
