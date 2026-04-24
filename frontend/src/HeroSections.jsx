@@ -36,3 +36,20 @@ export function StatSection() {
     </section>
   );
 }
+
+export function PipelineSection() {
+  return (
+    <section className="hero-section hero-pipeline">
+      <h2 className="hero-pipeline-title">
+        Label tactile data end&nbsp;to&nbsp;end.
+      </h2>
+      <ol className="hero-pipeline-row">
+        <li>Collect</li>
+        <li>Synchronize</li>
+        <li>Label</li>
+        <li>Validate</li>
+        <li>Ship</li>
+      </ol>
+    </section>
+  );
+}
