@@ -572,5 +572,41 @@
   .finale-dot {
     display: none;
   }
+
+  /* ---- Mobile new beats: full-width, stacked ---- */
+  .hero-stat,
+  .hero-video {
+    left: 0;
+    width: 100%;
+    padding: calc(var(--nav-h, 3.5rem) + 1.5rem) 1.25rem 1.5rem;
+  }
+
+  .hero-pipeline {
+    padding: calc(var(--nav-h, 3.5rem) + 1.5rem) 1.25rem 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .hero-pipeline-title {
+    font-size: clamp(1.6rem, 7vw, 2.6rem);
+  }
+
+  .hero-pipeline-row {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .hero-pipeline-row li + li::before {
+    content: "↓";
+    display: block;
+    margin: 0.3rem 0;
+  }
+
+  .hero-video-title {
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+  }
+
+  .hero-video-frame {
+    max-width: 100%;
+  }
 }
 
