@@ -64,6 +64,22 @@ const PER_FRAME_TIP_Y = [0.58, 0.15, 0.15, 0.15, 0.15, 0.15];
 // Per-frame zoom multiplier (fist was generated bigger than extended poses).
 const PER_FRAME_ZOOM = [0.75, 1.0, 1.0, 1.0, 1.0, 1.0];
 
+// ── Mobile micro-tune knobs ────────────────────────────────────────────────
+// Each is a viewport y fraction (0 = top, 1 = bottom) that locks the
+// corresponding pose's tip anchor on mobile (cw < MOBILE_MAX_W). Set `null`
+// to let the auto-alignment in tipYForFrame() run (which anchors the bottom
+// of extended-finger frames to the bottom of the fist for a consistent
+// wrist-cuff line).
+//
+//   MOBILE_FIST_TIP_Y      → frame 0 (fist)
+//   MOBILE_EXTENDED_TIP_Y  → frames 1-5 (one through five fingers extended)
+//
+// Both are fractions of ch, so the responsiveness across phone sizes is
+// preserved — only the y-position within the viewport changes.
+const MOBILE_FIST_TIP_Y = null;
+const MOBILE_EXTENDED_TIP_Y = null;
+// ───────────────────────────────────────────────────────────────────────────
+
 function usePrefersReducedMotion() {
   const ref = useRef(false);
   useEffect(() => {
@@ -89,6 +105,34 @@ function computePaintRect(iw, ih, cw, ch, zoom, tipV, tipY) {
   const dx = pivotX * cw - GLOVE_PIVOT_U * dw;
   const dy = tipY * ch - tipV * dh;
   return { dx, dy, dw, dh };
+}
+
+// Mobile-only tipY override: anchors the BOTTOM of each extended-finger frame
+// (1..5) to the bottom of the fist (frame 0) so the wrist-cuff line reads
+// consistently across poses on phones (where the fist's cuff sits in view but
+// the taller extended-finger poses otherwise spill past the viewport bottom).
+// Returns the default tipY on desktop or for the fist itself.
+function tipYForFrame(idx, cw, ch, img, fistImg) {
+  const defaultTipY = PER_FRAME_TIP_Y[idx] ?? 0.5;
+  if (!isMobileViewport(cw)) return defaultTipY;
+  // Honor explicit mobile overrides first. Only fall through to the
+  // auto-alignment below when the override is null.
+  if (idx === 0 && MOBILE_FIST_TIP_Y !== null) return MOBILE_FIST_TIP_Y;
+  if (idx !== 0 && MOBILE_EXTENDED_TIP_Y !== null) return MOBILE_EXTENDED_TIP_Y;
+  if (idx === 0 || !img?.naturalWidth || !fistImg?.naturalWidth) {
+    return defaultTipY;
+  }
+  const { zoomBase } = pivotsFor(cw);
+  const scaleFist = Math.min(cw / fistImg.naturalWidth, ch / fistImg.naturalHeight);
+  const scaleCur = Math.min(cw / img.naturalWidth, ch / img.naturalHeight);
+  const dhFist = fistImg.naturalHeight * scaleFist * zoomBase * (PER_FRAME_ZOOM[0] ?? 1);
+  const dhCur = img.naturalHeight * scaleCur * zoomBase * (PER_FRAME_ZOOM[idx] ?? 1);
+  const tipVFist = PER_FRAME_TIP_V[0] ?? 0.1;
+  const tipVCur = PER_FRAME_TIP_V[idx] ?? 0.042;
+  const tipYFist = PER_FRAME_TIP_Y[0] ?? 0.58;
+  // bottom_fist = tipYFist*ch + (1 - tipVFist)*dhFist
+  // Solve for tipYCur such that bottom_cur == bottom_fist.
+  return tipYFist + ((1 - tipVFist) * dhFist - (1 - tipVCur) * dhCur) / ch;
 }
 
 function paintAnchored(ctx, img, cw, ch, alpha, zoom, tipV, tipY) {
@@ -132,7 +176,9 @@ export function ScrollStage({ progressRef, heroRef }) {
       const { zoomBase } = pivotsFor(w);
       const refZoom = zoomBase * (PER_FRAME_ZOOM[refIdx] ?? 1);
       const refTipV = PER_FRAME_TIP_V[refIdx] ?? 0.042;
-      const refTipY = PER_FRAME_TIP_Y[refIdx] ?? 0.5;
+      // Use the same mobile-adjusted tipY as the paint loop so the dots-at-
+      // fingertips CSS vars track the shifted glove position.
+      const refTipY = tipYForFrame(refIdx, w, h, ref, frames[0]);
       const { dx, dy, dw, dh } = computePaintRect(
         ref.naturalWidth, ref.naturalHeight, w, h, refZoom, refTipV, refTipY
       );
@@ -188,7 +234,7 @@ export function ScrollStage({ progressRef, heroRef }) {
           ctx, frames[idx], cw, ch, 1,
           zoomFor(idx),
           PER_FRAME_TIP_V[idx] ?? 0.042,
-          PER_FRAME_TIP_Y[idx] ?? 0.5
+          tipYForFrame(idx, cw, ch, frames[idx], frames[0])
         );
       }
 
