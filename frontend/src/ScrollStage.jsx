@@ -2,30 +2,31 @@ import { useEffect, useRef } from "react";
 import { scrollStages } from "./scrollStages.js";
 import { useFramePreloader } from "./useFramePreloader.js";
 
-// Scroll-progress phase boundaries.
-const FRAMES_END = 0.55;        // counting 1→5 done by here
-const ASSEMBLE_START = 0.55;    // logo dots rise + hand descends start
-const ASSEMBLE_END = 0.80;      // dots arrive at logo positions, hand offscreen
-const SHIFT_START = 0.80;       // finished logo shifts + CTA slides in
-const SHIFT_END = 0.95;
+// Scroll-progress phase boundaries. Six beats fit a 560vh sticky budget.
+const FRAMES_END = 0.42;
+const ASSEMBLE_START = 0.42;
+const ASSEMBLE_END = 0.55;
+const STAT_START = 0.55;
+const STAT_END = 0.68;
+const PIPELINE_START = 0.68;
+const PIPELINE_END = 0.81;
+const VIDEO_START = 0.81;
+const VIDEO_END = 0.92;
+const FORM_START = 0.92;
+const FORM_END = 1.00;
 
-// Glove canvas layout. Pivot-based anchoring: each frame's wrist-bottom
-// (PIVOT_U, PER_FRAME_PIVOT_V[i]) is painted at viewport (PIVOT_X, PIVOT_Y).
-// Anchoring on the wrist keeps the hand vertically aligned across frames even
-// though the fist image (frame 0) has its visible pixels cropped ~5% earlier
-// than the extended-finger frames.
+// Glove canvas layout. Tip-anchored: each frame's highest visible image point
+// (PIVOT_U, PER_FRAME_TIP_V[i]) is painted at viewport (PIVOT_X, PER_FRAME_TIP_Y[i]),
+// so the asymmetry between the bulky fist and the tall extended-finger poses
+// scales with viewport on every screen size.
 const GLOVE_ZOOM_BASE = 1.8;    // base paint-time zoom (desktop)
 const GLOVE_PIVOT_U = 0.5;      // image horizontal center (all frames ~= 0.5)
 const GLOVE_PIVOT_X = 0.30;     // viewport x (fraction of cw)
-const GLOVE_PIVOT_Y = 1.95;     // viewport y (fraction of ch) — wrist-bottom lands well below viewport, keeping fingers visible up top
 
-// Mobile/portrait override: on narrow viewports, desktop pivots paint the hand
-// off-screen (scale tied to cw forces a tiny image whose wrist anchor is far
-// below the viewport). Recenter horizontally, anchor wrist at viewport bottom,
-// and bump zoom so the fingers fill the upper portion of the screen.
+// Mobile/portrait override: recenter horizontally and bump zoom so the hand
+// fills the narrow viewport instead of sitting in a side column.
 const MOBILE_MAX_W = 720;
 const GLOVE_PIVOT_X_MOBILE = 0.5;
-const GLOVE_PIVOT_Y_MOBILE = 1.02;
 const GLOVE_ZOOM_BASE_MOBILE = 2.6;
 
 function isMobileViewport(cw) {
@@ -36,20 +37,25 @@ function pivotsFor(cw) {
   if (isMobileViewport(cw)) {
     return {
       pivotX: GLOVE_PIVOT_X_MOBILE,
-      pivotY: GLOVE_PIVOT_Y_MOBILE,
       zoomBase: GLOVE_ZOOM_BASE_MOBILE
     };
   }
   return {
     pivotX: GLOVE_PIVOT_X,
-    pivotY: GLOVE_PIVOT_Y,
     zoomBase: GLOVE_ZOOM_BASE
   };
 }
-// v-coord of each frame's visible wrist bottom (measured by alpha-scan).
-const PER_FRAME_PIVOT_V = [0.9505, 0.9993, 0.9993, 0.9993, 0.9993, 0.9993];
+// v-coord of each frame's highest visible point. Frames 1–5 extend a finger
+// to ~v=0.042 (matches HeroFinale's middle-finger tip dot); frame 0 is a fist
+// whose top knuckle sits ~v=0.10.
+const PER_FRAME_TIP_V = [0.10, 0.042, 0.042, 0.042, 0.042, 0.042];
+// Viewport y fraction where each frame's tip is anchored. Bias the bulky
+// fist a touch below center and the extended-finger poses a touch above
+// center so the fist body settles into view and the finger reads as
+// "reaching up" rather than dipping.
+const PER_FRAME_TIP_Y = [0.58, 0.15, 0.15, 0.15, 0.15, 0.15];
 // Per-frame zoom multiplier (fist was generated bigger than extended poses).
-const PER_FRAME_ZOOM = [0.82, 1.0, 1.0, 1.0, 1.0, 1.0];
+const PER_FRAME_ZOOM = [0.75, 1.0, 1.0, 1.0, 1.0, 1.0];
 
 function usePrefersReducedMotion() {
   const ref = useRef(false);
@@ -67,22 +73,21 @@ function usePrefersReducedMotion() {
 }
 
 // Computes the destination rect (in canvas pixels) the image paints into.
-// Pivot-based: image point (PIVOT_U, pivotV) lands at viewport (PIVOT_X, PIVOT_Y),
-// so the glove grows around a fixed viewport anchor as zoom changes.
-function computePaintRect(iw, ih, cw, ch, zoom, pivotV) {
-  const { pivotX, pivotY } = pivotsFor(cw);
+// Tip-anchored: image point (PIVOT_U, tipV) lands at viewport (PIVOT_X, tipY).
+function computePaintRect(iw, ih, cw, ch, zoom, tipV, tipY) {
+  const { pivotX } = pivotsFor(cw);
   const scale = Math.min(cw / iw, ch / ih) * zoom;
   const dw = iw * scale;
   const dh = ih * scale;
   const dx = pivotX * cw - GLOVE_PIVOT_U * dw;
-  const dy = pivotY * ch - pivotV * dh;
+  const dy = tipY * ch - tipV * dh;
   return { dx, dy, dw, dh };
 }
 
-function paintAnchored(ctx, img, cw, ch, alpha, zoom, pivotV) {
+function paintAnchored(ctx, img, cw, ch, alpha, zoom, tipV, tipY) {
   if (!img || !img.complete || !img.naturalWidth) return;
   const { dx, dy, dw, dh } = computePaintRect(
-    img.naturalWidth, img.naturalHeight, cw, ch, zoom, pivotV
+    img.naturalWidth, img.naturalHeight, cw, ch, zoom, tipV, tipY
   );
   const prev = ctx.globalAlpha;
   ctx.globalAlpha = alpha;
@@ -119,9 +124,10 @@ export function ScrollStage({ progressRef, heroRef }) {
       if (!ref || !ref.naturalWidth) return;
       const { zoomBase } = pivotsFor(w);
       const refZoom = zoomBase * (PER_FRAME_ZOOM[refIdx] ?? 1);
-      const refPivotV = PER_FRAME_PIVOT_V[refIdx] ?? 0.9993;
+      const refTipV = PER_FRAME_TIP_V[refIdx] ?? 0.042;
+      const refTipY = PER_FRAME_TIP_Y[refIdx] ?? 0.5;
       const { dx, dy, dw, dh } = computePaintRect(
-        ref.naturalWidth, ref.naturalHeight, w, h, refZoom, refPivotV
+        ref.naturalWidth, ref.naturalHeight, w, h, refZoom, refTipV, refTipY
       );
       writeVars({
         "--glove-x": `${(dx / w * 100).toFixed(3)}%`,
@@ -167,12 +173,15 @@ export function ScrollStage({ progressRef, heroRef }) {
           zoomBase * (PER_FRAME_ZOOM[idx] ?? 1);
 
         // Snap to the nearest beat — no crossfade between adjacent frames.
-        // Per-frame pivotV aligns each frame's wrist bottom at (PIVOT_X, PIVOT_Y)
-        // so the hand stays vertically locked across poses.
+        // Per-frame (tipV, tipY) anchors each frame's highest visible point
+        // at its own viewport y, biasing the fist down and the extended
+        // fingers up.
         const idx = Math.round(framesP * (count - 1));
         paintAnchored(
           ctx, frames[idx], cw, ch, 1,
-          zoomFor(idx), PER_FRAME_PIVOT_V[idx] ?? 0.9993
+          zoomFor(idx),
+          PER_FRAME_TIP_V[idx] ?? 0.042,
+          PER_FRAME_TIP_Y[idx] ?? 0.5
         );
       }
 
@@ -188,15 +197,22 @@ export function ScrollStage({ progressRef, heroRef }) {
       const assembleMoveP = clamp01((assembleP - 0.3) / 0.7);
       const handDescendVh = assembleMoveP * 110;
 
-      // ---- Shift phase: finale form fades in on the right ----
-      const shiftP = reduce
-        ? (p >= SHIFT_START ? 1 : 0)
-        : clamp01((p - SHIFT_START) / (SHIFT_END - SHIFT_START));
+      // ---- New beats + form: each fades in over its own scroll range ----
+      const phaseP = (start, end) =>
+        reduce
+          ? (p >= start ? 1 : 0)
+          : clamp01((p - start) / (end - start));
+      const statP = phaseP(STAT_START, STAT_END);
+      const pipelineP = phaseP(PIPELINE_START, PIPELINE_END);
+      const videoP = phaseP(VIDEO_START, VIDEO_END);
+      const formP = phaseP(FORM_START, FORM_END);
 
       // ---- Active blurb index (kept in lockstep with the frame index so the
       //      copy label always matches the pose on screen) ----
+      // Blurb 6 ("They still can't feel…") rides the assemble beat; once the
+      // stat beat begins all blurbs fade out (no CSS rule matches index 7+).
       let blurb;
-      if (p >= SHIFT_START) blurb = 7;
+      if (p >= STAT_START) blurb = 7;
       else if (p >= ASSEMBLE_START) blurb = 6;
       else if (s0.frames) {
         const count = s0.frames.length;
@@ -211,7 +227,10 @@ export function ScrollStage({ progressRef, heroRef }) {
         "--assemble-p": assembleP.toFixed(4),
         "--assemble-fade-p": assembleFadeP.toFixed(4),
         "--assemble-move-p": assembleMoveP.toFixed(4),
-        "--shift-p": shiftP.toFixed(4),
+        "--stat-p": statP.toFixed(4),
+        "--pipeline-p": pipelineP.toFixed(4),
+        "--video-p": videoP.toFixed(4),
+        "--form-p": formP.toFixed(4),
         "--hand-descend": `${handDescendVh.toFixed(2)}vh`,
         "--active-blurb": String(blurb)
       });

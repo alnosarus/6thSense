@@ -31,27 +31,20 @@
 
   position: relative;
   background: #000;
-  height: 300vh;
-  cursor: none;
+  height: 560vh;
 }
 
-/* Kill text selection & cursor flicker across the whole hero so the particle
-   trail is the only cursor. Only form controls opt back in. */
+/* Suppress accidental text selection across the hero (still feels like a
+   canvas while scrolling); form controls opt back in. */
 .scroll-hero,
 .scroll-hero * {
   user-select: none;
   -webkit-user-select: none;
-  cursor: none;
 }
 .scroll-hero input,
 .scroll-hero textarea {
   user-select: text;
   -webkit-user-select: text;
-  cursor: text;
-}
-.scroll-hero button,
-.scroll-hero a {
-  cursor: pointer;
 }
 
 .scroll-hero-sticky {
@@ -175,8 +168,8 @@
 .finale-dot--olive {
   background: #7a8f3a;
   box-shadow:
-    0 0 calc(28px * var(--shift-p, 0))
-    rgba(197, 224, 99, calc(0.6 * var(--shift-p, 0)));
+    0 0 calc(28px * var(--form-p, 0))
+    rgba(197, 224, 99, calc(0.6 * var(--form-p, 0)));
   /* Olive waits until browns are moved into place, then fades in. */
   opacity: clamp(0, calc((var(--assemble-p, 0) - 0.7) / 0.3), 1);
 }
@@ -187,9 +180,9 @@
   top: 50%;
   left: 55%;
   right: var(--gutter);
-  transform: translateY(-50%) translateX(calc(-1 * (1 - var(--shift-p, 0)) * 6vw));
+  transform: translateY(-50%) translateX(calc(-1 * (1 - var(--form-p, 0)) * 6vw));
   max-width: 34rem;
-  opacity: var(--shift-p, 0);
+  opacity: var(--form-p, 0);
   pointer-events: auto;
   display: flex;
   flex-direction: column;
@@ -386,7 +379,7 @@
 @media (max-width: 720px) {
   .scroll-hero {
     /* Shorter scroll budget so mobile users don't hit an endless sticky. */
-    height: 240vh;
+    height: 460vh;
   }
 
   /* Blurbs become a full-width centered column that sits above the glove. */
@@ -415,7 +408,7 @@
     max-width: none;
     /* Rebuild the shift transform so translateY doesn't also have to carry
        the -50% center trick used on desktop. */
-    transform: translateY(calc((1 - var(--shift-p, 0)) * 4vh));
+    transform: translateY(calc((1 - var(--form-p, 0)) * 4vh));
   }
 
   /* Darken the tactile-field behind the form so the stat numerals + labels
@@ -469,18 +462,3 @@
   }
 }
 
-/* ---- Touch devices: restore native cursor + don't rely on hover ---- */
-@media (hover: none), (pointer: coarse) {
-  .scroll-hero,
-  .scroll-hero * {
-    cursor: auto;
-  }
-  .scroll-hero button,
-  .scroll-hero a {
-    cursor: pointer;
-  }
-  .scroll-hero input,
-  .scroll-hero textarea {
-    cursor: text;
-  }
-}
