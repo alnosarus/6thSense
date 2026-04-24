@@ -25,8 +25,14 @@ function AppInner() {
 
       <header className={navClassName} role="banner">
         <nav className="nav-flagship-inner" aria-label="Primary">
-          <a className="wordmark wordmark-on-dark" href="#top">
-            6THSENSE
+          <a className="wordmark wordmark-on-dark" href="#top" aria-label="6thSense home">
+            <img
+              className="nav-logo"
+              src="/Logo_Alpha.png"
+              alt=""
+              aria-hidden="true"
+            />
+            <span className="nav-logo-text">6THSENSE</span>
           </a>
           <div className="nav-links nav-links-on-dark">
             <a href="#system" className={navClass("system")}>

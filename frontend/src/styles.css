@@ -263,6 +263,29 @@ h3,
   font-size: 0.72rem;
   font-weight: 600;
   transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Logo_Alpha.png has generous transparent padding around the dot cluster
+   (cluster occupies roughly the center-right of a 1024×1024 canvas), so the
+   rendered size needs to be ~1.6× the visible text height to read as peer.
+   Dark brown dots would vanish on the dark pill, so white-out via filter to
+   match wordmark color. */
+.nav-logo {
+  display: block;
+  height: 1.7rem;
+  width: 1.7rem;
+  object-fit: contain;
+  flex-shrink: 0;
+  margin-left: -0.35rem;
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+}
+
+.nav-logo-text {
+  display: inline-block;
 }
 
 .wordmark-on-dark:hover,
