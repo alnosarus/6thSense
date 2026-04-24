@@ -32,6 +32,10 @@
   position: relative;
   background: #000;
   height: 820vh;
+  /* Quote-logo transform: scale() can overflow horizontally on narrow
+     viewports. Clip at the hero root so the body doesn't acquire a
+     horizontal scrollbar. */
+  overflow-x: clip;
 }
 
 /* Suppress accidental text selection across the hero (still feels like a
@@ -180,33 +184,28 @@
   color: #c5e063;
 }
 
+/* Unified "logo slot": all four source logos render into the same fixed box
+   with object-fit: contain. Each PNG's intrinsic whitespace is absorbed by
+   the slot, so every beat (Amazon → Meta) reads at the same visual weight.
+   The slot is wider than tall to accommodate wordmark logos (Columbia) without
+   letting square-ish marks (Amazon, Meta) dominate. */
 .hero-quote-logo {
-  height: clamp(2.4rem, 4vw, 3.4rem);
-  width: auto;
-  max-width: min(22rem, 70vw);
+  height: clamp(5.5rem, 9vw, 7.5rem);
+  width: clamp(16rem, 28vw, 22rem);
+  max-width: 80vw;
   object-fit: contain;
+  object-position: center;
   opacity: 0.78;
   filter: brightness(0) invert(1);
+  transform-origin: center;
 }
 
-/* Each source's PNG has its own amount of surrounding whitespace, so the
-   actual wordmarks render at different effective sizes at equal container
-   height. Per-source multipliers over the base (~3.4rem) bring them to
-   visual parity: Amazon 3×, Stanford 2×, Meta 5×. */
-.hero-quote-logo[src*="amazon" i] {
-  height: clamp(7.2rem, 12vw, 10.2rem);
-  max-width: min(34rem, 85vw);
-}
-
-.hero-quote-logo[src*="stanford" i] {
-  height: clamp(4.8rem, 8vw, 6.8rem);
-  max-width: min(28rem, 80vw);
-}
-
-.hero-quote-logo[src*="meta" i] {
-  height: clamp(12rem, 20vw, 17rem);
-  max-width: min(42rem, 92vw);
-}
+/* PNG-specific scale compensation: identical slot footprint, but the
+   rendered wordmark is up-scaled for sources whose PNGs bake in large
+   transparent margins. Targets visual parity with Columbia/Stanford
+   (which have tight crops and render near slot edges). */
+.hero-quote-logo[src*="amazon" i] { transform: scale(1.35); }
+.hero-quote-logo[src*="meta" i]   { transform: scale(1.8); }
 
 .hero-quote-attr {
   margin: -0.15rem 0 0;
@@ -558,8 +557,11 @@
   }
 
   .hero-quote-logo {
-    height: clamp(2rem, 6vw, 2.8rem);
-    max-width: 80vw;
+    height: clamp(3.8rem, 14vw, 5.2rem);
+    /* Keep slot narrow enough that 1.8× Meta scale still fits within viewport
+       (slot × 1.8 ≤ ~95vw → slot ≤ ~52vw). */
+    width: clamp(10rem, 50vw, 16rem);
+    max-width: 52vw;
   }
 
   .hero-pipeline {

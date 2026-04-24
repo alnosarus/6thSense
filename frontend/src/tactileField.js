@@ -12,15 +12,6 @@ const TWINKLE_ALPHA = 0.35;    // ±alpha swing from the twinkle wave
 const TWINKLE_SIZE = 0.22;     // ±size swing (fraction of base)
 const BOB_AMPLITUDE = 2.5;     // CSS px — sub-pixel water ripple
 
-// Cursor trail — random digits 1–9 are dropped at the pointer each few frames
-// and fade out in place. Reads like code printing under the hand.
-const TRAIL_SPAWN_EVERY = 12;      // spawn one digit every N frames
-const TRAIL_MAX = 40;
-const TRAIL_LIFE_DECAY = 0.006;    // ~2.8 s life at 60 fps
-const TRAIL_FONT_PX = 16;
-const TRAIL_FONT =
-  "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
-const TRAIL_COLOR = "#ffffff";
 const EDGE_COLOR = "197, 224, 99";   // #c5e063 lime, as r,g,b for rgba()
 const NODE_PALETTE = [
   "#c5e063", // brand lime
@@ -35,8 +26,6 @@ export function initTactileField(canvas) {
   if (!ctx) return null;
 
   const nodes = [];
-  const trailDigits = [];       // transient { x, y, digit, life } trail glyphs
-  let trailFrameCounter = 0;
 
   const state = {
     w: 0, h: 0,                // CSS pixels
@@ -159,37 +148,6 @@ export function initTactileField(canvas) {
         ctx.beginPath();
         ctx.arc(rx, ry, radius, 0, Math.PI * 2);
         ctx.fill();
-      }
-
-      // Cursor trail — drop a random digit 1–9 at the pointer every few frames
-      // and fade it out in place.
-      trailFrameCounter++;
-      if (state.pressure > 0.1
-          && trailFrameCounter % TRAIL_SPAWN_EVERY === 0
-          && trailDigits.length < TRAIL_MAX) {
-        trailDigits.push({
-          x: state.pointerX,
-          y: state.pointerY,
-          digit: String(1 + Math.floor(Math.random() * 9)),
-          life: 1.0
-        });
-      }
-      if (trailDigits.length > 0) {
-        ctx.font = `${TRAIL_FONT_PX}px ${TRAIL_FONT}`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = TRAIL_COLOR;
-        for (let i = trailDigits.length - 1; i >= 0; i--) {
-          const d = trailDigits[i];
-          d.life -= TRAIL_LIFE_DECAY;
-          if (d.life <= 0) {
-            trailDigits.splice(i, 1);
-            continue;
-          }
-          ctx.globalAlpha = d.life * 0.9;
-          ctx.fillText(d.digit, d.x, d.y);
-        }
-        ctx.globalAlpha = 1;
       }
 
       state.lastT = timeSec;

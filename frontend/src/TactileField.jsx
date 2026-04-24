@@ -44,13 +44,11 @@ export function TactileField() {
       const rect = canvas.getBoundingClientRect();
       pointerX = e.clientX - rect.left;
       pointerY = e.clientY - rect.top;
-      // The emitter is active only where CSS has hidden the real cursor. If
-      // the element under the pointer has any other cursor (text, pointer,
-      // auto…), let the native cursor do the talking.
-      const cursor = e.target
-        ? window.getComputedStyle(e.target).cursor
-        : "none";
-      targetPressure = cursor === "none" ? 1 : 0;
+      // Drive the node-enlargement pressure whenever the pointer is over the
+      // hero region. Native cursor still shows; the field just lights up where
+      // the pointer is.
+      const inHero = !!(e.target && e.target.closest && e.target.closest(".scroll-hero"));
+      targetPressure = inHero ? 1 : 0;
     };
     const handleLeave = () => { targetPressure = 0; };
 
