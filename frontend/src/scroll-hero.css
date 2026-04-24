@@ -156,10 +156,10 @@
 }
 
 .hero-finale-stat-logo {
-  height: clamp(1.9rem, 3vw, 2.6rem);
+  height: clamp(2.8rem, 4.5vw, 4rem);
   width: auto;
-  margin-top: 0.65rem;
-  opacity: 0.72;
+  margin-top: 0.9rem;
+  opacity: 0.82;
   filter: brightness(0) invert(1);
 }
 
