@@ -3,14 +3,24 @@ import { ScrollHero } from "./ScrollHero.jsx";
 import { OpenerAnimation } from "./OpenerAnimation.jsx";
 import ScrollProgress from "./ScrollProgress.jsx";
 import { useRevealNav } from "./useRevealNav.js";
-import { useActiveNavSection } from "./useActiveNavSection.js";
 
 function AppInner() {
   const reduceMotion = useReducedMotion();
   const { className: navClassName, pastStory } = useRevealNav({ reduceMotion: !!reduceMotion });
-  const activeNavKey = useActiveNavSection();
 
-  const navClass = (key) => (activeNavKey === key ? "nav-link--active" : "");
+  // "Talk to us" CTA scrolls to the form at the end of the hero's sticky
+  // scroll range. Progress 0.94–1.00 is the form beat; 0.99 lands with the
+  // form fully visible without sitting exactly on the scroll-out edge.
+  const scrollToWaitlist = (event) => {
+    event.preventDefault();
+    const hero = document.querySelector(".scroll-hero");
+    if (!hero) return;
+    const total = hero.offsetHeight - window.innerHeight;
+    window.scrollTo({
+      top: hero.offsetTop + total * 0.99,
+      behavior: "smooth"
+    });
+  };
 
   return (
     <>
@@ -35,19 +45,11 @@ function AppInner() {
             <span className="nav-logo-text">6THSENSE</span>
           </a>
           <div className="nav-links nav-links-on-dark">
-            <a href="#system" className={navClass("system")}>
-              System
-            </a>
-            <a href="#catalog" className={navClass("catalog")}>
-              Catalog
-            </a>
-            <a href="#credibility" className={navClass("credibility")}>
-              Credibility
-            </a>
-            <a href="#faq" className={navClass("faq")}>
-              FAQ
-            </a>
-            <a href="#waitlist" className="nav-cta nav-cta-on-dark">
+            <a
+              href="#waitlist"
+              className="nav-cta nav-cta-on-dark"
+              onClick={scrollToWaitlist}
+            >
               Talk to us
             </a>
           </div>
