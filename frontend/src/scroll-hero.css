@@ -189,6 +189,25 @@
   filter: brightness(0) invert(1);
 }
 
+/* Each source's PNG has its own amount of surrounding whitespace, so the
+   actual wordmarks render at different effective sizes at equal container
+   height. Per-source multipliers over the base (~3.4rem) bring them to
+   visual parity: Amazon 3×, Stanford 2×, Meta 5×. */
+.hero-quote-logo[src*="amazon" i] {
+  height: clamp(7.2rem, 12vw, 10.2rem);
+  max-width: min(34rem, 85vw);
+}
+
+.hero-quote-logo[src*="stanford" i] {
+  height: clamp(4.8rem, 8vw, 6.8rem);
+  max-width: min(28rem, 80vw);
+}
+
+.hero-quote-logo[src*="meta" i] {
+  height: clamp(12rem, 20vw, 17rem);
+  max-width: min(42rem, 92vw);
+}
+
 .hero-quote-attr {
   margin: -0.15rem 0 0;
   font-family: var(--font-body);
