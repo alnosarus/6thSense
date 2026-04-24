@@ -16,16 +16,16 @@ import { useState } from "react";
  */
 // Fingertip coords are normalized (u, v) in the source PNG (2752×1536),
 // measured once by alpha-scanning the open-hand frame (frame-005).
-// End positions: tight stair on upper-left with 3% horizontal + 6% vertical
-// step, mirroring the opener's 180px logo grid.
-// Ordered bottom-left → top-right (olive last).
+// End positions: compact stair tucked in the top-left corner so the new
+// beats (stat / pipeline / video) own the rest of the viewport. 3% horizontal
+// step, 5% vertical step. Ordered bottom-left → top-right (olive last).
 const dots = [
-  { tipU: 0.6235, tipV: 0.1810, endLeft: 18, endTop: 56, color: "brown" }, // pinky
-  { tipU: 0.5683, tipV: 0.0879, endLeft: 21, endTop: 56, color: "brown" }, // ring
-  { tipU: 0.5058, tipV: 0.0417, endLeft: 21, endTop: 50, color: "brown" }, // middle
-  { tipU: 0.4415, tipV: 0.0703, endLeft: 24, endTop: 50, color: "brown" }, // index
-  { tipU: 0.3656, tipV: 0.3151, endLeft: 24, endTop: 44, color: "brown" }, // thumb
-  { startLeft: 27, startTop: 44, endLeft: 27, endTop: 44, color: "olive" }
+  { tipU: 0.6235, tipV: 0.1810, endLeft: 4,  endTop: 18, color: "brown" }, // pinky
+  { tipU: 0.5683, tipV: 0.0879, endLeft: 7,  endTop: 18, color: "brown" }, // ring
+  { tipU: 0.5058, tipV: 0.0417, endLeft: 7,  endTop: 13, color: "brown" }, // middle
+  { tipU: 0.4415, tipV: 0.0703, endLeft: 10, endTop: 13, color: "brown" }, // index
+  { tipU: 0.3656, tipV: 0.3151, endLeft: 10, endTop: 8,  color: "brown" }, // thumb
+  { startLeft: 13, startTop: 8, endLeft: 13, endTop: 8, color: "olive" }
 ];
 
 export function HeroFinale() {

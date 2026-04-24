@@ -197,15 +197,18 @@ export function ScrollStage({ progressRef, heroRef }) {
       const assembleMoveP = clamp01((assembleP - 0.3) / 0.7);
       const handDescendVh = assembleMoveP * 110;
 
-      // ---- New beats + form: each fades in over its own scroll range ----
-      const phaseP = (start, end) =>
-        reduce
-          ? (p >= start ? 1 : 0)
-          : clamp01((p - start) / (end - start));
-      const statP = phaseP(STAT_START, STAT_END);
-      const pipelineP = phaseP(PIPELINE_START, PIPELINE_END);
-      const videoP = phaseP(VIDEO_START, VIDEO_END);
-      const formP = phaseP(FORM_START, FORM_END);
+      // ---- New beats: each section is visible only while scroll is inside
+      //      its window. Binary (in/out) — the CSS transition on
+      //      .hero-section smooths the edges. Same pattern as --active-blurb. ----
+      const windowP = (start, end) => (p >= start && p < end ? 1 : 0);
+      const statP = windowP(STAT_START, STAT_END);
+      const pipelineP = windowP(PIPELINE_START, PIPELINE_END);
+      const videoP = windowP(VIDEO_START, VIDEO_END);
+      // Form is the terminal beat — keep its progressive fade-in so the CTA
+      // slides/fades as it settles.
+      const formP = reduce
+        ? (p >= FORM_START ? 1 : 0)
+        : clamp01((p - FORM_START) / (FORM_END - FORM_START));
 
       // ---- Active blurb index (kept in lockstep with the frame index so the
       //      copy label always matches the pose on screen) ----
