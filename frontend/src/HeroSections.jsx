@@ -53,3 +53,14 @@ export function PipelineSection() {
     </section>
   );
 }
+
+export function VideoSection() {
+  return (
+    <section className="hero-section hero-video">
+      <h2 className="hero-video-title">See the data.</h2>
+      <div className="hero-video-frame" aria-hidden="true">
+        <span className="hero-video-frame-label">Sample dataset preview</span>
+      </div>
+    </section>
+  );
+}
