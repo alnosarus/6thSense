@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { ScrollStage } from "./ScrollStage.jsx";
 import { HeroBlurbs } from "./HeroBlurbs.jsx";
 import { HeroFinale } from "./HeroFinale.jsx";
+import { StatSection } from "./HeroSections.jsx";
 import { TactileField } from "./TactileField.jsx";
 import { useScrollProgress } from "./useScrollProgress.js";
 
@@ -23,6 +24,7 @@ export function ScrollHero() {
           <ScrollStage progressRef={progressRef} heroRef={heroRef} />
         </div>
         <HeroBlurbs />
+        <StatSection />
         <HeroFinale />
       </div>
     </div>

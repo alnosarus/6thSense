@@ -133,6 +133,29 @@
   transform: translateY(0);
 }
 
+/* ---- New scrubbed beats (stat / pipeline / video) ---- */
+
+.hero-section {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  padding: 0 var(--gutter);
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(.22,1,.36,1);
+}
+
+.hero-stat {
+  left: 50%;
+  width: 50%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.6rem;
+  opacity: var(--stat-p, 0);
+  transform: translateY(calc((1 - var(--stat-p, 0)) * 12px));
+}
+
 /* ---- Finale: dots (left) + form (right) ---- */
 
 .hero-finale {

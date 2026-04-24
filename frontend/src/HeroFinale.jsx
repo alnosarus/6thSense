@@ -72,29 +72,6 @@ export function HeroFinale() {
       })}
 
       <form className="hero-finale-form" onSubmit={onSubmit} noValidate>
-        <div className="hero-finale-stat" aria-label="Vision alone solves 30 percent of manipulation tasks; with touch, 90 percent. Amazon Vulcan.">
-          <div className="hero-finale-stat-unit">
-            <span className="hero-finale-stat-label hero-finale-stat-label--left">
-              vision<br />alone
-            </span>
-            <span className="hero-finale-stat-num">
-              30<span className="hero-finale-stat-pct">%</span>
-            </span>
-          </div>
-          <span className="hero-finale-stat-arrow" aria-hidden="true">→</span>
-          <div className="hero-finale-stat-unit hero-finale-stat-unit--accent">
-            <span className="hero-finale-stat-num">
-              90<span className="hero-finale-stat-pct">%</span>
-            </span>
-            <span className="hero-finale-stat-label hero-finale-stat-label--right">
-              with<br />touch
-            </span>
-          </div>
-        </div>
-        <p className="hero-finale-stat-attr">
-          Amazon Vulcan &middot; manipulation tasks
-        </p>
-
         <h2 className="hero-finale-title">Give your robot a sixth sense.</h2>
         <p className="hero-finale-subtitle">
           We build the tactile dataset that closes the gap.
