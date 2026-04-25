@@ -37,7 +37,7 @@ export function VulcanQuote() {
   return (
     <QuoteBeat
       progressVar="--vulcan-p"
-      logoSrc="/amazon-robotics-logo.png"
+      logoSrc="/logos/amazon-robotics-logo.png"
       logoAlt="Amazon Robotics"
       attribution="Vulcan · manipulation tasks"
     >
@@ -51,7 +51,7 @@ export function ColumbiaQuote() {
   return (
     <QuoteBeat
       progressVar="--columbia-p"
-      logoSrc="/Columbia.png"
+      logoSrc="/logos/Columbia.png"
       logoAlt="Columbia Engineering · Robotic Manipulation and Mobility Lab"
       attribution="Matei Ciocarlie"
     >
@@ -65,7 +65,7 @@ export function StanfordQuote() {
   return (
     <QuoteBeat
       progressVar="--stanford-p"
-      logoSrc="/stanford.avif"
+      logoSrc="/logos/stanford.avif"
       logoAlt="Stanford"
       attribution="DenseTact · Kennedy Lab"
     >
@@ -80,7 +80,7 @@ export function MetaQuote() {
   return (
     <QuoteBeat
       progressVar="--meta-p"
-      logoSrc="/Meta.png"
+      logoSrc="/logos/Meta.png"
       logoAlt="Meta AI"
       attribution="DIGIT · PyTouch"
     >
@@ -115,6 +115,32 @@ export function VideoSection() {
       <div className="hero-video-frame" aria-hidden="true">
         <span className="hero-video-frame-label">Sample dataset preview</span>
       </div>
+    </section>
+  );
+}
+
+const BACKERS = [
+  { src: "/logos/Entrepreneurs_First_Logo.png", alt: "Entrepreneurs First" },
+  { src: "/logos/uchicago.png",                  alt: "The University of Chicago" },
+  { src: "/logos/Gtech.png",                     alt: "Georgia Tech" }
+];
+
+export function BackedBySection() {
+  return (
+    <section className="hero-section hero-backed">
+      <p className="hero-backed-label">Backed by</p>
+      <ul className="hero-backed-row">
+        {BACKERS.map((b) => (
+          <li key={b.src} className="hero-backed-item">
+            <img
+              className="hero-backed-logo"
+              src={b.src}
+              alt={b.alt}
+              loading="lazy"
+            />
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

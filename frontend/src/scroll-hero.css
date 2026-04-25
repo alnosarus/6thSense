@@ -31,7 +31,7 @@
 
   position: relative;
   background: #000;
-  height: 820vh;
+  height: 920vh;
   /* Quote-logo transform: scale() can overflow horizontally on narrow
      viewports. Clip at the hero root so the body doesn't acquire a
      horizontal scrollbar. */
@@ -304,6 +304,57 @@
   color: rgba(241, 241, 236, 0.45);
 }
 
+/* ---- Backed-by beat: small label over a row of partner / backer logos ---- */
+
+.hero-backed {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  opacity: var(--backed-p, 0);
+  transform: translateY(calc((1 - var(--backed-p, 0)) * 12px));
+}
+
+.hero-backed-label {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: clamp(0.7rem, 1vw, 0.85rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(241, 241, 236, 0.55);
+}
+
+.hero-backed-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2rem, 6vw, 5rem);
+  flex-wrap: wrap;
+  max-width: min(60rem, 90vw);
+}
+
+.hero-backed-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Each backer logo renders into a fixed-height slot. object-fit: contain
+   keeps each brand's intrinsic aspect ratio. Logos are shown at their
+   native colors so each backer's brand identity comes through. */
+.hero-backed-logo {
+  display: block;
+  height: clamp(2.4rem, 5vw, 3.6rem);
+  width: auto;
+  max-width: clamp(8rem, 18vw, 14rem);
+  object-fit: contain;
+  opacity: 0.92;
+}
+
 /* ---- Finale: dots (left) + form (right) ---- */
 
 .hero-finale {
@@ -478,7 +529,7 @@
 @media (max-width: 720px) {
   .scroll-hero {
     /* Shorter scroll budget so mobile users don't hit an endless sticky. */
-    height: 680vh;
+    height: 760vh;
   }
 
   /* Blurbs become a full-width centered column that sits above the glove. */
@@ -590,6 +641,23 @@
 
   .hero-video-frame {
     max-width: 100%;
+  }
+
+  .hero-backed {
+    padding: calc(var(--nav-h, 3.5rem) + 1.5rem) 1.25rem 1.5rem;
+    gap: 1.25rem;
+  }
+
+  /* Stack the three logos vertically on phones; horizontal row spills past
+     a 360-ish viewport once each logo's max-width is honored. */
+  .hero-backed-row {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .hero-backed-logo {
+    height: clamp(2.4rem, 9vw, 3.6rem);
+    max-width: 70vw;
   }
 }
 

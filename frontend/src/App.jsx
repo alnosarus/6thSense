@@ -38,7 +38,7 @@ function AppInner() {
           <a className="wordmark wordmark-on-dark" href="#top" aria-label="6thSense home">
             <img
               className="nav-logo"
-              src="/Logo_Alpha.png"
+              src="/logos/Logo_Alpha.png"
               alt=""
               aria-hidden="true"
             />

@@ -8,7 +8,8 @@ import {
   StanfordQuote,
   MetaQuote,
   PipelineSection,
-  VideoSection
+  VideoSection,
+  BackedBySection
 } from "./HeroSections.jsx";
 import { TactileField } from "./TactileField.jsx";
 import { useScrollProgress } from "./useScrollProgress.js";
@@ -37,6 +38,7 @@ export function ScrollHero() {
         <MetaQuote />
         <PipelineSection />
         <VideoSection />
+        <BackedBySection />
         <HeroFinale />
       </div>
     </div>

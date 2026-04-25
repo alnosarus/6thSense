@@ -2,23 +2,25 @@ import { useEffect, useRef } from "react";
 import { scrollStages } from "./scrollStages.js";
 import { useFramePreloader } from "./useFramePreloader.js";
 
-// Scroll-progress phase boundaries. Nine beats across a 820vh sticky budget.
-// Each quote beat is a ~10% slice (~82vh) that matches the pacing of a blurb.
-const FRAMES_END = 0.28;
-const ASSEMBLE_START = 0.28;
-const ASSEMBLE_END = 0.36;    // hand descends off-screen, dots suppressed
-const VULCAN_START = 0.36;
-const VULCAN_END = 0.46;
-const COLUMBIA_START = 0.46;
-const COLUMBIA_END = 0.56;
-const STANFORD_START = 0.56;
-const STANFORD_END = 0.66;
-const META_START = 0.66;
-const META_END = 0.76;
-const PIPELINE_START = 0.76;
-const PIPELINE_END = 0.86;
-const VIDEO_START = 0.86;
-const VIDEO_END = 0.94;
+// Scroll-progress phase boundaries. Ten beats across a 920vh sticky budget.
+// Each main beat is ~9% (~83vh) which matches the pacing of a blurb.
+const FRAMES_END = 0.25;
+const ASSEMBLE_START = 0.25;
+const ASSEMBLE_END = 0.32;    // hand descends off-screen, dots suppressed
+const VULCAN_START = 0.32;
+const VULCAN_END = 0.41;
+const COLUMBIA_START = 0.41;
+const COLUMBIA_END = 0.50;
+const STANFORD_START = 0.50;
+const STANFORD_END = 0.59;
+const META_START = 0.59;
+const META_END = 0.68;
+const PIPELINE_START = 0.68;
+const PIPELINE_END = 0.77;
+const VIDEO_START = 0.77;
+const VIDEO_END = 0.86;
+const BACKED_START = 0.86;
+const BACKED_END = 0.94;
 const FORM_START = 0.94;
 const FORM_END = 1.00;
 
@@ -260,6 +262,7 @@ export function ScrollStage({ progressRef, heroRef }) {
       const metaP = windowP(META_START, META_END);
       const pipelineP = windowP(PIPELINE_START, PIPELINE_END);
       const videoP = windowP(VIDEO_START, VIDEO_END);
+      const backedP = windowP(BACKED_START, BACKED_END);
       // Form is the terminal beat — keep its progressive fade-in so the CTA
       // slides/fades as it settles.
       const formP = reduce
@@ -292,6 +295,7 @@ export function ScrollStage({ progressRef, heroRef }) {
         "--meta-p": metaP.toFixed(4),
         "--pipeline-p": pipelineP.toFixed(4),
         "--video-p": videoP.toFixed(4),
+        "--backed-p": backedP.toFixed(4),
         "--form-p": formP.toFixed(4),
         "--hand-descend": `${handDescendVh.toFixed(2)}vh`,
         "--active-blurb": String(blurb)
