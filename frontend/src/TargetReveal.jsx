@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useAnimate, useReducedMotion } from "framer-motion";
 
 const ACCENT = "#c5e063";
-const SEQUENCE_GAP_MS = 1400;
+const SEQUENCE_GAP_MS = 1000;
 const OPENER_DELAY_MS = 4000;
 
 /**
@@ -139,7 +139,7 @@ export function TargetReveal({ text, blurbIndex, order }) {
       await animate(
         lineRef.current,
         { scaleY: 1, opacity: 1 },
-        { duration: 1.5, ease: [0.16, 1, 0.3, 1] }
+        { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
       );
       if (cancelled) return;
 
@@ -157,8 +157,8 @@ export function TargetReveal({ text, blurbIndex, order }) {
         ],
         ...letters.map((el, i) => [
           el,
-          { opacity: 1 },
-          { duration: 0.1, at: `<+${i * 0.08}` },
+          { opacity: 0.9 },
+          { duration: 0.1, at: `<+${i * 0.09}` },
         ]),
       ]);
       if (cancelled) return;
