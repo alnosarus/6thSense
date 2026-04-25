@@ -348,9 +348,9 @@
    native colors so each backer's brand identity comes through. */
 .hero-backed-logo {
   display: block;
-  height: clamp(2.4rem, 5vw, 3.6rem);
+  height: clamp(3.4rem, 7vw, 5.2rem);
   width: auto;
-  max-width: clamp(8rem, 18vw, 14rem);
+  max-width: clamp(11rem, 24vw, 19rem);
   object-fit: contain;
   opacity: 0.92;
 }
@@ -656,8 +656,8 @@
   }
 
   .hero-backed-logo {
-    height: clamp(2.4rem, 9vw, 3.6rem);
-    max-width: 70vw;
+    height: clamp(3.4rem, 13vw, 5.2rem);
+    max-width: 80vw;
   }
 }
 

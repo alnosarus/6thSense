@@ -121,7 +121,7 @@ export function VideoSection() {
 
 const BACKERS = [
   { src: "/logos/Entrepreneurs_First_Logo.png", alt: "Entrepreneurs First" },
-  { src: "/logos/uchicago.png",                  alt: "The University of Chicago" },
+  { src: "/logos/University Logo_2Color_DarkGreystone_WhiteFill_RGB.png", alt: "The University of Chicago" },
   { src: "/logos/Gtech.png",                     alt: "Georgia Tech" }
 ];
 
