@@ -2,19 +2,21 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useAnimate, useReducedMotion } from "framer-motion";
 
 const ACCENT = "#c5e063";
-const SEQUENCE_GAP_MS = 1100;
+const SEQUENCE_GAP_MS = 1400;
 const OPENER_DELAY_MS = 4000;
 
 /**
  * In-text slider reveal for a single target word/phrase inside a hero blurb.
  *
  * Choreography (re-runs each time the blurb at `blurbIndex` becomes active):
- *   wait order * 1100ms (per-blurb sequencing)
+ *   wait order * 1400ms (per-blurb sequencing)
  *   0.0 -> 0.25s   line draws in:  scaleY 0 -> 1, opacity 0 -> 1.
- *   0.25 -> 0.95s  slide + reveal: line left 0% -> 100% (ease-out); letters
- *                                   opacity 0 -> 1 with 34ms-per-letter
- *                                   stagger as the line slides over them.
- *   0.95 -> 1.10s  line fades:     opacity 1 -> 0 at the right edge.
+ *   0.25 -> 1.25s  slide + reveal: line left 0% -> 100% (ease-out, 1.0s);
+ *                                   letters opacity 0 -> 1 with 80ms-per-
+ *                                   letter stagger and 0.2s per-letter fade
+ *                                   so the bar's leading edge stays close
+ *                                   to the most-recently-revealed letter.
+ *   1.25 -> 1.40s  line fades:     opacity 1 -> 0 at the right edge.
  *
  * Triggering: a MutationObserver on .scroll-hero's style attribute watches
  * --active-blurb. Each transition into String(blurbIndex) increments
@@ -115,19 +117,22 @@ export function TargetReveal({ text, blurbIndex, order }) {
       );
       if (cancelled) return;
 
-      // Phase 2: line slides; letters fade in with a 34ms-per-letter
-      // stagger. Same ease-out curve on the line so it decelerates
+      // Phase 2: line slides; letters fade in with an 80ms-per-letter
+      // stagger and a snappier per-letter fade. Bar slowed (1.0s) and
+      // letter fade shortened (0.2s) so the bar's leading edge stays
+      // close to the most-recently-revealed letter instead of racing
+      // ahead. Same ease-out curve on the line so it still decelerates
       // toward the right edge.
       await animate([
         [
           lineRef.current,
           { left: "100%" },
-          { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+          { duration: 1.0, ease: [0.22, 1, 0.36, 1] },
         ],
         ...letters.map((el, i) => [
           el,
           { opacity: 1 },
-          { duration: 0.4, at: `<+${i * 0.034}` },
+          { duration: 0.2, at: `<+${i * 0.08}` },
         ]),
       ]);
       if (cancelled) return;
