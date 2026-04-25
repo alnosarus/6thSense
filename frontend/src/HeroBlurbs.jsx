@@ -1,5 +1,3 @@
-import { GlassCupReveal } from "./GlassCupReveal.jsx";
-
 /**
  * Right-side copy that swaps with scroll beats. Each blurb has a data-index
  * and is visible only when --active-blurb matches. Selection is done via a
@@ -7,15 +5,12 @@ import { GlassCupReveal } from "./GlassCupReveal.jsx";
  *
  * Five blurbs map 1:1 with the five hand poses in narrative order:
  * pointy, +middle, +ring, +pinky, open palm.
- *
- * Blurb 0 contains an inline animation on the phrase "glass cup" — see
- * GlassCupReveal.jsx for the choreography.
  */
 export function HeroBlurbs() {
   return (
     <div className="hero-blurbs" aria-live="polite">
       <p className="hero-blurb" data-index="0">
-        Robots can tell the difference between a <GlassCupReveal /> and a paper cup.
+        Robots tell the difference between a glass cup and a paper cup.
       </p>
       <p className="hero-blurb" data-index="1">
         But they do it by looking, not by feeling.
