@@ -114,20 +114,22 @@ export function TargetReveal({ text, blurbIndex, order }) {
     let cancelled = false;
 
     const run = async () => {
-      // Snap to initial state FIRST, before the order wait. Target 1
-      // (order=1) otherwise stays at its previous "fully revealed" state
-      // for the full 1.4s wait — looking permanently visible while
-      // target 0 plays. Resetting before the wait keeps both targets
-      // invisible until each one's turn to animate.
-      await animate([
-        [
-          lineRef.current,
-          { left: "0%", scaleY: 0, opacity: 0 },
-          { duration: 0 },
-        ],
-        ...letters.map((el) => [el, { opacity: 0 }, { duration: 0, at: "<" }]),
-      ]);
-      if (cancelled) return;
+      // Snap to initial state via direct DOM writes — synchronous and
+      // unambiguous. framer-motion's duration:0 animate has a subtle race
+      // for target 0 (no order delay): the snap doesn't reliably paint
+      // before Phase 1's animate starts, so Phase 1 reads stale post-
+      // Phase-3 values (scaleY=1, left=100%, opacity=0) and degenerates
+      // to a fade-only at the right edge of the word — the bar appears
+      // not to reappear at all. Target 1's 1000ms order wait masks the
+      // race. Direct style writes apply atomically.
+      if (lineRef.current) {
+        lineRef.current.style.left = "0%";
+        lineRef.current.style.opacity = "0";
+        lineRef.current.style.transform = "scaleY(0)";
+      }
+      letters.forEach((el) => {
+        if (el) el.style.opacity = "0";
+      });
 
       // Wait for our slot in the per-blurb sequence.
       if (order > 0) {
