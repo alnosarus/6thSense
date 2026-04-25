@@ -5,18 +5,22 @@ import { motion, useAnimate, useReducedMotion } from "framer-motion";
  * In-text animation for the phrase "glass cup" inside hero blurb 0.
  *
  * Choreography (re-runs each time blurb 0 becomes the active blurb):
- *   0.0 -> 0.9s   slide:        cup translates left to 100% of phrase width;
- *                                water sloshes (skewY 0 -> -8 -> 0);
- *                                reveal layer's clip-path inset shrinks 100% -> 0%.
- *   0.9 -> 1.0s   anticipation: cup leans forward (rotate 0 -> 5deg).
- *   1.0 -> 1.6s   tip + fall:   cup rotates 5 -> 85deg, drifts to left:110%,
- *                                falls y: 0 -> 200%; water fades to 0;
- *                                four droplets arc out from the rim.
+ *   0.0 -> 1.5s   slide:        cup translates left to 100% of phrase width;
+ *                                water sloshes (skewY 0 -> -8 -> 0); reveal
+ *                                layer's clip-path inset shrinks 100% -> 0%.
+ *                                Cup and reveal share the same linear ease
+ *                                so the cup's right edge is exactly where
+ *                                the text appears.
+ *   1.5 -> 1.6s   anticipation: cup leans forward (rotate 0 -> 5deg).
+ *   1.6 -> 2.3s   tip + fall:   cup rotates 5 -> 85deg, drifts to left:110%,
+ *                                falls y: 0 -> 120vh, opacity 1 -> 0; water
+ *                                fades to 0; four droplets arc out from rim.
  *
  * Triggering: a MutationObserver on .scroll-hero's style attribute watches
  * --active-blurb. Each transition into "0" increments playKey, which the
- * animation effect uses as its dependency. A seed-on-mount path handles the
- * case where blurb 0 is already active before the observer attaches.
+ * animation effect uses as its dependency. The seed-on-mount path defers by
+ * ~4s on fresh tabs so the cup animation does not play behind the brand
+ * opener overlay (OpenerAnimation runs ~3.8s on first load per session).
  *
  * Reduced motion: returns plain text, no SVG, no observer.
  */
@@ -40,7 +44,26 @@ export function GlassCupReveal() {
     const readActive = () =>
       root.style.getPropertyValue("--active-blurb").trim() === "0";
 
-    if (readActive()) setPlayKey((k) => k + 1);
+    // Fresh-tab opener (OpenerAnimation.jsx) plays for ~3.8s while body
+    // scroll is locked at scrollY=0. Defer the seed-on-mount until the
+    // opener finishes, otherwise the cup animation burns invisibly behind
+    // the overlay.
+    const openerWillPlay =
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("sixthsense.openerSeen") !== "1" &&
+      window.scrollY === 0;
+    const seedDelayMs = openerWillPlay ? 4000 : 0;
+
+    const seedIfActive = () => {
+      if (readActive()) setPlayKey((k) => k + 1);
+    };
+
+    let seedTimer = null;
+    if (seedDelayMs > 0) {
+      seedTimer = setTimeout(seedIfActive, seedDelayMs);
+    } else {
+      seedIfActive();
+    }
 
     let wasActive = readActive();
     const obs = new MutationObserver(() => {
@@ -49,7 +72,10 @@ export function GlassCupReveal() {
       wasActive = isActive;
     });
     obs.observe(root, { attributes: true, attributeFilter: ["style"] });
-    return () => obs.disconnect();
+    return () => {
+      obs.disconnect();
+      if (seedTimer) clearTimeout(seedTimer);
+    };
   }, [prefersReducedMotion]);
 
   // Animation timeline: re-runs whenever playKey increments.
@@ -58,12 +84,15 @@ export function GlassCupReveal() {
     if (!cupRef.current || !waterRef.current || !revealRef.current) return;
 
     const droplets = dropletRefs.current.filter(Boolean);
+    let cancelled = false;
 
     const run = async () => {
       // Snap to initial state — handles mid-animation re-entry cleanly.
+      // Reset includes opacity:1 on the cup so a re-entry after the fall
+      // (which faded opacity to 0) shows the cup back at full visibility.
       await animate(
         [
-          [cupRef.current, { left: "0%", y: 0, rotate: 0 }, { duration: 0 }],
+          [cupRef.current, { left: "0%", y: 0, rotate: 0, opacity: 1 }, { duration: 0 }],
           [waterRef.current, { skewY: 0, opacity: 1 }, { duration: 0, at: "<" }],
           [
             revealRef.current,
@@ -77,35 +106,41 @@ export function GlassCupReveal() {
           ]),
         ]
       );
+      if (cancelled) return;
 
-      // Slide phase — cup, water slosh, reveal all concurrent.
+      // Slide phase. Cup left and reveal clip-path share the SAME duration
+      // and linear ease so they advance in lockstep — the cup's right edge
+      // is always exactly where the text begins to appear.
       await animate([
         [
           cupRef.current,
           { left: "100%" },
-          { duration: 0.9, ease: [0.4, 0, 0.2, 1] },
+          { duration: 1.5, ease: "linear" },
         ],
         [
           waterRef.current,
           { skewY: [0, -8, 0] },
-          { duration: 0.9, at: "<" },
+          { duration: 1.5, at: "<" },
         ],
         [
           revealRef.current,
           { clipPath: "inset(0 0% 0 0)" },
-          { duration: 0.9, at: "<", ease: "linear" },
+          { duration: 1.5, at: "<", ease: "linear" },
         ],
       ]);
+      if (cancelled) return;
 
       // Anticipation lean.
       await animate(cupRef.current, { rotate: 5 }, { duration: 0.1 });
+      if (cancelled) return;
 
-      // Tip + fall + spill — concurrent.
+      // Tip + fall + spill. y:120vh guarantees the cup exits below any
+      // viewport, and opacity:0 ensures it does not linger as a stuck SVG.
       await animate([
         [
           cupRef.current,
-          { rotate: 85, left: "110%", y: "200%" },
-          { duration: 0.6, ease: [0.55, 0, 0.85, 0.4] },
+          { rotate: 85, left: "110%", y: "120vh", opacity: 0 },
+          { duration: 0.7, ease: [0.55, 0, 0.85, 0.4] },
         ],
         [
           waterRef.current,
@@ -125,6 +160,10 @@ export function GlassCupReveal() {
     };
 
     run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [playKey, prefersReducedMotion, animate]);
 
   if (prefersReducedMotion) {
