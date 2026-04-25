@@ -66,6 +66,12 @@ const PER_FRAME_TIP_Y = [0.58, 0.15, 0.15, 0.15, 0.15, 0.15];
 // Per-frame zoom multiplier (fist was generated bigger than extended poses).
 const PER_FRAME_ZOOM = [0.75, 1.0, 1.0, 1.0, 1.0, 1.0];
 
+// Narrative beat → asset index. The hand transition plays asset frames in
+// this order: pointy, +middle, +ring, +pinky, +thumb / open palm. The fist
+// asset (index 0) is never painted but stays loaded as the wrist-cuff
+// alignment reference for tipYForFrame() on mobile.
+const BEAT_TO_ASSET = [1, 2, 3, 4, 5];
+
 // ── Mobile micro-tune knobs ────────────────────────────────────────────────
 // Each is a viewport y fraction (0 = top, 1 = bottom) that locks the
 // corresponding pose's tip anchor on mobile (cw < MOBILE_MAX_W). Set `null`
@@ -219,6 +225,9 @@ export function ScrollStage({ progressRef, heroRef }) {
       const ch = canvas.clientHeight;
       ctx.clearRect(0, 0, cw, ch);
 
+      const beatCount = BEAT_TO_ASSET.length;
+      const beatIdx = Math.round(framesP * (beatCount - 1));
+
       if (s0.frames) {
         const frames = s0.frames;
         const count = frames.length;
@@ -227,16 +236,16 @@ export function ScrollStage({ progressRef, heroRef }) {
         const zoomFor = (idx) =>
           zoomBase * (PER_FRAME_ZOOM[idx] ?? 1);
 
-        // Snap to the nearest beat — no crossfade between adjacent frames.
-        // Per-frame (tipV, tipY) anchors each frame's highest visible point
-        // at its own viewport y, biasing the fist down and the extended
-        // fingers up.
-        const idx = Math.round(framesP * (count - 1));
+        // Snap to the nearest narrative beat — no crossfade between adjacent
+        // frames. BEAT_TO_ASSET maps narrative position (0..4) to the actual
+        // asset on disk so the per-frame anchor arrays (indexed by asset)
+        // can stay untouched.
+        const assetIdx = BEAT_TO_ASSET[beatIdx];
         paintAnchored(
-          ctx, frames[idx], cw, ch, 1,
-          zoomFor(idx),
-          PER_FRAME_TIP_V[idx] ?? 0.042,
-          tipYForFrame(idx, cw, ch, frames[idx], frames[0])
+          ctx, frames[assetIdx], cw, ch, 1,
+          zoomFor(assetIdx),
+          PER_FRAME_TIP_V[assetIdx] ?? 0.042,
+          tipYForFrame(assetIdx, cw, ch, frames[assetIdx], frames[0])
         );
       }
 
@@ -269,19 +278,14 @@ export function ScrollStage({ progressRef, heroRef }) {
         ? (p >= FORM_START ? 1 : 0)
         : clamp01((p - FORM_START) / (FORM_END - FORM_START));
 
-      // ---- Active blurb index (kept in lockstep with the frame index so the
-      //      copy label always matches the pose on screen) ----
-      // Blurb 6 ("They still can't feel…") rides the assemble beat; once the
-      // Vulcan quote begins all blurbs fade out (no CSS rule matches index 7+).
+      // Blurb data-indexes match narrative beats (0..4). 5 is a sentinel
+      // value with no matching CSS rule, so all blurbs fade to opacity 0
+      // during the assemble window and after Vulcan begins.
       let blurb;
-      if (p >= VULCAN_START) blurb = 7;
-      else if (p >= ASSEMBLE_START) blurb = 6;
-      else if (s0.frames) {
-        const count = s0.frames.length;
-        blurb = Math.round(framesP * (count - 1)); // 0..5 ↔ fist..Touch
-      } else {
-        blurb = 0;
-      }
+      if (p >= VULCAN_START) blurb = 5;
+      else if (p >= ASSEMBLE_START) blurb = 5;
+      else if (s0.frames) blurb = beatIdx;
+      else blurb = 0;
 
       writeVars({
         "--stop-progress": p.toFixed(4),

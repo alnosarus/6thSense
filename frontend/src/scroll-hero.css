@@ -130,9 +130,7 @@
 .scroll-hero[style*="--active-blurb: 1"] .hero-blurb[data-index="1"],
 .scroll-hero[style*="--active-blurb: 2"] .hero-blurb[data-index="2"],
 .scroll-hero[style*="--active-blurb: 3"] .hero-blurb[data-index="3"],
-.scroll-hero[style*="--active-blurb: 4"] .hero-blurb[data-index="4"],
-.scroll-hero[style*="--active-blurb: 5"] .hero-blurb[data-index="5"],
-.scroll-hero[style*="--active-blurb: 6"] .hero-blurb[data-index="6"] {
+.scroll-hero[style*="--active-blurb: 4"] .hero-blurb[data-index="4"] {
   opacity: 1;
   transform: translateY(0);
 }
