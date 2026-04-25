@@ -68,15 +68,24 @@ export function TargetReveal({ text, blurbIndex, order }) {
     // START of its play (not the end), so by the time this effect runs
     // the flag is already "1" and a fresh-tab read would lie.
     const openerWillBlock = blurbIndex === 0 && openerWillPlay;
-    const seedDelayMs = openerWillBlock ? OPENER_DELAY_MS : 0;
+
+    // Gate BOTH the seed-on-mount and the MutationObserver behind a
+    // single isReady flag. Without this, ScrollStage's first --active-blurb
+    // write fires the observer immediately, which would kick off the
+    // animation during the opener; the 4s seed timer would then fire
+    // later and restart it (resetting mid-way through).
+    let isReady = !openerWillBlock;
 
     const seedIfActive = () => {
-      if (readActive()) setPlayKey((k) => k + 1);
+      if (isReady && readActive()) setPlayKey((k) => k + 1);
     };
 
     let seedTimer = null;
-    if (seedDelayMs > 0) {
-      seedTimer = setTimeout(seedIfActive, seedDelayMs);
+    if (openerWillBlock) {
+      seedTimer = setTimeout(() => {
+        isReady = true;
+        seedIfActive();
+      }, OPENER_DELAY_MS);
     } else {
       seedIfActive();
     }
@@ -84,7 +93,7 @@ export function TargetReveal({ text, blurbIndex, order }) {
     let wasActive = readActive();
     const obs = new MutationObserver(() => {
       const isActive = readActive();
-      if (isActive && !wasActive) setPlayKey((k) => k + 1);
+      if (isReady && isActive && !wasActive) setPlayKey((k) => k + 1);
       wasActive = isActive;
     });
     obs.observe(root, { attributes: true, attributeFilter: ["style"] });
