@@ -27,10 +27,23 @@ const OPENER_DELAY_MS = 4000;
  * Reduced motion: returns plain text in the lime accent color, no line,
  * no observer, no animation.
  */
+// Captures whether the brand opener is about to play. Computed during
+// render so it runs BEFORE OpenerAnimation's effect sets sixthsense.openerSeen
+// (which would otherwise make us think the opener was already seen).
+function computeOpenerWillPlay() {
+  if (typeof window === "undefined") return false;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const alreadySeen = sessionStorage.getItem("sixthsense.openerSeen") === "1";
+  const deepLinked = window.scrollY > 0;
+  return !reduce && !alreadySeen && !deepLinked;
+}
+
 export function TargetReveal({ text, blurbIndex, order }) {
   const prefersReducedMotion = useReducedMotion();
   const [scope, animate] = useAnimate();
   const [playKey, setPlayKey] = useState(0);
+  // Snapshot at first render — sessionStorage hasn't been touched yet.
+  const [openerWillPlay] = useState(computeOpenerWillPlay);
 
   const rootRef = useRef(null);
   const lineRef = useRef(null);
@@ -49,12 +62,12 @@ export function TargetReveal({ text, blurbIndex, order }) {
     // Opener delay applies only to blurb 0 — the only blurb that can be
     // already-active on fresh page load while the brand opener is playing.
     // Blurbs 1..4 only become active after the user scrolls, which can
-    // only happen after the opener releases body scroll.
-    const openerWillBlock =
-      blurbIndex === 0 &&
-      typeof window !== "undefined" &&
-      sessionStorage.getItem("sixthsense.openerSeen") !== "1" &&
-      window.scrollY === 0;
+    // only happen after the opener releases body scroll. We use the
+    // render-time snapshot (openerWillPlay) instead of re-reading
+    // sessionStorage here, because OpenerAnimation sets the flag at the
+    // START of its play (not the end), so by the time this effect runs
+    // the flag is already "1" and a fresh-tab read would lie.
+    const openerWillBlock = blurbIndex === 0 && openerWillPlay;
     const seedDelayMs = openerWillBlock ? OPENER_DELAY_MS : 0;
 
     const seedIfActive = () => {
@@ -80,7 +93,7 @@ export function TargetReveal({ text, blurbIndex, order }) {
       obs.disconnect();
       if (seedTimer) clearTimeout(seedTimer);
     };
-  }, [prefersReducedMotion, blurbIndex]);
+  }, [prefersReducedMotion, blurbIndex, openerWillPlay]);
 
   // Animation timeline: re-runs whenever playKey increments.
   useEffect(() => {
@@ -92,13 +105,11 @@ export function TargetReveal({ text, blurbIndex, order }) {
     let cancelled = false;
 
     const run = async () => {
-      // Wait for our slot in the per-blurb sequence.
-      if (order > 0) {
-        await new Promise((r) => setTimeout(r, order * SEQUENCE_GAP_MS));
-      }
-      if (cancelled) return;
-
-      // Snap to initial state — handles mid-animation re-entry cleanly.
+      // Snap to initial state FIRST, before the order wait. Target 1
+      // (order=1) otherwise stays at its previous "fully revealed" state
+      // for the full 1.4s wait — looking permanently visible while
+      // target 0 plays. Resetting before the wait keeps both targets
+      // invisible until each one's turn to animate.
       await animate([
         [
           lineRef.current,
@@ -109,11 +120,17 @@ export function TargetReveal({ text, blurbIndex, order }) {
       ]);
       if (cancelled) return;
 
+      // Wait for our slot in the per-blurb sequence.
+      if (order > 0) {
+        await new Promise((r) => setTimeout(r, order * SEQUENCE_GAP_MS));
+      }
+      if (cancelled) return;
+
       // Phase 1: line draws in from the baseline upward.
       await animate(
         lineRef.current,
         { scaleY: 1, opacity: 1 },
-        { duration: 0.25, ease: [0.16, 1, 0.3, 1] }
+        { duration: 1.5, ease: [0.16, 1, 0.3, 1] }
       );
       if (cancelled) return;
 
@@ -132,7 +149,7 @@ export function TargetReveal({ text, blurbIndex, order }) {
         ...letters.map((el, i) => [
           el,
           { opacity: 1 },
-          { duration: 0.2, at: `<+${i * 0.08}` },
+          { duration: 0.1, at: `<+${i * 0.08}` },
         ]),
       ]);
       if (cancelled) return;
