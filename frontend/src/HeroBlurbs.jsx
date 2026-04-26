@@ -37,7 +37,7 @@ export function HeroBlurbs() {
       </p>
       <p className="hero-blurb" data-index="4">
         We <TargetReveal text="teach" blurbIndex={4} order={0} /> your robots
-        how to <TargetReveal text="feel" blurbIndex={4} order={1} />.
+        how to <TargetReveal text="feel" blurbIndex={4} order={1} color="#cd5a3c" />.
       </p>
     </div>
   );

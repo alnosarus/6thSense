@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useAnimate, useReducedMotion } from "framer-motion";
 
-const ACCENT = "#c5e063";
+const DEFAULT_ACCENT = "#c5e063";
 const SEQUENCE_GAP_MS = 1000;
 const OPENER_DELAY_MS = 4000;
 
@@ -39,7 +39,7 @@ function computeOpenerWillPlay() {
   return !reduce && !alreadySeen && !deepLinked;
 }
 
-export function TargetReveal({ text, blurbIndex, order }) {
+export function TargetReveal({ text, blurbIndex, order, color = DEFAULT_ACCENT }) {
   const prefersReducedMotion = useReducedMotion();
   const [scope, animate] = useAnimate();
   const [playKey, setPlayKey] = useState(0);
@@ -183,7 +183,7 @@ export function TargetReveal({ text, blurbIndex, order }) {
   }, [playKey, prefersReducedMotion, animate, order]);
 
   if (prefersReducedMotion) {
-    return <span style={{ color: ACCENT }}>{text}</span>;
+    return <span style={{ color: color }}>{text}</span>;
   }
 
   return (
@@ -207,7 +207,7 @@ export function TargetReveal({ text, blurbIndex, order }) {
           top: "0.05em",
           width: "2px",
           height: "1em",
-          background: ACCENT,
+          background: color,
           transformOrigin: "bottom",
           opacity: 0,
           scaleY: 0,
@@ -219,7 +219,7 @@ export function TargetReveal({ text, blurbIndex, order }) {
           ref={(el) => {
             letterRefs.current[i] = el;
           }}
-          style={{ color: ACCENT, opacity: 0 }}
+          style={{ color: color, opacity: 0 }}
         >
           {char === " " ? " " : char}
         </motion.span>
