@@ -12,6 +12,13 @@ from testcontainers.postgres import PostgresContainer
 from app.models import Base
 
 
+def pytest_configure(config):
+    """Set a stub DATABASE_URL so module-level `app = create_app()` doesn't
+    raise at collection time.  The real URL is injected by the
+    `postgres_container` session fixture before any test actually runs."""
+    os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://stub:stub@localhost/stub")
+
+
 @pytest.fixture(scope="session")
 def postgres_container():
     with PostgresContainer("postgres:16-alpine") as pg:
@@ -19,6 +26,21 @@ def postgres_container():
         url = pg.get_connection_url().replace("psycopg2", "asyncpg")
         os.environ["DATABASE_URL"] = url
         yield pg
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def _reset_db_singletons():
+    """Reset the module-level engine/sessionmaker singletons in app.core.db
+    before each async test so they are re-created on the current event loop.
+    Without this, the second test sees connections attached to a closed loop."""
+    import app.core.db as _db
+    _db._engine = None
+    _db._sessionmaker = None
+    yield
+    if _db._engine is not None:
+        await _db._engine.dispose()
+    _db._engine = None
+    _db._sessionmaker = None
 
 
 @pytest_asyncio.fixture

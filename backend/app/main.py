@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
-from app.api.routes import health
+from app.api.routes import health, leads
 from app.core.config import get_settings
 
 
@@ -26,7 +28,22 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @application.exception_handler(RequestValidationError)
+    async def _validation_handler(_req: Request, exc: RequestValidationError):
+        # PII-safe: drop any `input` field; keep only field path + message.
+        errors: dict[str, str] = {}
+        for err in exc.errors():
+            loc = err.get("loc") or ()
+            field = loc[-1] if loc else "body"
+            errors[str(field)] = err.get("msg", "Invalid value.")
+        return JSONResponse(
+            status_code=400,
+            content={"ok": False, "errors": errors},
+        )
+
     application.include_router(health.router)
+    application.include_router(leads.router)
     return application
 
 
