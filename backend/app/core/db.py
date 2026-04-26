@@ -38,6 +38,8 @@ def _make_engine():
     )
 
 
+# Module-level singletons are safe here: uvicorn runs one process per worker
+# with a single event loop; there is no inter-thread race in async route code.
 _engine = None
 _sessionmaker: async_sessionmaker[AsyncSession] | None = None
 

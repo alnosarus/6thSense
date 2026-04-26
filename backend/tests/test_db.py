@@ -19,3 +19,12 @@ def test_postgres_alias_normalised():
         _to_asyncpg_url("postgres://u:p@h/d")
         == "postgresql+asyncpg://u:p@h/d"
     )
+
+
+def test_query_params_preserved():
+    assert (
+        _to_asyncpg_url(
+            "postgresql://u:p@h/d?sslmode=require&application_name=test"
+        )
+        == "postgresql+asyncpg://u:p@h/d?sslmode=require&application_name=test"
+    )
