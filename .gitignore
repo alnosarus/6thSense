@@ -35,8 +35,9 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
-# Model outputs
+# Model outputs (ML weights/binaries – NOT the SQLAlchemy app models package)
 models/
+!backend/app/models/
 runs/
 *.pth
 *.pt
