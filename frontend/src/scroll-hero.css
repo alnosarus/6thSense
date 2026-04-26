@@ -370,12 +370,19 @@
   color: #f1f1ec;
 }
 
-/* Footer-scale partner logos inside the finale form. Inherits the form's
-   --form-p fade automatically as a child of .hero-finale-form. Sits BELOW
-   the submit button (after the CTA) as a credibility close-out. */
+/* Partner logos pinned to the bottom of the viewport, full-width centered.
+   Sibling of .hero-finale-form (not a child) so the form stays vertically
+   centered while the logos anchor to the bottom edge. Fade-in is bound to
+   --form-p directly so the logos appear in lockstep with the form. */
 .hero-finale-backed {
-  margin: 1.25rem 0 0;
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
+  pointer-events: none;
+  opacity: var(--form-p, 0);
+  transition: opacity 0.3s ease;
 }
 .hero-finale-backed-label {
   margin: 0 0 0.5rem;
@@ -550,16 +557,27 @@
     font-size: clamp(2rem, 9vw, 3.2rem);
   }
 
-  /* Finale form becomes a full-width bottom card. */
+  /* Finale form becomes a full-width bottom card. Sits above the Backed-by
+     block (which is pinned to the very bottom of the viewport). */
   .hero-finale-form {
     top: auto;
     left: 1rem;
     right: 1rem;
-    bottom: 1.75rem;
+    bottom: 7rem;
     width: auto;
     /* Reset the -50% center trick used on desktop; mobile anchors via
        left/right/bottom and only carries the fade-up translate. */
     transform: translateY(calc((1 - var(--form-p, 0)) * 4vh));
+  }
+
+  /* Shrink the bottom-pinned logos on mobile so the row fits in one line
+     across narrow viewports. */
+  .hero-finale-backed-logo {
+    height: clamp(2rem, 7vw, 2.8rem);
+    max-width: clamp(6rem, 22vw, 10rem);
+  }
+  .hero-finale-backed-row {
+    gap: clamp(0.6rem, 2vw, 1rem);
   }
 
   /* Darken the tactile-field behind the form so the stat numerals + labels

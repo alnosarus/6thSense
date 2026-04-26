@@ -111,27 +111,6 @@ export function HeroFinale() {
         <button type="submit" className="hero-finale-submit">
           Discuss your dataset
         </button>
-        <div className="hero-finale-backed">
-          <p className="hero-finale-backed-label">Backed by</p>
-          <ul className="hero-finale-backed-row">
-            {BACKERS.map((b) => (
-              <li
-                key={b.src}
-                className={
-                  "hero-finale-backed-item" +
-                  (b.needsLightBg ? " hero-finale-backed-item--lit" : "")
-                }
-              >
-                <img
-                  className="hero-finale-backed-logo"
-                  src={b.src}
-                  alt={b.alt}
-                  loading="lazy"
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
         {status ? (
           <p
             className={`hero-finale-status hero-finale-status--${tone}`}
@@ -142,6 +121,28 @@ export function HeroFinale() {
           </p>
         ) : null}
       </form>
+
+      <div className="hero-finale-backed">
+        <p className="hero-finale-backed-label">Backed by</p>
+        <ul className="hero-finale-backed-row">
+          {BACKERS.map((b) => (
+            <li
+              key={b.src}
+              className={
+                "hero-finale-backed-item" +
+                (b.needsLightBg ? " hero-finale-backed-item--lit" : "")
+              }
+            >
+              <img
+                className="hero-finale-backed-logo"
+                src={b.src}
+                alt={b.alt}
+                loading="lazy"
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
