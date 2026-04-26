@@ -166,19 +166,6 @@
   transition: opacity 0.4s ease, transform 0.5s cubic-bezier(.22,1,.36,1);
 }
 
-/* Quote beats — uniform "sentence + logo + attribution" layout for each
-   research citation (Amazon Vulcan, Columbia, Stanford, Meta AI). Each beat
-   aliases its own progress var onto --quote-p via inline style, so all four
-   share a single opacity/transform rule. */
-.hero-quote {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: clamp(1rem, 2.2vw, 1.75rem);
-  opacity: var(--quote-p, 0);
-  transform: translateY(calc((1 - var(--quote-p, 0)) * 12px));
-}
 
 .hero-quote-text {
   margin: 0;
@@ -554,12 +541,7 @@
 
 /* ---- Mobile: collapse the split layout ---- */
 @media (max-width: 720px) {
-  .scroll-hero {
-    /* Shorter scroll budget so mobile users don't hit an endless sticky. */
-    height: 760vh;
-  }
-
-  /* Blurbs become a full-width centered column that sits above the glove. */
+/* Blurbs become a full-width centered column that sits above the glove. */
   .hero-blurbs {
     left: 0;
     width: 100%;
@@ -635,25 +617,11 @@
   }
 
   /* ---- Mobile new beats: full-width, stacked ---- */
-  .hero-quote,
   .hero-video {
     padding: calc(var(--nav-h, 3.5rem) + 1.5rem) 1.25rem 1.5rem;
   }
 
-  .hero-quote-text {
-    font-size: clamp(1.4rem, 6vw, 2.1rem);
-    max-width: 20ch;
-  }
-
-  .hero-quote-logo {
-    height: clamp(3.8rem, 14vw, 5.2rem);
-    /* Keep slot narrow enough that 1.8× Meta scale still fits within viewport
-       (slot × 1.8 ≤ ~95vw → slot ≤ ~52vw). */
-    width: clamp(10rem, 50vw, 16rem);
-    max-width: 52vw;
-  }
-
-  .hero-pipeline {
+.hero-pipeline {
     padding: calc(var(--nav-h, 3.5rem) + 1.5rem) 1.25rem 1.5rem;
     gap: 1.5rem;
   }
