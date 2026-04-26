@@ -566,7 +566,8 @@
     top: auto;
     left: 1rem;
     right: 1rem;
-    bottom: 7rem;
+    /* Bottom margin = backed-by clearance (~80px when single row) + cushion. */
+    bottom: 8.5rem;
     width: auto;
     /* Reset the -50% center trick used on desktop; mobile anchors via
        left/right/bottom and only carries the fade-up translate. */
@@ -574,13 +575,23 @@
   }
 
   /* Shrink the bottom-pinned logos on mobile so the row fits in one line
-     across narrow viewports. */
+     across narrow viewports. Lower bound dropped from 6rem → 4rem so the
+     22vw preferred value can actually take effect on phones ≤ 432px wide
+     (where 6rem would otherwise force the row to wrap). */
   .hero-finale-backed-logo {
-    height: clamp(2rem, 7vw, 2.8rem);
-    max-width: clamp(6rem, 22vw, 10rem);
+    height: clamp(1.8rem, 7vw, 2.6rem);
+    max-width: clamp(4rem, 22vw, 9rem);
   }
   .hero-finale-backed-row {
-    gap: clamp(0.6rem, 2vw, 1rem);
+    /* Force single-row layout so the section's height stays predictable
+     for the form's bottom-clearance math. */
+    flex-wrap: nowrap;
+    gap: clamp(0.5rem, 2vw, 0.9rem);
+  }
+  /* Tighter card padding on mobile so the white-card logos don't add
+     significant horizontal width when packed alongside the EF logo. */
+  .hero-finale-backed-item--lit {
+    padding: 0.3rem 0.5rem;
   }
 
   /* Darken the tactile-field behind the form so the stat numerals + labels
