@@ -28,7 +28,7 @@ export function HeroBlurbs() {
       <p className="hero-blurb" data-index="2">
         Vision <TargetReveal text="alone" blurbIndex={2} order={0} /> cannot
         communicate{" "}
-        <TargetReveal text="materiality" blurbIndex={2} order={1} />.
+        <TargetReveal text="texture" blurbIndex={2} order={1} />.
       </p>
       <p className="hero-blurb" data-index="3">
         We map <TargetReveal text="tactile" blurbIndex={3} order={0} />{" "}
