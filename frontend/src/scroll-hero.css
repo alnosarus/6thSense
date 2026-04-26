@@ -657,10 +657,10 @@
 .quote-timeline {
   position: relative;
   width: 100%;
-  /* Each quote gets ~45vh of scroll budget. First quote at 8% of section
-     height, last at 88%, packed into 180vh so the timeline reads as one
+  /* Each quote gets ~35vh of scroll budget. First quote at 8% of section
+     height, last at 88%, packed into 140vh so the timeline reads as one
      coherent moment rather than a long scroll. */
-  height: 180vh;
+  height: 140vh;
   padding: 0 var(--gutter);
   /* Transparent so the sticky TactileField behind .scroll-hero shows through. */
   background: transparent;
@@ -790,7 +790,7 @@
 /* ---- QuoteTimeline mobile (≤720px): single column, line on the left ---- */
 @media (max-width: 720px) {
   .quote-timeline {
-    height: 260vh;
+    height: 200vh;
     padding: 0 1.25rem 0 calc(1.5rem + 1.25rem);
   }
 
