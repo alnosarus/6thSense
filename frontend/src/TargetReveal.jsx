@@ -138,30 +138,35 @@ export function TargetReveal({ text, blurbIndex, order }) {
       }
       if (cancelled) return;
 
-      // Phase 1: line draws in from the baseline upward.
-      await animate(
-        lineRef.current,
-        { scaleY: 1, opacity: 1 },
-        { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
-      );
-      if (cancelled) return;
-
-      // Phase 2: line slides; letters fade in with an 80ms-per-letter
-      // stagger and a snappier per-letter fade. Bar slowed (1.0s) and
-      // letter fade shortened (0.2s) so the bar's leading edge stays
-      // close to the most-recently-revealed letter instead of racing
-      // ahead. Same ease-out curve on the line so it still decelerates
-      // toward the right edge.
+      // Combined timeline: vertical bar draw, horizontal bar slide, and
+      // per-letter fade-ins all run on the same animate() call so each one's
+      // START TIME is independently tunable via its `at:` value (absolute
+      // seconds from the start of this timeline). Durations and easings
+      // are unchanged — only start offsets are knobs.
       await animate([
+        // Bar's vertical draw (scaleY 0→1). Anchored at t=0.
+        [
+          lineRef.current,
+          { scaleY: 1, opacity: 1 },
+          { duration: 0.0, ease: [0.16, 1, 0.3, 1], at: 0 },
+        ],
+        // Bar's horizontal slide (left 0%→100%). Tweak `at:` to control
+        // when the slide STARTS:
+        //   at: 0.5  → starts after the vertical draw completes (old behavior)
+        //   at: 0    → starts at the same instant as the vertical draw
+        //   at: 0.2  → starts 200ms into the vertical draw
         [
           lineRef.current,
           { left: "100%" },
-          { duration: 1.0, ease: [0.22, 1, 0.36, 1] },
+          { duration: 1.0, ease: [0.22, 1, 0.36, 1], at: 0.5 },
         ],
+        // Letters fade in. `at:` is absolute timeline time:
+        //   leading constant = wait before the FIRST letter
+        //   i * 0.09         = 90ms stagger between consecutive letters
         ...letters.map((el, i) => [
           el,
           { opacity: 0.9 },
-          { duration: 0.1, at: `<+${i * 0.09}` },
+          { duration: 0.1, at: 0.5+i * 0.09 },
         ]),
       ]);
       if (cancelled) return;
