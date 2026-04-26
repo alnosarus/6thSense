@@ -371,19 +371,20 @@
 }
 
 /* Footer-scale partner logos inside the finale form. Inherits the form's
-   --form-p fade automatically as a child of .hero-finale-form. */
+   --form-p fade automatically as a child of .hero-finale-form. Sits BELOW
+   the submit button (after the CTA) as a credibility close-out. */
 .hero-finale-backed {
-  margin: 0.75rem 0 1rem;
+  margin: 1.25rem 0 0;
   text-align: center;
 }
 .hero-finale-backed-label {
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.5rem;
   font-family: var(--font-ui);
   font-weight: 600;
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(241, 241, 236, 0.45);
+  color: rgba(241, 241, 236, 0.55);
 }
 .hero-finale-backed-row {
   list-style: none;
@@ -400,13 +401,26 @@
   align-items: center;
   justify-content: center;
 }
+/* Logos with mostly-dark artwork (UChicago, Georgia Tech) get a white card
+   so the brand is legible against the hero's black background. */
+.hero-finale-backed-item--lit {
+  background: #f1f1ec;
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+}
 .hero-finale-backed-logo {
   display: block;
-  height: clamp(1.6rem, 2.4vw, 2.2rem);
+  height: clamp(3.2rem, 4.8vw, 4.4rem);
   width: auto;
-  max-width: clamp(5rem, 10vw, 8rem);
+  max-width: clamp(10rem, 20vw, 16rem);
   object-fit: contain;
-  opacity: 0.75;
+  opacity: 0.85;
+}
+/* Inside a white card, the logo can be at full opacity — the contrast
+   problem the lit treatment solves is darkness on darkness, so dimming
+   would re-introduce it. */
+.hero-finale-backed-item--lit .hero-finale-backed-logo {
+  opacity: 1;
 }
 
 .hero-finale-subtitle {

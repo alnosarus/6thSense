@@ -33,8 +33,8 @@ const dots = [
 // (now-removed) standalone BackedBySection beat.
 const BACKERS = [
   { src: "/logos/Entrepreneurs_First_Logo.png", alt: "Entrepreneurs First" },
-  { src: "/logos/University Logo_2Color_DarkGreystone_WhiteFill_RGB.png", alt: "The University of Chicago" },
-  { src: "/logos/Gtech.png", alt: "Georgia Tech" }
+  { src: "/logos/University Logo_2Color_DarkGreystone_WhiteFill_RGB.png", alt: "The University of Chicago", needsLightBg: true },
+  { src: "/logos/Gtech.png", alt: "Georgia Tech", needsLightBg: true }
 ];
 
 export function HeroFinale() {
@@ -87,21 +87,6 @@ export function HeroFinale() {
 
       <form className="hero-finale-form" onSubmit={onSubmit} noValidate>
         <h2 className="hero-finale-title">Give your robot a sixth sense.</h2>
-        <div className="hero-finale-backed">
-          <p className="hero-finale-backed-label">Backed by</p>
-          <ul className="hero-finale-backed-row">
-            {BACKERS.map((b) => (
-              <li key={b.src} className="hero-finale-backed-item">
-                <img
-                  className="hero-finale-backed-logo"
-                  src={b.src}
-                  alt={b.alt}
-                  loading="lazy"
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
         <p className="hero-finale-subtitle">
           We build the tactile dataset that closes the gap.
         </p>
@@ -126,6 +111,27 @@ export function HeroFinale() {
         <button type="submit" className="hero-finale-submit">
           Discuss your dataset
         </button>
+        <div className="hero-finale-backed">
+          <p className="hero-finale-backed-label">Backed by</p>
+          <ul className="hero-finale-backed-row">
+            {BACKERS.map((b) => (
+              <li
+                key={b.src}
+                className={
+                  "hero-finale-backed-item" +
+                  (b.needsLightBg ? " hero-finale-backed-item--lit" : "")
+                }
+              >
+                <img
+                  className="hero-finale-backed-logo"
+                  src={b.src}
+                  alt={b.alt}
+                  loading="lazy"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
         {status ? (
           <p
             className={`hero-finale-status hero-finale-status--${tone}`}
