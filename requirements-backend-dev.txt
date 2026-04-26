@@ -1,0 +1,5 @@
+-r requirements-backend.txt
+pytest>=8.0
+pytest-asyncio>=0.23
+httpx>=0.27
+testcontainers[postgres]>=4.7
