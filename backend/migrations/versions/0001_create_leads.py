@@ -35,7 +35,12 @@ def upgrade() -> None:
         ),
         sa.UniqueConstraint("email", name="leads_email_key"),
     )
-    op.create_index("leads_created_at_idx", "leads", ["created_at"])
+    op.create_index(
+        "leads_created_at_idx",
+        "leads",
+        ["created_at"],
+        postgresql_ops={"created_at": "DESC"},
+    )
 
 
 def downgrade() -> None:

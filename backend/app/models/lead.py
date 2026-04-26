@@ -32,5 +32,10 @@ class Lead(Base):
     )
 
     __table_args__ = (
-        Index("leads_created_at_idx", "created_at", postgresql_using="btree"),
+        Index(
+            "leads_created_at_idx",
+            "created_at",
+            postgresql_using="btree",
+            postgresql_ops={"created_at": "DESC"},
+        ),
     )

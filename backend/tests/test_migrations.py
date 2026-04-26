@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -11,7 +12,7 @@ def _alembic(*args, env=None):
     cwd = Path(__file__).resolve().parents[1]  # backend/
     full_env = {**os.environ, **(env or {})}
     return subprocess.run(
-        ["alembic", *args],
+        [sys.executable, "-m", "alembic", *args],
         cwd=cwd,
         env=full_env,
         capture_output=True,
