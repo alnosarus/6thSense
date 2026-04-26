@@ -5,7 +5,6 @@ import { useElementScrollProgress } from "./useElementScrollProgress.js";
  * Vertical scroll-driven timeline of four research-citation quotes.
  *
  * - Central line draws top → bottom via clip-path tied to --timeline-p.
- * - A lime "drawing head" follows the leading edge of the drawn line.
  * - Four QuoteNodes alternate L/R (zigzag from top-left), positioned at
  *   8 / 36 / 62 / 88 percent of the section's height.
  * - Each node activates via IntersectionObserver; once active, its branch
@@ -144,7 +143,6 @@ export function QuoteTimeline() {
     >
       <div className="quote-timeline-line" aria-hidden="true">
         <span className="quote-timeline-line-fill" />
-        <span className="quote-timeline-head" />
       </div>
       {QUOTES.map((q, i) => (
         <QuoteNode key={i} {...q} />

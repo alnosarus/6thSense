@@ -18,11 +18,12 @@ const OPENER_DELAY_MS = 4000;
  *                                   to the most-recently-revealed letter.
  *   1.25 -> 1.40s  line fades:     opacity 1 -> 0 at the right edge.
  *
- * Triggering: a MutationObserver on .scroll-hero's style attribute watches
- * --active-blurb. Each transition into String(blurbIndex) increments
- * playKey, which the animation effect uses as its dependency. For
- * blurbIndex === 0 only, the seed-on-mount path defers by ~4s on fresh
- * tabs so the slider does not run behind the brand opener overlay.
+ * Triggering: a MutationObserver on .hero-stage-one's style attribute
+ * watches --active-blurb (written there by ScrollStage's rAF tick after the
+ * three-block hero refactor). Each transition into String(blurbIndex)
+ * increments playKey, which the animation effect uses as its dependency.
+ * For blurbIndex === 0 only, the seed-on-mount path defers by ~4s on
+ * fresh tabs so the slider does not run behind the brand opener overlay.
  *
  * Reduced motion: returns plain text in the lime accent color, no line,
  * no observer, no animation.
@@ -49,10 +50,10 @@ export function TargetReveal({ text, blurbIndex, order }) {
   const lineRef = useRef(null);
   const letterRefs = useRef([]);
 
-  // Trigger detection: watch --active-blurb on the .scroll-hero ancestor.
+  // Trigger detection: watch --active-blurb on the .hero-stage-one ancestor.
   useEffect(() => {
     if (prefersReducedMotion) return;
-    const root = rootRef.current?.closest(".scroll-hero");
+    const root = rootRef.current?.closest(".hero-stage-one");
     if (!root) return;
 
     const targetValue = String(blurbIndex);
