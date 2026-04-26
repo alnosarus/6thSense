@@ -28,6 +28,15 @@ const dots = [
   { startLeft: 13, startTop: 8, endLeft: 13, endTop: 8, color: "olive" }
 ];
 
+// Three partner logos, rendered as a footer row directly under the form
+// title. Sourced from /public/logos/. Same files previously used by the
+// (now-removed) standalone BackedBySection beat.
+const BACKERS = [
+  { src: "/logos/Entrepreneurs_First_Logo.png", alt: "Entrepreneurs First" },
+  { src: "/logos/University Logo_2Color_DarkGreystone_WhiteFill_RGB.png", alt: "The University of Chicago" },
+  { src: "/logos/Gtech.png", alt: "Georgia Tech" }
+];
+
 export function HeroFinale() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("");
@@ -78,6 +87,21 @@ export function HeroFinale() {
 
       <form className="hero-finale-form" onSubmit={onSubmit} noValidate>
         <h2 className="hero-finale-title">Give your robot a sixth sense.</h2>
+        <div className="hero-finale-backed">
+          <p className="hero-finale-backed-label">Backed by</p>
+          <ul className="hero-finale-backed-row">
+            {BACKERS.map((b) => (
+              <li key={b.src} className="hero-finale-backed-item">
+                <img
+                  className="hero-finale-backed-logo"
+                  src={b.src}
+                  alt={b.alt}
+                  loading="lazy"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
         <p className="hero-finale-subtitle">
           We build the tactile dataset that closes the gap.
         </p>

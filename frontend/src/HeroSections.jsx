@@ -119,28 +119,3 @@ export function VideoSection() {
   );
 }
 
-const BACKERS = [
-  { src: "/logos/Entrepreneurs_First_Logo.png", alt: "Entrepreneurs First" },
-  { src: "/logos/University Logo_2Color_DarkGreystone_WhiteFill_RGB.png", alt: "The University of Chicago" },
-  { src: "/logos/Gtech.png",                     alt: "Georgia Tech" }
-];
-
-export function BackedBySection() {
-  return (
-    <section className="hero-section hero-backed">
-      <p className="hero-backed-label">Backed by</p>
-      <ul className="hero-backed-row">
-        {BACKERS.map((b) => (
-          <li key={b.src} className="hero-backed-item">
-            <img
-              className="hero-backed-logo"
-              src={b.src}
-              alt={b.alt}
-              loading="lazy"
-            />
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}

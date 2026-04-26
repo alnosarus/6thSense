@@ -19,9 +19,7 @@ const PIPELINE_START = 0.68;
 const PIPELINE_END = 0.77;
 const VIDEO_START = 0.77;
 const VIDEO_END = 0.86;
-const BACKED_START = 0.86;
-const BACKED_END = 0.94;
-const FORM_START = 0.94;
+const FORM_START = 0.86;
 const FORM_END = 1.00;
 
 // Glove canvas layout. Tip-anchored: each frame's highest visible image point
@@ -271,7 +269,6 @@ export function ScrollStage({ progressRef, heroRef }) {
       const metaP = windowP(META_START, META_END);
       const pipelineP = windowP(PIPELINE_START, PIPELINE_END);
       const videoP = windowP(VIDEO_START, VIDEO_END);
-      const backedP = windowP(BACKED_START, BACKED_END);
       // Form is the terminal beat — keep its progressive fade-in so the CTA
       // slides/fades as it settles.
       const formP = reduce
@@ -299,7 +296,6 @@ export function ScrollStage({ progressRef, heroRef }) {
         "--meta-p": metaP.toFixed(4),
         "--pipeline-p": pipelineP.toFixed(4),
         "--video-p": videoP.toFixed(4),
-        "--backed-p": backedP.toFixed(4),
         "--form-p": formP.toFixed(4),
         "--hand-descend": `${handDescendVh.toFixed(2)}vh`,
         "--active-blurb": String(blurb)

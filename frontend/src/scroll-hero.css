@@ -302,56 +302,6 @@
   color: rgba(241, 241, 236, 0.45);
 }
 
-/* ---- Backed-by beat: small label over a row of partner / backer logos ---- */
-
-.hero-backed {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(1.25rem, 3vw, 2rem);
-  opacity: var(--backed-p, 0);
-  transform: translateY(calc((1 - var(--backed-p, 0)) * 12px));
-}
-
-.hero-backed-label {
-  margin: 0;
-  font-family: var(--font-ui);
-  font-weight: 600;
-  font-size: clamp(0.7rem, 1vw, 0.85rem);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(241, 241, 236, 0.55);
-}
-
-.hero-backed-row {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: clamp(2rem, 6vw, 5rem);
-  flex-wrap: wrap;
-  max-width: min(60rem, 90vw);
-}
-
-.hero-backed-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Each backer logo renders into a fixed-height slot. object-fit: contain
-   keeps each brand's intrinsic aspect ratio. Logos are shown at their
-   native colors so each backer's brand identity comes through. */
-.hero-backed-logo {
-  display: block;
-  height: clamp(3.4rem, 7vw, 5.2rem);
-  width: auto;
-  max-width: clamp(11rem, 24vw, 19rem);
-  object-fit: contain;
-  opacity: 0.92;
-}
 
 /* ---- Finale: dots (left) + form (right) ---- */
 
@@ -418,6 +368,45 @@
   line-height: 1.02;
   letter-spacing: -0.02em;
   color: #f1f1ec;
+}
+
+/* Footer-scale partner logos inside the finale form. Inherits the form's
+   --form-p fade automatically as a child of .hero-finale-form. */
+.hero-finale-backed {
+  margin: 0.75rem 0 1rem;
+  text-align: center;
+}
+.hero-finale-backed-label {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(241, 241, 236, 0.45);
+}
+.hero-finale-backed-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  flex-wrap: wrap;
+}
+.hero-finale-backed-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-finale-backed-logo {
+  display: block;
+  height: clamp(1.6rem, 2.4vw, 2.2rem);
+  width: auto;
+  max-width: clamp(5rem, 10vw, 8rem);
+  object-fit: contain;
+  opacity: 0.75;
 }
 
 .hero-finale-subtitle {
