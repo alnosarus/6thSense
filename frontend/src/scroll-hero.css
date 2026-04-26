@@ -31,7 +31,8 @@
 
   position: relative;
   background: #000;
-  height: 920vh;
+  /* Total height = HeroStageOne (~300vh) + QuoteTimeline (~280vh) +
+     HeroStageTwo (~340vh). Each child sets its own block-level height. */
   /* Quote-logo transform: scale() can overflow horizontally on narrow
      viewports. Clip at the hero root so the body doesn't acquire a
      horizontal scrollbar. */
@@ -51,25 +52,43 @@
   -webkit-user-select: text;
 }
 
-.scroll-hero-sticky {
+/* Each sticky stage owns its own scroll budget and sticky window. The
+   margin-bottom: -100vh trick collapses the stage's overflow back into the
+   document flow so children can pin to the viewport for the duration of
+   their parent's scroll travel. */
+.hero-stage {
+  position: relative;
+  width: 100%;
+}
+.hero-stage-one { height: 300vh; }
+.hero-stage-two { height: 340vh; }
+
+.hero-stage-sticky {
   position: sticky;
   top: 0;
   height: 100vh;
-  margin-bottom: -100vh;
   width: 100%;
   pointer-events: none;
   z-index: 1;
   isolation: isolate;
+  overflow: hidden;
 }
 
-/* Tactile pressure surface: shader-driven particle grid behind the glove.
-   Fills the sticky viewport, never intercepts pointer events. */
+/* Tactile pressure surface: shader-driven particle grid behind everything.
+   Mounted once at the .scroll-hero root and pinned to the viewport so it
+   renders continuously across all three blocks (Stage 1 sticky → timeline
+   → Stage 2 sticky) without remount or seam. */
 .tactile-field {
-  position: absolute;
-  inset: 0;
+  position: sticky;
+  top: 0;
+  left: 0;
   z-index: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  /* The sticky element occupies layout space equal to its own height; the
+     negative margin pulls subsequent siblings (HeroStageOne, etc.) up to
+     overlap it so the background sits behind them rather than above. */
+  margin-bottom: -100vh;
   display: block;
   pointer-events: none;
 }
