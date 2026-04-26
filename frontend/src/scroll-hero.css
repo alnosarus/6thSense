@@ -671,11 +671,15 @@
 }
 
 .quote-timeline-line {
-  position: absolute;
+  /* Sticky inside the section so the line stays pinned to the viewport
+     while the section is in view, rather than stretching the full section
+     height (which would scroll the line's top off-screen above the
+     viewport as the user scrolls deeper into the section). */
+  position: sticky;
   top: 0;
   left: 50%;
   width: 1.5px;
-  height: 100%;
+  height: 100vh;
   transform: translateX(-50%);
   pointer-events: none;
 }
