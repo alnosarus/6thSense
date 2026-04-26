@@ -144,12 +144,14 @@
 }
 
 /* Only the blurb whose data-index matches --active-blurb is visible. We match
-   by substring of the inline style written by ScrollStage's rAF tick. */
-.scroll-hero[style*="--active-blurb: 0"] .hero-blurb[data-index="0"],
-.scroll-hero[style*="--active-blurb: 1"] .hero-blurb[data-index="1"],
-.scroll-hero[style*="--active-blurb: 2"] .hero-blurb[data-index="2"],
-.scroll-hero[style*="--active-blurb: 3"] .hero-blurb[data-index="3"],
-.scroll-hero[style*="--active-blurb: 4"] .hero-blurb[data-index="4"] {
+   by substring of the inline style written by ScrollStage's rAF tick. The
+   var is written on .hero-stage-one (HeroStageOne's root), not on the
+   page-level .scroll-hero. */
+.hero-stage-one[style*="--active-blurb: 0"] .hero-blurb[data-index="0"],
+.hero-stage-one[style*="--active-blurb: 1"] .hero-blurb[data-index="1"],
+.hero-stage-one[style*="--active-blurb: 2"] .hero-blurb[data-index="2"],
+.hero-stage-one[style*="--active-blurb: 3"] .hero-blurb[data-index="3"],
+.hero-stage-one[style*="--active-blurb: 4"] .hero-blurb[data-index="4"] {
   opacity: 1;
   transform: translateY(0);
 }
