@@ -16,7 +16,7 @@ import { useElementScrollProgress } from "./useElementScrollProgress.js";
 const QUOTES = [
   {
     side: "left",
-    top: "8%",
+    top: "0%",
     logoSrc: "/logos/amazon-robotics-logo.png",
     logoAlt: "Amazon Robotics",
     attribution: "Vulcan · manipulation tasks",
