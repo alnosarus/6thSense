@@ -2,25 +2,14 @@ import { useEffect, useRef } from "react";
 import { scrollStages } from "./scrollStages.js";
 import { useFramePreloader } from "./useFramePreloader.js";
 
-// Scroll-progress phase boundaries. Ten beats across a 920vh sticky budget.
-// Each main beat is ~9% (~83vh) which matches the pacing of a blurb.
-const FRAMES_END = 0.25;
-const ASSEMBLE_START = 0.25;
-const ASSEMBLE_END = 0.32;    // hand descends off-screen, dots suppressed
-const VULCAN_START = 0.32;
-const VULCAN_END = 0.41;
-const COLUMBIA_START = 0.41;
-const COLUMBIA_END = 0.50;
-const STANFORD_START = 0.50;
-const STANFORD_END = 0.59;
-const META_START = 0.59;
-const META_END = 0.68;
-const PIPELINE_START = 0.68;
-const PIPELINE_END = 0.77;
-const VIDEO_START = 0.77;
-const VIDEO_END = 0.86;
-const FORM_START = 0.86;
-const FORM_END = 1.00;
+// Scroll-progress phase boundaries within Stage 1's ~300vh budget.
+// Counting plays over the first 85% of stage 1; assemble (glove descend +
+// dots fade) plays over the remaining 15%. Stage 1 owns ONLY these two
+// phases — quotes / pipeline / video / form moved to QuoteTimeline and
+// HeroStageTwo.
+const FRAMES_END = 0.85;
+const ASSEMBLE_START = 0.85;
+const ASSEMBLE_END = 1.00;
 
 // Glove canvas layout. Tip-anchored: each frame's highest visible image point
 // (PIVOT_U, PER_FRAME_TIP_V[i]) is painted at viewport (PIVOT_X, PER_FRAME_TIP_Y[i]),
@@ -259,28 +248,11 @@ export function ScrollStage({ progressRef, heroRef }) {
       const assembleMoveP = clamp01((assembleP - 0.3) / 0.7);
       const handDescendVh = assembleMoveP * 110;
 
-      // ---- New beats: each section is visible only while scroll is inside
-      //      its window. Binary (in/out) — the CSS transition on
-      //      .hero-section smooths the edges. Same pattern as --active-blurb. ----
-      const windowP = (start, end) => (p >= start && p < end ? 1 : 0);
-      const vulcanP = windowP(VULCAN_START, VULCAN_END);
-      const columbiaP = windowP(COLUMBIA_START, COLUMBIA_END);
-      const stanfordP = windowP(STANFORD_START, STANFORD_END);
-      const metaP = windowP(META_START, META_END);
-      const pipelineP = windowP(PIPELINE_START, PIPELINE_END);
-      const videoP = windowP(VIDEO_START, VIDEO_END);
-      // Form is the terminal beat — keep its progressive fade-in so the CTA
-      // slides/fades as it settles.
-      const formP = reduce
-        ? (p >= FORM_START ? 1 : 0)
-        : clamp01((p - FORM_START) / (FORM_END - FORM_START));
-
       // Blurb data-indexes match narrative beats (0..4). 5 is a sentinel
-      // value with no matching CSS rule, so all blurbs fade to opacity 0
-      // during the assemble window and after Vulcan begins.
+      // value with no matching CSS rule — assigned during assemble so all
+      // blurbs fade to opacity 0 once the counting phase ends.
       let blurb;
-      if (p >= VULCAN_START) blurb = 5;
-      else if (p >= ASSEMBLE_START) blurb = 5;
+      if (p >= ASSEMBLE_START) blurb = 5;
       else if (s0.frames) blurb = beatIdx;
       else blurb = 0;
 
@@ -290,13 +262,6 @@ export function ScrollStage({ progressRef, heroRef }) {
         "--assemble-p": assembleP.toFixed(4),
         "--assemble-fade-p": assembleFadeP.toFixed(4),
         "--assemble-move-p": assembleMoveP.toFixed(4),
-        "--vulcan-p": vulcanP.toFixed(4),
-        "--columbia-p": columbiaP.toFixed(4),
-        "--stanford-p": stanfordP.toFixed(4),
-        "--meta-p": metaP.toFixed(4),
-        "--pipeline-p": pipelineP.toFixed(4),
-        "--video-p": videoP.toFixed(4),
-        "--form-p": formP.toFixed(4),
         "--hand-descend": `${handDescendVh.toFixed(2)}vh`,
         "--active-blurb": String(blurb)
       });
