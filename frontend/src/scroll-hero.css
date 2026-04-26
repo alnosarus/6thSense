@@ -795,8 +795,13 @@
   }
 
   .quote-timeline-line {
-    left: 1.5rem;
-    transform: none;
+    /* Section padding-left is calc(1.5rem + 1.25rem); line's natural
+       in-flow position is therefore 2.75rem from viewport left. Pull it
+       back to 1.5rem via transform, since `position: sticky` ignores
+       absolute-unit `left` values in Chromium when there's no horizontal
+       scroll context. */
+    left: 0;
+    transform: translateX(-1.25rem);
   }
 
   .quote-timeline-dot {
