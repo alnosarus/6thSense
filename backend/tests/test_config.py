@@ -1,9 +1,7 @@
-import os
 from app.core.config import get_settings
 
 
 def test_settings_reads_database_url(monkeypatch):
-    get_settings.cache_clear() if hasattr(get_settings, "cache_clear") else None
     monkeypatch.setenv("DATABASE_URL", "postgresql://u:p@h:5432/db")
     monkeypatch.setenv("SENSEPROBE_CORS_ORIGINS", "https://example.com")
     s = get_settings()
