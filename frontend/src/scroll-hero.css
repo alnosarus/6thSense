@@ -663,3 +663,241 @@
   }
 }
 
+/* ---- QuoteTimeline: vertical timeline replacing the 4 sticky quote beats ---- */
+
+.quote-timeline {
+  position: relative;
+  width: 100%;
+  /* Each quote occupies ~70vh of scroll. First quote sits at 8% of section
+     height, last at 88%, so a 280vh section gives each one room to enter,
+     activate, and clear before the next. */
+  height: 280vh;
+  padding: 0 var(--gutter);
+  background: #000;
+  /* Same horizontal-overflow guard as the parent .scroll-hero — the
+     translateY animations on cards near viewport edges shouldn't
+     produce a horizontal scrollbar. */
+  overflow-x: clip;
+}
+
+.quote-timeline-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1.5px;
+  height: 100%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.quote-timeline-line-fill {
+  position: absolute;
+  inset: 0;
+  background: rgba(241, 241, 236, 0.25);
+  /* Reveal mask: inset(top, right, bottom, left). As --timeline-p grows,
+     the bottom inset shrinks, exposing more of the line top → bottom. */
+  clip-path: inset(0 0 calc((1 - var(--timeline-p, 0)) * 100%) 0);
+}
+
+.quote-timeline-head {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--timeline-p, 0) * 100%);
+  width: 14px;
+  height: 40px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(
+    to bottom,
+    rgba(197, 224, 99, 0) 0%,
+    rgba(197, 224, 99, 0.95) 70%,
+    rgba(197, 224, 99, 1) 100%
+  );
+  filter: blur(2px);
+  box-shadow: 0 0 12px rgba(197, 224, 99, 0.6);
+  /* Visible only while the line is actively drawing — fade in from the start
+     and fade out near the end so it doesn't sit hard against the bottom edge. */
+  opacity: clamp(
+    0,
+    calc(min(
+      (var(--timeline-p, 0) - 0.02) * 50,
+      (1 - var(--timeline-p, 0)) * 50
+    )),
+    1
+  );
+}
+
+.quote-timeline-node {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.quote-timeline-dot {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c5e063;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.25s cubic-bezier(.22, 1, .36, 1);
+  box-shadow: 0 0 8px rgba(197, 224, 99, 0.5);
+}
+.quote-timeline-node[data-active="true"] .quote-timeline-dot {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.quote-timeline-branch {
+  position: absolute;
+  top: 0;
+  height: 1.5px;
+  width: 64px;
+  background: rgba(241, 241, 236, 0.4);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(.22, 1, .36, 1);
+}
+.quote-timeline-node--left .quote-timeline-branch {
+  right: calc(50% + 4px);
+  transform-origin: right center;
+}
+.quote-timeline-node--right .quote-timeline-branch {
+  left: calc(50% + 4px);
+  transform-origin: left center;
+}
+.quote-timeline-node[data-active="true"] .quote-timeline-branch {
+  transform: scaleX(1);
+}
+
+.quote-timeline-card {
+  position: absolute;
+  top: 0;
+  width: min(30ch, 38vw);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(0.75rem, 1.6vw, 1.25rem);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.35s ease 0.15s,
+              transform 0.4s cubic-bezier(.22, 1, .36, 1) 0.15s;
+}
+.quote-timeline-node--left .quote-timeline-card {
+  right: calc(50% + 4px + 64px + 24px);
+  align-items: flex-end;
+  text-align: right;
+}
+.quote-timeline-node--right .quote-timeline-card {
+  left: calc(50% + 4px + 64px + 24px);
+  align-items: flex-start;
+  text-align: left;
+}
+.quote-timeline-node[data-active="true"] .quote-timeline-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The card uses the existing .hero-quote-text / .hero-quote-logo /
+   .hero-quote-attr typography rules so the per-quote visual stays
+   identical to the previous sticky beats. The card just relays them
+   into a flex column instead of a centered stack. */
+.quote-timeline-card .hero-quote-text {
+  margin: 0;
+  /* Slightly tighter than the centered sticky version, since the card
+     is narrower and side-aligned. */
+  font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+  line-height: 1.15;
+}
+.quote-timeline-card .hero-quote-logo {
+  /* Smaller logo slot than the sticky-beat slot — the logo is supporting
+     attribution here, not a centerpiece. */
+  height: clamp(3rem, 5vw, 4.2rem);
+  width: clamp(9rem, 18vw, 14rem);
+}
+.quote-timeline-card .hero-quote-attr {
+  margin: 0;
+}
+
+/* ---- QuoteTimeline mobile (≤720px): single column, line on the left ---- */
+@media (max-width: 720px) {
+  .quote-timeline {
+    height: 360vh;
+    padding: 0 1.25rem 0 calc(1.5rem + 1.25rem);
+  }
+
+  .quote-timeline-line {
+    left: 1.5rem;
+    transform: none;
+  }
+  .quote-timeline-head {
+    left: 1.5rem;
+    transform: translate(-50%, -50%);
+  }
+
+  .quote-timeline-dot {
+    left: 1.5rem;
+    width: 6px;
+    height: 6px;
+  }
+
+  .quote-timeline-branch {
+    width: 32px;
+    /* Always grow left → right from the line on mobile. */
+    left: calc(1.5rem + 4px);
+    right: auto;
+    transform-origin: left center;
+  }
+  /* Override the desktop right-side rule that pinned the branch to right:50%. */
+  .quote-timeline-node--left .quote-timeline-branch,
+  .quote-timeline-node--right .quote-timeline-branch {
+    right: auto;
+    left: calc(1.5rem + 4px);
+    transform-origin: left center;
+  }
+
+  .quote-timeline-card,
+  .quote-timeline-node--left .quote-timeline-card,
+  .quote-timeline-node--right .quote-timeline-card {
+    left: calc(1.5rem + 4px + 32px + 16px);
+    right: 1.25rem;
+    width: auto;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .quote-timeline-card .hero-quote-text {
+    font-size: clamp(1.3rem, 5.5vw, 1.9rem);
+  }
+  .quote-timeline-card .hero-quote-logo {
+    height: clamp(2.4rem, 9vw, 3.4rem);
+    width: clamp(7rem, 32vw, 10rem);
+  }
+}
+
+/* ---- Reduced motion: line fully drawn, head hidden, branches/cards static ---- */
+@media (prefers-reduced-motion: reduce) {
+  .quote-timeline-line-fill {
+    clip-path: none;
+  }
+  .quote-timeline-head {
+    display: none;
+  }
+  .quote-timeline-dot,
+  .quote-timeline-branch,
+  .quote-timeline-card {
+    transition: none;
+  }
+  .quote-timeline-dot {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .quote-timeline-branch {
+    transform: scaleX(1);
+  }
+  .quote-timeline-card {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
