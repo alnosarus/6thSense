@@ -465,7 +465,8 @@
   line-height: 1.4;
 }
 
-.hero-finale-form input[type="email"] {
+.hero-finale-form input[type="email"],
+.hero-finale-form input[type="text"] {
   width: 100%;
   box-sizing: border-box;
   padding: 0.85rem 1rem;
@@ -479,7 +480,8 @@
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 
-.hero-finale-form input[type="email"]:focus-visible {
+.hero-finale-form input[type="email"]:focus-visible,
+.hero-finale-form input[type="text"]:focus-visible {
   border-color: #c5e063;
   background: rgba(255, 255, 255, 0.08);
 }
@@ -572,6 +574,15 @@
     /* Reset the -50% center trick used on desktop; mobile anchors via
        left/right/bottom and only carries the fade-up translate. */
     transform: translateY(calc((1 - var(--form-p, 0)) * 4vh));
+  }
+
+  /* Three-input form fits a phone viewport: shrink padding + label gap. */
+  .hero-finale-form input[type="email"],
+  .hero-finale-form input[type="text"] {
+    padding: 0.7rem 0.9rem;
+  }
+  .hero-finale-label {
+    margin-top: 0.15rem;
   }
 
   /* Shrink the bottom-pinned logos on mobile so the row fits in one line
@@ -875,5 +886,18 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.hero-finale-submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.hero-finale-fielderror {
+  margin: 0.2rem 0 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: #ff8888;
+  line-height: 1.3;
 }
 
