@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
+from app.core.limiter import current_rate_limit, limiter
 from app.schemas import LeadCreate, LeadResponse
 
 
 router = APIRouter(prefix="/api", tags=["leads"])
 
 
-# Postgres `xmax = 0` after INSERT ... ON CONFLICT DO UPDATE is the canonical
-# "was this row newly inserted?" trick. Returns true on insert, false on update.
 _UPSERT_SQL = text(
     """
     INSERT INTO leads (name, email, organization)
@@ -29,7 +28,9 @@ _UPSERT_SQL = text(
 
 
 @router.post("/leads", response_model=LeadResponse)
+@limiter.limit(current_rate_limit)
 async def create_lead(
+    request: Request,
     payload: LeadCreate,
     session: AsyncSession = Depends(get_session),
 ) -> LeadResponse:

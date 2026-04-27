@@ -4,9 +4,11 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 
 from app.api.routes import health, leads
 from app.core.config import get_settings
+from app.core.limiter import limiter
 from app.core.middleware import MaxBodySizeMiddleware
 
 
@@ -22,6 +24,9 @@ def create_app() -> FastAPI:
         version="0.1.0",
         lifespan=lifespan,
     )
+
+    application.state.limiter = limiter
+
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -33,7 +38,6 @@ def create_app() -> FastAPI:
 
     @application.exception_handler(RequestValidationError)
     async def _validation_handler(_req: Request, exc: RequestValidationError):
-        # PII-safe: drop any `input` field; keep only field path + message.
         errors: dict[str, str] = {}
         for err in exc.errors():
             loc = err.get("loc") or ()
@@ -42,6 +46,13 @@ def create_app() -> FastAPI:
         return JSONResponse(
             status_code=400,
             content={"ok": False, "errors": errors},
+        )
+
+    @application.exception_handler(RateLimitExceeded)
+    async def _rate_limit_handler(_req: Request, _exc: RateLimitExceeded):
+        return JSONResponse(
+            status_code=429,
+            content={"ok": False, "error": "Too many requests. Please slow down."},
         )
 
     application.include_router(health.router)
