@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +14,7 @@ from app.schemas import LeadCreate, LeadResponse
 
 
 router = APIRouter(prefix="/api", tags=["leads"])
+logger = logging.getLogger(__name__)
 
 
 _UPSERT_SQL = text(
@@ -22,7 +25,7 @@ _UPSERT_SQL = text(
         name         = EXCLUDED.name,
         organization = EXCLUDED.organization,
         updated_at   = now()
-    RETURNING (xmax = 0) AS inserted
+    RETURNING id, (xmax = 0) AS inserted
     """
 )
 
@@ -34,14 +37,20 @@ async def create_lead(
     payload: LeadCreate,
     session: AsyncSession = Depends(get_session),
 ) -> LeadResponse:
-    result = await session.execute(
-        _UPSERT_SQL,
-        {
-            "name": payload.name,
-            "email": payload.email,
-            "organization": payload.organization,
-        },
-    )
-    inserted: bool = result.scalar_one()
+    row = (
+        await session.execute(
+            _UPSERT_SQL,
+            {
+                "name": payload.name,
+                "email": payload.email,
+                "organization": payload.organization,
+            },
+        )
+    ).one()
+    lead_id, inserted = row
     await session.commit()
-    return LeadResponse(ok=True, created=inserted)
+    logger.info(
+        "lead_captured",
+        extra={"lead_id": int(lead_id), "is_new": bool(inserted)},
+    )
+    return LeadResponse(ok=True, created=bool(inserted))

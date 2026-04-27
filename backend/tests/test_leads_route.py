@@ -53,3 +53,16 @@ async def test_invalid_email_returns_400_with_field_errors(client):
     body = res.json()
     assert body["ok"] is False
     assert "email" in body["errors"]
+
+
+@pytest.mark.asyncio
+async def test_success_log_contains_no_pii(client, caplog):
+    import logging
+    caplog.set_level(logging.INFO)
+    await client.post(
+        "/api/leads",
+        json={"name": "Ada", "email": "ada@x.com", "organization": "Acme"},
+    )
+    captured = " ".join(caplog.messages + [str(r.__dict__) for r in caplog.records])
+    assert "ada@x.com" not in captured
+    assert "Acme" not in captured

@@ -9,6 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from app.api.routes import health, leads
 from app.core.config import get_settings
 from app.core.limiter import limiter
+from app.core.logging import configure_logging
 from app.core.middleware import MaxBodySizeMiddleware
 
 
@@ -18,6 +19,7 @@ async def lifespan(_app: FastAPI):
 
 
 def create_app() -> FastAPI:
+    configure_logging()
     settings = get_settings()
     application = FastAPI(
         title="6thSense API",
