@@ -8,6 +8,10 @@ from app.main import create_app
 @pytest_asyncio.fixture
 async def client(db_session, monkeypatch):
     monkeypatch.setenv("SENSEPROBE_RATE_LIMIT", "3/minute")
+    from app.core.limiter import limiter
+    # Reset the in-process bucket store so this test starts clean even if
+    # earlier tests touched the limiter on overlapping IPs.
+    limiter.reset()
     app = create_app()
     async with AsyncClient(
         transport=ASGITransport(app=app),
