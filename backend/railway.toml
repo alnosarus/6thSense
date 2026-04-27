@@ -1,6 +1,13 @@
+# Railway service config for the 6thSense backend.
+#
+# IMPORTANT: leave Railway's "Root Directory" at the repository root
+# (NOT set to `backend/`). The Dockerfile uses repo-root paths like
+# `COPY backend/app /app/app` and reads `requirements-backend.txt` from
+# the repo root, so the build context must be the repo root.
+
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "backend/Dockerfile"
 
 [deploy]
 startCommand = "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
