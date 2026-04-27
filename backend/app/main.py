@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 
 from app.api.routes import health, leads
 from app.core.config import get_settings
+from app.core.middleware import MaxBodySizeMiddleware
 
 
 @asynccontextmanager
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    application.add_middleware(MaxBodySizeMiddleware)
 
     @application.exception_handler(RequestValidationError)
     async def _validation_handler(_req: Request, exc: RequestValidationError):
