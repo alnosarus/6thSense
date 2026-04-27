@@ -365,7 +365,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .hero-finale-title {
@@ -448,7 +448,7 @@
 }
 
 .hero-finale-label {
-  margin-top: 0.25rem;
+  margin-top: 0.15rem;
   font-family: var(--font-ui);
   font-size: 0.72rem;
   font-weight: 600;
@@ -458,7 +458,7 @@
 }
 
 .hero-finale-hint {
-  margin: 0.15rem 0 0.5rem;
+  margin: 0.1rem 0 0.3rem;
   font-family: var(--font-body);
   font-size: 0.82rem;
   color: rgba(241, 241, 236, 0.52);
@@ -469,7 +469,7 @@
 .hero-finale-form input[type="text"] {
   width: 100%;
   box-sizing: border-box;
-  padding: 0.85rem 1rem;
+  padding: 0.7rem 0.9rem;
   font-family: var(--font-body);
   font-size: 1rem;
   color: #f1f1ec;
@@ -487,9 +487,9 @@
 }
 
 .hero-finale-submit {
-  margin-top: 0.6rem;
+  margin-top: 0.4rem;
   align-self: center;
-  padding: 0.8rem 1.6rem;
+  padding: 0.7rem 1.6rem;
   font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.95rem;
