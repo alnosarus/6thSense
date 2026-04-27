@@ -186,15 +186,13 @@ export function HeroFinale() {
           {submitting ? "Sending…" : "Discuss your dataset"}
         </button>
 
-        {status ? (
-          <p
-            className={`hero-finale-status hero-finale-status--${tone}`}
-            role="status"
-            aria-live="polite"
-          >
-            {status}
-          </p>
-        ) : null}
+        <p
+          className={`hero-finale-status hero-finale-status--${tone}`}
+          role="status"
+          aria-live="polite"
+        >
+          {status || " "}
+        </p>
       </form>
 
       <div className="hero-finale-backed">

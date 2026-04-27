@@ -355,7 +355,10 @@
 /* Finale form: centered column, settles up into place as it fades in. */
 .hero-finale-form {
   position: absolute;
-  top: 50%;
+  /* Biased above center so the form has room below for the status / field-error
+     line and the Backed-by row at bottom: 1.5rem. Mobile (below) overrides this
+     with a bottom-anchored layout. */
+  top: 46%;
   left: 50%;
   transform: translate(-50%, calc(-50% + (1 - var(--form-p, 0)) * 12px));
   width: min(34rem, calc(100% - 2 * var(--gutter)));
@@ -509,7 +512,11 @@
 }
 
 .hero-finale-status {
+  /* Always reserves one line of vertical space, even when the form is in its
+     idle state with no message — keeps form height stable so the layout
+     doesn't shift when an error appears. */
   margin: 0.6rem 0 0;
+  min-height: 1.4em;
   font-family: var(--font-body);
   font-size: 0.9rem;
   line-height: 1.4;
