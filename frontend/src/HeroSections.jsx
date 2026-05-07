@@ -7,6 +7,8 @@
  *   --video-p      → VideoSection
  */
 
+import { useEffect, useRef, useState } from "react";
+
 export function PipelineSection() {
   return (
     <section className="hero-section hero-pipeline">
@@ -25,11 +27,34 @@ export function PipelineSection() {
 }
 
 export function VideoSection() {
+  const videoRef = useRef(null);
+  const [reduceMotion] = useState(() =>
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
+  );
+
+  useEffect(() => {
+    if (reduceMotion && videoRef.current) {
+      videoRef.current.pause();
+    }
+  }, [reduceMotion]);
+
   return (
     <section className="hero-section hero-video">
       <h2 className="hero-video-title">See the data.</h2>
-      <div className="hero-video-frame" aria-hidden="true">
-        <span className="hero-video-frame-label">Sample dataset preview</span>
+      <div className="hero-video-frame">
+        <video
+          ref={videoRef}
+          className="hero-video-media"
+          src="/Demo_1.mp4"
+          poster="/Demo_1_poster.jpg"
+          {...(reduceMotion ? {} : { autoPlay: true })}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label="Tactile sensor data preview"
+        />
       </div>
     </section>
   );
