@@ -61,11 +61,17 @@ export function HeroStageTwo() {
         el.style.setProperty("--form-p", formP.toFixed(4));
         el.style.setProperty("--assemble-fade-p", "1");
         el.style.setProperty("--assemble-move-p", "1");
+        document.body.style.setProperty("--video-p", videoP.toFixed(4));
+        document.body.classList.toggle("hero-video-active", videoP > 0.5);
       }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      document.body.style.removeProperty("--video-p");
+      document.body.classList.remove("hero-video-active");
+    };
   }, [progressRef, reducedRef]);
 
   return (
