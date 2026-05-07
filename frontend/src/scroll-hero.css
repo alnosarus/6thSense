@@ -293,21 +293,18 @@
 .hero-video-frame {
   width: 100%;
   max-width: 32rem;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 2990 / 1312;
   background: #1a1a1a;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
 }
 
-.hero-video-frame-label {
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(241, 241, 236, 0.45);
+.hero-video-media {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 
