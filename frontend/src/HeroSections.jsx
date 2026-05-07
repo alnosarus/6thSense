@@ -41,7 +41,6 @@ export function VideoSection() {
 
   return (
     <section className="hero-section hero-video">
-      <h2 className="hero-video-title">See the data.</h2>
       <div className="hero-video-frame">
         <video
           ref={videoRef}
