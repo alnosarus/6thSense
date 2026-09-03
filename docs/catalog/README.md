@@ -153,10 +153,6 @@ Both tiers are private. The catalog tier holds only `catalog.json`, clip JSON, p
 previews, stills, IMU previews and tactile previews. Full sellable packages live in the
 processed tier. Neither is public-read; the browser receives short-lived presigned URLs.
 
-```bash
-AWS_PROFILE=6thsense-admin ./scripts/catalog/provision_s3.sh
-```
-
 The production buckets and the `catalog-media-reader` IAM user are provisioned separately.
 That user needs `GetObject` on `6thsense-catalog/*`,
 `6thsense-processed/imported/*`, and `6thsense-processed/packages/*`. Both tiers use the
