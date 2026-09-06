@@ -15,7 +15,16 @@ from starlette.types import ASGIApp
 from app.core.config import get_settings
 
 
-GUARDED_PREFIXES: tuple[str, ...] = ("/api/auth/", "/api/portal/", "/api/admin/")
+GUARDED_PREFIXES: tuple[str, ...] = (
+    "/api/auth/",
+    "/api/portal/",
+    "/api/admin/",
+    # Every /api/ops/ write is cookie-authenticated and destructive-ish --
+    # approve, pay, and a hard delete that purges objects from a bucket which
+    # denies deletes to its uploaders. Omitting the prefix here would leave a
+    # logged-in ops session one cross-site form post away from a purge.
+    "/api/ops/",
+)
 # State-changing methods on cookie-authenticated routes get the Origin check.
 UNSAFE_METHODS: frozenset[str] = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 

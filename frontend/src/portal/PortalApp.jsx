@@ -4,9 +4,10 @@ import AdminDashboard from "./AdminDashboard.jsx";
 import CustomerHome from "./CustomerHome.jsx";
 import FounderDashboard from "./FounderDashboard.jsx";
 import InvestorHome from "./InvestorHome.jsx";
+import OpsDashboard from "./OpsDashboard.jsx";
 import { RequireAuth } from "./RequireAuth.jsx";
 import { RequireRole } from "./RequireRole.jsx";
-import { CATALOG_ROLES, roleHome } from "./roleHome.js";
+import { CATALOG_ROLES, OPS_ROLES, roleHome } from "./roleHome.js";
 import { useSession } from "./useSession.jsx";
 
 // Lazily loaded: the catalog pulls in five tab components, a hand-rolled SVG
@@ -39,6 +40,9 @@ export default function PortalApp() {
         </Route>
         <Route element={<RequireRole role="investor" />}>
           <Route path="investor" element={<InvestorHome />} />
+        </Route>
+        <Route element={<RequireRole role={OPS_ROLES} />}>
+          <Route path="ops" element={<OpsDashboard />} />
         </Route>
         <Route element={<RequireRole role={CATALOG_ROLES} />}>
           <Route

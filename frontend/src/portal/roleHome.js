@@ -29,8 +29,20 @@
  */
 export const CATALOG_ROLES = ["guest", "investor", "customer", "founder", "admin"];
 
+/**
+ * Roles that may reach /portal/ops.
+ *
+ * MIRRORS OPS_ROLES on the server (app/api/routes/ops.py). `ops` lands here by
+ * the default rule — its home is /portal/ops — and founder/admin are included
+ * so the people who own the company are not locked out of its payment ledger.
+ */
+export const OPS_ROLES = ["ops", "founder", "admin"];
+
 /** Portal routes not owned by a single role. */
-const SHARED_ROUTES = [{ path: "/portal/catalog", roles: CATALOG_ROLES }];
+const SHARED_ROUTES = [
+  { path: "/portal/catalog", roles: CATALOG_ROLES },
+  { path: "/portal/ops", roles: OPS_ROLES },
+];
 
 /** Roles whose home is not `/portal/<role>`. */
 const HOME_OVERRIDES = { guest: "/portal/catalog" };

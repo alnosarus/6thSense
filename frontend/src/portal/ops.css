@@ -1,0 +1,124 @@
+/* Collector operations board. Same system as admin.css (DESIGN.md: dark
+   cinematic, General Sans body, Geist Mono for data, warm orange #F0612A) --
+   the tokens are redeclared rather than imported because .ops is mounted
+   inside the portal shell, not the admin shell. */
+.ops {
+  --o-ground: #0e0d0a;
+  --o-surface: #141009;
+  --o-surface-2: #1c1810;
+  --o-line: rgba(255, 255, 255, 0.12);
+  --o-text: #f4f1ea;
+  --o-muted: #a49c86;
+  --o-accent: #f0612a;
+  --o-ok: #8fd08a;
+  --o-warn: #e0b45f;
+  --o-danger: #e0705f;
+  --o-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  min-height: 100vh;
+  padding: 28px 24px 64px;
+  background: var(--o-ground);
+  color: var(--o-text);
+  font-family: "General Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ops-head h1 { margin: 0 0 4px; font-size: 24px; font-weight: 600; letter-spacing: -0.01em; }
+.ops-muted { color: var(--o-muted); font-size: 13px; margin: 0; }
+.ops-head code { font-family: var(--o-mono); color: var(--o-accent); }
+.ops-error {
+  margin: 14px 0 0; padding: 10px 12px; border-radius: 8px; font-size: 13px;
+  background: rgba(224, 112, 95, 0.12); border: 1px solid var(--o-danger); color: #f6cfc8;
+}
+
+/* Tiles */
+.ops-tiles {
+  display: grid; gap: 10px; margin: 20px 0;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+.ops-tile {
+  background: var(--o-surface); border: 1px solid var(--o-line);
+  border-radius: 10px; padding: 12px 14px;
+}
+.ops-tile-n { font-family: var(--o-mono); font-size: 20px; }
+.ops-tile-l { color: var(--o-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+/* Controls */
+.ops-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.ops-spacer { flex: 1; }
+.ops-check { display: inline-flex; gap: 6px; align-items: center; color: var(--o-muted); font-size: 13px; }
+.ops select, .ops input[type="text"], .ops input:not([type]) {
+  background: var(--o-surface-2); color: var(--o-text);
+  border: 1px solid var(--o-line); border-radius: 7px; padding: 6px 9px; font-size: 13px;
+  font-family: inherit;
+}
+.ops button {
+  background: var(--o-surface-2); color: var(--o-text); border: 1px solid var(--o-line);
+  border-radius: 7px; padding: 6px 11px; font-size: 12px; cursor: pointer; font-family: inherit;
+}
+.ops button:hover:not(:disabled) { border-color: var(--o-accent); color: var(--o-accent); }
+.ops button:disabled { opacity: 0.4; cursor: not-allowed; }
+.ops button.danger { border-color: rgba(224, 112, 95, 0.5); color: var(--o-danger); }
+.ops button.danger:hover { background: rgba(224, 112, 95, 0.14); border-color: var(--o-danger); color: var(--o-danger); }
+
+/* Table */
+.ops-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ops-table th {
+  text-align: left; padding: 8px 10px; color: var(--o-muted); font-weight: 500;
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--o-line); white-space: nowrap;
+}
+.ops-table td { padding: 9px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); vertical-align: middle; }
+.ops-table .num { text-align: right; font-family: var(--o-mono); white-space: nowrap; }
+.ops-table th.num { text-align: right; }
+.ops-table .mono { font-family: var(--o-mono); font-size: 12px; }
+/* Deleted rows stay legible -- struck through, not hidden, because the whole
+   point of keeping the row is that somebody can still read it. */
+.ops-row-deleted { opacity: 0.45; }
+.ops-row-deleted .mono { text-decoration: line-through; }
+.ops-del { display: flex; gap: 6px; align-items: center; }
+
+/* Chips */
+.ops-chip {
+  display: inline-block; margin-top: 3px; padding: 1px 7px; border-radius: 999px;
+  font-size: 10.5px; font-family: var(--o-mono); color: var(--o-muted);
+  background: rgba(255, 255, 255, 0.06); border: 1px solid var(--o-line);
+}
+.ops-chip.ok { color: var(--o-ok); border-color: rgba(143, 208, 138, 0.4); }
+.ops-chip.warn { color: var(--o-warn); border-color: rgba(224, 180, 95, 0.4); }
+.ops-chip.bad { color: var(--o-danger); border-color: rgba(224, 112, 95, 0.45); }
+
+.ops-busy {
+  position: fixed; right: 18px; bottom: 18px; padding: 7px 13px; border-radius: 999px;
+  background: var(--o-surface-2); border: 1px solid var(--o-accent);
+  color: var(--o-accent); font-size: 12px; font-family: var(--o-mono);
+}
+
+/* Preview */
+.ops-play {
+  width: 28px; padding: 4px 0 !important; text-align: center;
+  font-size: 11px; line-height: 1;
+}
+.ops-modal-back {
+  position: fixed; inset: 0; z-index: 50; display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.72); padding: 24px;
+}
+.ops-modal {
+  width: min(1100px, 96vw); max-height: 92vh; overflow: auto;
+  background: var(--o-surface); border: 1px solid var(--o-line);
+  border-radius: 12px; padding: 16px 18px 20px;
+}
+.ops-modal header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px;
+}
+.ops-modal header .mono { font-family: var(--o-mono); font-size: 13px; }
+.ops-modal select { margin-bottom: 10px; width: 100%; }
+/* Letterboxed on black: a 4000x1200 side-by-side frame is 3.33:1, and any
+   object-fit that crops would hide one of the two eyes. */
+.ops-modal video {
+  width: 100%; max-height: 62vh; display: block; background: #000;
+  border-radius: 8px; border: 1px solid var(--o-line);
+}
+.ops-modal .ops-muted { margin-top: 8px; }
+.ops-modal code { font-family: var(--o-mono); color: var(--o-accent); }
