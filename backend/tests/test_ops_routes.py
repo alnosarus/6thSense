@@ -211,3 +211,71 @@ async def test_import_merges_and_never_regenerates(app, db_session):
     assert again.json()["added"] == 0
     b = next(e for e in again.json()["episodes"] if e["recording"] == "ego_b")
     assert b["approved"] is True
+
+
+# --- task labels --------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_task_names_are_case_insensitively_unique(app, db_session):
+    """"Garment Folding" and "garment folding" are one activity and two labels.
+    Splitting them is the exact failure the table exists to prevent, so the
+    clash is refused at creation rather than cleaned up later."""
+    sid = await _sid(db_session, "ops")
+    async with _client(app) as c:
+        first = await c.post("/api/ops/tasks",
+                             json={"name": "Garment Folding", "category": "packing_and_folding"},
+                             cookies={"sid": sid}, headers={"Origin": ORIGIN})
+        assert first.status_code == 200
+        dupe = await c.post("/api/ops/tasks",
+                            json={"name": "garment folding", "category": "other"},
+                            cookies={"sid": sid}, headers={"Origin": ORIGIN})
+    assert dupe.status_code == 409
+    assert "Garment Folding" in dupe.json()["detail"]
+
+
+@pytest.mark.asyncio
+async def test_label_an_episode_and_clear_it(app, db_session):
+    sid = await _sid(db_session, "ops")
+    await _episode(db_session)
+    async with _client(app) as c:
+        made = await c.post("/api/ops/tasks", json={"name": "Floor Sweeping",
+                                                    "category": "cleaning_and_waste"},
+                            cookies={"sid": sid}, headers={"Origin": ORIGIN})
+        tid = made.json()["tasks"][0]["id"]
+        on = await c.post("/api/ops/episodes/ego_test_0001/task", json={"task_id": tid},
+                          cookies={"sid": sid}, headers={"Origin": ORIGIN})
+        assert next(e for e in on.json()["episodes"]
+                    if e["recording"] == "ego_test_0001")["task_id"] == tid
+        assert on.json()["totals"]["unlabelled"] == 0
+
+        bad = await c.post("/api/ops/episodes/ego_test_0001/task", json={"task_id": 999999},
+                           cookies={"sid": sid}, headers={"Origin": ORIGIN})
+        assert bad.status_code == 404
+
+        off = await c.post("/api/ops/episodes/ego_test_0001/task", json={"task_id": None},
+                           cookies={"sid": sid}, headers={"Origin": ORIGIN})
+    assert next(e for e in off.json()["episodes"]
+                if e["recording"] == "ego_test_0001")["task_id"] is None
+
+
+@pytest.mark.asyncio
+async def test_retiring_a_task_does_not_delete_its_episodes(app, db_session):
+    """SET NULL, not CASCADE. Losing a label is a relabelling chore; losing the
+    episodes that carried it is a loss."""
+    import sqlalchemy as sa
+    sid = await _sid(db_session, "ops")
+    await _episode(db_session)
+    async with _client(app) as c:
+        made = await c.post("/api/ops/tasks", json={"name": "Tray Kitting",
+                                                    "category": "pick_place_kitting"},
+                            cookies={"sid": sid}, headers={"Origin": ORIGIN})
+        tid = made.json()["tasks"][0]["id"]
+        await c.post("/api/ops/episodes/ego_test_0001/task", json={"task_id": tid},
+                     cookies={"sid": sid}, headers={"Origin": ORIGIN})
+    await db_session.execute(sa.text("DELETE FROM ops_tasks WHERE id = :i"), {"i": tid})
+    await db_session.commit()
+    async with _client(app) as c:
+        after = await c.get("/api/ops/state", cookies={"sid": sid})
+    row = next(e for e in after.json()["episodes"] if e["recording"] == "ego_test_0001")
+    assert row["task_id"] is None          # label gone
+    assert row["recording"] == "ego_test_0001"   # episode still here

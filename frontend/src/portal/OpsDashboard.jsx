@@ -22,6 +22,8 @@ export default function OpsDashboard() {
   const [showDeleted, setShowDeleted] = useState(false);
   const [session, setSession] = useState("");
   const [wearerName, setWearerName] = useState("");
+  const [taskName, setTaskName] = useState("");
+  const [taskCat, setTaskCat] = useState("other");
   const [preview, setPreview] = useState(null);   // {recording, files, error, pick}
 
   const load = useCallback(async () => {
@@ -65,6 +67,16 @@ export default function OpsDashboard() {
     [state],
   );
 
+  // Grouped so the dropdown reads as the taxonomy it is, not a flat list of 13.
+  const taskGroups = useMemo(() => {
+    const by = new Map();
+    for (const task of state?.tasks ?? []) {
+      if (!by.has(task.category)) by.set(task.category, []);
+      by.get(task.category).push(task);
+    }
+    return [...by.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [state]);
+
   const rows = useMemo(() => {
     let list = state?.episodes ?? [];
     if (!showDeleted) list = list.filter((e) => !e.deleted_at);
@@ -102,6 +114,7 @@ export default function OpsDashboard() {
           ["Approved", fmt(t.approved)],
           ["Paid", fmt(t.paid)],
           ["Unassigned", fmt(t.unassigned)],
+          ["Unlabelled", fmt(t.unlabelled)],
           ["Clock unverified", fmt(t.clock_flagged)],
           ["Deleted", fmt(t.deleted)],
         ].map(([label, value]) => (
@@ -135,6 +148,22 @@ export default function OpsDashboard() {
           }}>
           Add wearer
         </button>
+        <input placeholder="new task label" value={taskName}
+               onChange={(e) => setTaskName(e.target.value)} />
+        <select value={taskCat} onChange={(e) => setTaskCat(e.target.value)}
+                title="category, as used in the delivered takes catalog">
+          {[...new Set([...(state?.tasks ?? []).map((x) => x.category), "other"])]
+            .sort().map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <button
+          disabled={!taskName.trim() || busy === "task"}
+          onClick={async () => {
+            await act("task", "/api/ops/tasks",
+                      { name: taskName.trim(), category: taskCat });
+            setTaskName("");
+          }}>
+          Add task
+        </button>
       </div>
 
       <table className="ops-table">
@@ -142,7 +171,7 @@ export default function OpsDashboard() {
           <tr>
             <th /><th>Recording</th><th>Camera</th><th>Started</th>
             <th className="num">Min</th><th className="num">Size</th>
-            <th>Wearer</th><th>Quality</th><th>Approved</th><th>Paid</th><th>Delete</th>
+            <th>Wearer</th><th>Task</th><th>Quality</th><th>Approved</th><th>Paid</th><th>Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -179,6 +208,24 @@ export default function OpsDashboard() {
                   <option value="">unassigned</option>
                   {state.wearers.map((w) => (
                     <option key={w.id} value={w.id}>{w.name}</option>
+                  ))}
+                </select>
+              </td>
+              <td>
+                <select
+                  value={e.task_id ?? ""}
+                  disabled={!!e.deleted_at}
+                  onChange={(ev) =>
+                    act(`task-${e.recording}`, `/api/ops/episodes/${e.recording}/task`,
+                        { task_id: ev.target.value ? Number(ev.target.value) : null })}
+                >
+                  <option value="">unlabelled</option>
+                  {taskGroups.map(([cat, list]) => (
+                    <optgroup key={cat} label={cat.replace(/_/g, " ")}>
+                      {list.map((task) => (
+                        <option key={task.id} value={task.id}>{task.name}</option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </td>

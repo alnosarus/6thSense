@@ -24,7 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth_deps import current_user
 from app.core.db import get_session
 from app.core.ops_s3 import OpsS3Unavailable, episode_files
-from app.models import Episode, User, Wearer
+from app.models import Episode, Task, User, Wearer
 
 
 router = APIRouter(prefix="/api/ops", tags=["ops"])
@@ -50,6 +50,10 @@ def _wearer_json(w: Wearer) -> dict:
             "is_active": w.is_active}
 
 
+def _task_json(t: Task) -> dict:
+    return {"id": t.id, "name": t.name, "category": t.category, "is_active": t.is_active}
+
+
 def _episode_json(e: Episode) -> dict:
     return {
         "id": e.id, "recording": e.recording, "session": e.session,
@@ -61,7 +65,7 @@ def _episode_json(e: Episode) -> dict:
         "complete": e.complete, "truncated": e.truncated,
         "clock_source": e.clock_source, "clock_ok": e.clock_source == "ntp",
         "fw": e.fw, "no_metadata": e.no_metadata,
-        "wearer_id": e.wearer_id,
+        "wearer_id": e.wearer_id, "task_id": e.task_id,
         "approved": e.approved,
         "approved_at": e.approved_at.isoformat() if e.approved_at else None,
         "paid": e.paid, "paid_at": e.paid_at.isoformat() if e.paid_at else None,
@@ -78,10 +82,13 @@ async def _state(db: AsyncSession) -> dict:
                                  Episode.recording.desc()))).scalars().all()
     wearers = (await db.execute(
         select(Wearer).order_by(Wearer.name))).scalars().all()
+    tasks = (await db.execute(
+        select(Task).order_by(Task.category, Task.name))).scalars().all()
     live = [e for e in eps if e.deleted_at is None]
     return {
         "episodes": [_episode_json(e) for e in eps],
         "wearers": [_wearer_json(w) for w in wearers],
+        "tasks": [_task_json(x) for x in tasks],
         "totals": {
             "episodes": len(live),
             "deleted": len(eps) - len(live),
@@ -90,6 +97,7 @@ async def _state(db: AsyncSession) -> dict:
             "approved": sum(1 for e in live if e.approved),
             "paid": sum(1 for e in live if e.paid),
             "unassigned": sum(1 for e in live if e.wearer_id is None),
+            "unlabelled": sum(1 for e in live if e.task_id is None),
             "clock_flagged": sum(1 for e in live if e.clock_source != "ntp"),
         },
     }
@@ -114,6 +122,29 @@ async def create_wearer(body: WearerIn, _: User = Depends(require_ops),
                         db: AsyncSession = Depends(get_session)) -> dict:
     db.add(Wearer(name=body.name.strip(), contact=body.contact.strip(),
                   note=body.note.strip()))
+    await db.commit()
+    return await _state(db)
+
+
+# --- tasks --------------------------------------------------------------------
+
+class TaskIn(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    category: str = Field(default="other", max_length=60)
+
+
+@router.post("/tasks")
+async def create_task(body: TaskIn, _: User = Depends(require_ops),
+                      db: AsyncSession = Depends(get_session)) -> dict:
+    """Add a label. Case-insensitively unique, because "Garment Folding" and
+    "garment folding" are the split this table exists to prevent."""
+    name = body.name.strip()
+    clash = (await db.execute(
+        select(Task).where(func.lower(Task.name) == name.lower()))).scalar_one_or_none()
+    if clash is not None:
+        raise HTTPException(status_code=409,
+                            detail=f"'{clash.name}' already exists in {clash.category}.")
+    db.add(Task(name=name, category=(body.category or "other").strip() or "other"))
     await db.commit()
     return await _state(db)
 
@@ -144,6 +175,26 @@ async def assign_episode(recording: str, body: AssignIn,
         if not exists:
             raise HTTPException(status_code=404, detail="Unknown wearer.")
     e.wearer_id = body.wearer_id
+    await db.commit()
+    return await _state(db)
+
+
+class TaskAssignIn(BaseModel):
+    task_id: int | None = None
+
+
+@router.post("/episodes/{recording}/task")
+async def label_episode(recording: str, body: TaskAssignIn,
+                        _: User = Depends(require_ops),
+                        db: AsyncSession = Depends(get_session)) -> dict:
+    e = await _episode_or_404(db, recording)
+    if body.task_id is not None:
+        exists = (await db.execute(
+            select(func.count()).select_from(Task)
+            .where(Task.id == body.task_id))).scalar_one()
+        if not exists:
+            raise HTTPException(status_code=404, detail="Unknown task.")
+    e.task_id = body.task_id
     await db.commit()
     return await _state(db)
 

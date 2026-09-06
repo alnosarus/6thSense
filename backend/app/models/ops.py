@@ -42,6 +42,37 @@ from app.models.lead import Base
 #: to its uploaders, so a purge is not something that can be undone by re-upload.
 DELETE_KINDS: tuple[str, ...] = ("soft", "hard")
 
+#: The task taxonomy already in use in the delivered takes catalog
+#: (~/Desktop/6thSense_Takes_Catalog/vocabulary-takes_meta.json), which grades
+#: every episode as category -> task. Reproduced here rather than invented,
+#: because a label that does not match the one already shipped to a customer
+#: splits the same activity into two names and makes the dataset unsearchable.
+TASK_CATEGORIES: tuple[str, ...] = (
+    "cleaning_and_waste",
+    "electronics_assembly",
+    "packing_and_folding",
+    "pick_place_kitting",
+    "soldering_and_bonding",
+    "other",
+)
+
+#: Seeded by migration 0010, verbatim from that catalog.
+SEED_TASKS: tuple[tuple[str, str], ...] = (
+    ("cleaning_and_waste", "Floor Sweeping"),
+    ("cleaning_and_waste", "Waste Bagging"),
+    ("electronics_assembly", "Enclosure Assembly"),
+    ("electronics_assembly", "Screw Assembly"),
+    ("packing_and_folding", "Blanket Folding"),
+    ("packing_and_folding", "Carton Folding"),
+    ("packing_and_folding", "Garment Folding"),
+    ("pick_place_kitting", "Dart Placement"),
+    ("pick_place_kitting", "Module Inspection"),
+    ("pick_place_kitting", "Print Removal"),
+    ("pick_place_kitting", "Tray Kitting"),
+    ("soldering_and_bonding", "Hot-Glue Bonding"),
+    ("soldering_and_bonding", "PCB Soldering"),
+)
+
 
 class Wearer(Base):
     """A person who carries a camera. Not a login — see the module docstring."""
@@ -62,6 +93,31 @@ class Wearer(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
 
     __table_args__ = (Index("ops_wearers_name_idx", "name"),)
+
+
+class Task(Base):
+    """What the wearer was doing. A controlled list, not free text on the episode.
+
+    Free text would be quicker to build and would fragment the dataset inside a
+    week -- "folding", "Folding", "fold laundry" and "Garment Folding" are one
+    activity and four labels, and the whole value of the label is that takes of
+    the same activity group. The list is editable, so an activity nobody
+    anticipated is one row rather than a schema change.
+    """
+
+    __tablename__ = "ops_tasks"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    #: Matches the delivered catalog's `category` field. Free-form rather than a
+    #: CHECK: the taxonomy is a working vocabulary, and a new category should not
+    #: need a migration on a Friday.
+    category: Mapped[str] = mapped_column(String(60), nullable=False, server_default="other")
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    __table_args__ = (Index("ops_tasks_category_idx", "category"),)
 
 
 class Episode(Base):
@@ -98,6 +154,11 @@ class Episode(Base):
 
     wearer_id: Mapped[int | None] = mapped_column(
         BigInteger, ForeignKey("ops_wearers.id", ondelete="SET NULL"))
+    #: SET NULL, not CASCADE: retiring a task label must not delete the episodes
+    #: that carried it. They become unlabelled and get relabelled, which is a
+    #: chore; deleting them would be a loss.
+    task_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("ops_tasks.id", ondelete="SET NULL"))
     #: Reviewed and accepted for payment. Distinct from the automatic quality
     #: verdict the scan computes: a human said yes.
     approved: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
@@ -132,5 +193,6 @@ class Episode(Base):
         ),
         Index("ops_episodes_session_idx", "session"),
         Index("ops_episodes_wearer_idx", "wearer_id"),
+        Index("ops_episodes_task_idx", "task_id"),
         Index("ops_episodes_started_idx", "started_at"),
     )
