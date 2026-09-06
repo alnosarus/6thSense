@@ -11,9 +11,9 @@ from app.models.lead import Base
 
 
 #: Every value `users.role` may take, in the order the CHECK constraint states
-#: them. Kept in lockstep with migration 0007_add_guest_role.py and
-#: app.cli.VALID_ROLES.
-ROLES: tuple[str, ...] = ("admin", "founder", "customer", "investor", "guest")
+#: them. Kept in lockstep with the latest role migration
+#: (0008_add_ops_role.py) and app.cli.VALID_ROLES.
+ROLES: tuple[str, ...] = ("admin", "founder", "customer", "investor", "guest", "ops")
 
 #: The shared, read-only demo role handed to prospects. It carries no database
 #: privilege of its own -- every restriction is enforced in the application
@@ -28,6 +28,17 @@ GUEST_ROLE = "guest"
 #: and restore the demo account after a rollback instead of demanding the row be
 #: deleted by hand. Keep in lockstep with 0007_add_guest_role.DOWNGRADE_FOLD_ROLE.
 GUEST_DOWNGRADE_FOLD_ROLE = "customer"
+
+#: The collector-operations role. The ops area holds wearer profiles, episode
+#: assignments and payment approvals -- personal data plus a payment ledger --
+#: which is why it is its own role and not a reuse of `founder`: require_role()
+#: matches exactly, so sharing the role would make every ops login a founder
+#: login permanently, with no way to separate them afterwards.
+#:
+#: It is deliberately absent from catalog_redact.CATALOG_ROLES, so an ops
+#: account is refused at app/api/routes/catalog.py rather than falling through
+#: to preview access. Adding a role must not silently widen anything.
+OPS_ROLE = "ops"
 
 #: The single account allowed to hold GUEST_ROLE via `app.cli seed-guest`.
 #: The login form also accepts the bare username `guest`, which resolves here
@@ -58,10 +69,10 @@ class User(Base):
 
     __table_args__ = (
         CheckConstraint(
-            # Keep in lockstep with ROLES above and migration 0007. The test
+            # Keep in lockstep with ROLES above and migration 0008. The test
             # suite builds its schema from this metadata (create_all), not from
             # the migrations, so a role missing here fails only under test.
-            "role IN ('admin', 'founder', 'customer', 'investor', 'guest')",
+            "role IN ('admin', 'founder', 'customer', 'investor', 'guest', 'ops')",
             name="users_role_check",
         ),
         Index("users_role_idx", "role"),

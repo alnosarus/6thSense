@@ -17,6 +17,7 @@ from fastapi import HTTPException
 from app.api.routes.catalog import catalog_reader, parse_range, request_origin
 from app.core.catalog_redact import (
     CATALOG_ROLES,
+    NON_CATALOG_ROLES,
     FULL_ROLES,
     LEVEL_FULL,
     LEVEL_PREVIEW,
@@ -190,12 +191,19 @@ def test_full_and_preview_partition_the_catalog_roles():
 def test_catalog_roles_track_the_database_role_list():
     """Tripwire. A new role must not silently inherit catalog access.
 
-    `users.role` is constrained by migration 0007. If a role is added there,
-    somebody has to decide whether it may read the catalog at all and whether it
-    gets full or preview access — so this test fails until FULL_ROLES /
-    PREVIEW_ROLES in catalog_redact.py are updated deliberately.
+    `users.role` is constrained by the latest role migration. If a role is added
+    there, somebody has to decide whether it may read the catalog at all and
+    whether it gets full or preview access — so this test fails until
+    FULL_ROLES / PREVIEW_ROLES / NON_CATALOG_ROLES in catalog_redact.py are
+    updated deliberately.
+
+    The partition, not just the union, is the invariant: a role listed in both
+    CATALOG_ROLES and NON_CATALOG_ROLES would read as denied at the route and
+    as permitted everywhere that tests membership, which is the ambiguity this
+    tripwire exists to prevent.
     """
-    assert CATALOG_ROLES == set(ROLES)
+    assert CATALOG_ROLES | NON_CATALOG_ROLES == set(ROLES)
+    assert not (CATALOG_ROLES & NON_CATALOG_ROLES)
 
 
 # --- The S3 driver, offline ------------------------------------------------------

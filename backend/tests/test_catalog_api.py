@@ -165,6 +165,19 @@ async def test_signed_media_needs_no_session_because_the_url_is_the_capability(
 
 # --- Manifest ---------------------------------------------------------------------
 
+async def test_ops_role_is_refused_the_catalog(app, db_session):
+    """`ops` is not in CATALOG_ROLES, so catalog.py must refuse it outright.
+
+    Worth asserting rather than assuming: access_level() returns LEVEL_PREVIEW
+    for anything it does not recognise, so if the route ever gated on the level
+    instead of on membership, a brand-new role would silently acquire preview
+    access to customer data the day it was added.
+    """
+    sid = await _session_for(db_session, "ops")
+    assert "ops" not in CATALOG_ROLES
+    assert (await _get(app, "/api/catalog", sid)).status_code == 403
+
+
 @pytest.mark.parametrize("role", sorted(CATALOG_ROLES))
 async def test_manifest_is_readable_by_every_catalog_role(app, db_session, role):
     sid = await _session_for(db_session, role)

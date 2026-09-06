@@ -95,6 +95,18 @@ FULL_ROLES = frozenset({"customer", "founder", "admin"})
 PREVIEW_ROLES = frozenset({"guest", "investor"})
 #: Every role that may read the catalog at all.
 CATALOG_ROLES = FULL_ROLES | PREVIEW_ROLES
+#: Roles that may NOT read the catalog at all -- refused at
+#: app/api/routes/catalog.py before access_level() is ever consulted. Being in
+#: this set is as deliberate a decision as being in FULL_ROLES or
+#: PREVIEW_ROLES: the tripwire in tests/test_catalog_store.py requires every
+#: value of app.models.user.ROLES to appear in exactly one of the three, so a
+#: role added to the database cannot quietly skip the question.
+#:
+#: `ops` is here because the collector-operations area is orthogonal to the
+#: customer catalog -- it reads the capture bucket and the payment ledger, not
+#: delivered clips -- and access_level() answers LEVEL_PREVIEW for anything it
+#: does not recognise, so silence would have meant preview access.
+NON_CATALOG_ROLES = frozenset({"ops"})
 #: Roles that may see operational detail (bucket, prefix) on /health.
 STAFF_ROLES = frozenset({"founder", "admin"})
 

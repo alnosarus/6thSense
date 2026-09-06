@@ -35,3 +35,18 @@ async def test_email_unique(db_session):
     db_session.add(User(email="a@x.com", name="B", role="customer", password_hash="h"))
     with pytest.raises(IntegrityError):
         await db_session.flush()
+
+
+@pytest.mark.asyncio
+async def test_ops_role_accepted(db_session):
+    """The ops area holds wearer profiles, episode assignments and payment
+    approvals, so it gets its own role instead of reusing `founder` --
+    require_role() matches exactly, and a shared role could never be separated
+    again. See migration 0008."""
+    db_session.add(User(email="ops@6thsense.dev", name="6thSense Ops",
+                        role="ops", password_hash="x"))
+    await db_session.flush()
+    fetched = (await db_session.execute(
+        select(User).where(User.role == "ops"))).scalar_one()
+    assert fetched.email == "ops@6thsense.dev"
+    assert fetched.is_active is True
